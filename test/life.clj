@@ -5,11 +5,11 @@
 (deftest life-is-evolving
   (testing "Still life remains the same"
     (let [stepper life/conway-stepper]
-      (is (= life/pattern-square (stepper life/pattern-square)))
-      (is (= life/pattern-eater (stepper life/pattern-eater)))))
+      (is (= (life/patterns :square) (stepper (life/patterns :square))))
+      (is (= (life/patterns :eater) (stepper (life/patterns :eater))))))
   (testing "Glider evolves as expected"
     (let [stepper life/conway-stepper
-          glider (life/create-world 4 4 [life/pattern-glider])
+          glider (life/create-world 4 4 [(life/patterns :glider)])
           after-one-step (life/create-world 4 4 [{:width 4
                                                   :height 4
                                                   :alive-cells #{[0 1] [2 1] [1 2] [2 2] [1 3]}}])]
