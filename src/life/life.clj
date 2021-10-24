@@ -2,6 +2,14 @@
   (:require [clojure.set :as set]
             [clojure.string :as str]))
 
+(def pattern-glider
+  ;; -o-
+  ;; --o
+  ;; ooo
+  {:width 3
+   :height 3
+   :alive-cells #{[1 0] [2 1] [0 2] [1 2] [2 2]}})
+
 (def pattern-eater
   ;; ---oo--oo
   ;; o---o--oo
@@ -31,8 +39,22 @@
      :height height
      :alive-cells cells}))
 
-(defn create []
-  (fn [board] board))
+(defn neighbours
+  [[x y]]
+  (for [dx [-1 0 1] dy [-1 0 1] :when (not= 0 dx dy)]
+    [(+ dx x) (+ dy y)]))
+
+(defn stepper
+  [neighbours birth? survive?]
+  (fn [board]
+    {:width (board :width)
+     :height (board :height)
+     :alive-cells
+      (set (for [[loc n] (frequencies (mapcat neighbours (board :alive-cells)))
+                 :when (if ((board :alive-cells) loc) (survive? n) (birth? n))]
+             loc))}))
+
+(def conway-stepper (stepper neighbours #{3} #{2 3}))
 
 (defn extract-x-axis [entry]
   (->> entry
@@ -56,5 +78,8 @@
                               (str/join (repeat (board :width) "-"))) y-axis))))
 
 (comment
-  (println (draw-world (create-world 9 6 [pattern-eater])))
+  (stepper neighbours #{3} #{2 3})
+  (conway-stepper pattern-eater)
+  (println (draw-world (create-world 9 6 [pattern-glider])))
+  (println (draw-world (conway-stepper (create-world 9 6 [pattern-glider]))))
   (prepare-output pattern-eater))
