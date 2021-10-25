@@ -8,9 +8,7 @@
    ;; --o
    ;; ooo
    :glider
-   {:width 3
-    :height 3
-    :alive-cells #{[1 0] [2 1] [0 2] [1 2] [2 2]}}
+   #{[1 0] [2 1] [0 2] [1 2] [2 2]}
 
    ;; ---oo--oo
    ;; o---o--oo
@@ -19,23 +17,18 @@
    ;; oo-------
    ;; oo-------
    :eater
-   {:width 9
-    :height 6
-    :alive-cells #{[3 0] [4 0] [7 0] [8 0]
-                   [0 1] [4 1] [7 1] [8 1]
-                   [0 2] [1 2] [2 2] [3 2]
-                   [0 4] [1 4] [0 5] [1 5]}}
+   #{[3 0] [4 0] [7 0] [8 0]
+     [0 1] [4 1] [7 1] [8 1]
+     [0 2] [1 2] [2 2] [3 2]
+     [0 4] [1 4] [0 5] [1 5]}
 
    ;; oo
    ;; oo
    :square
-   {:width 2
-    :height 2
-    :alive-cells #{[0 0] [1 0] [0 1] [1 1]}}})
+   #{[0 0] [1 0] [0 1] [1 1]}})
 
 (defn create-world [width height patterns]
   (let [cells (->> patterns
-                   (map #(% :alive-cells))
                    (apply set/union))]
     {:width width
      :height height
@@ -81,7 +74,7 @@
 
 (comment
   (stepper neighbours #{3} #{2 3})
-  (conway-stepper (patterns :eater))
+  (conway-stepper (create-world 10 10 [(patterns :eater)]))
   (println (draw-world (create-world 9 6 [(patterns :glider)])))
   (println (draw-world (conway-stepper (create-world 9 6 [(patterns :glider)]))))
-  (prepare-output (patterns :eater)))
+  (prepare-output (create-world 10 10 [(patterns :eater)])))
