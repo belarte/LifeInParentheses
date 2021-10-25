@@ -27,7 +27,7 @@
    :square
    #{[0 0] [1 0] [0 1] [1 1]}})
 
-(defn create-world [width height patterns]
+(defn create-board [width height patterns]
   (let [cells (->> patterns
                    (apply set/union))]
     {:width width
@@ -65,7 +65,7 @@
 (defn draw-line [width array]
   (str/join (map #(if (contains? array %) "#" "-") (range width))))
 
-(defn draw-world [board]
+(defn draw-board [board]
   (let [y-axis (range (board :height))
         output (prepare-output board)]
     (str/join \newline (map #(if (contains? output %)
@@ -78,7 +78,7 @@
 (comment
   (offset (patterns :glider) [1 2])
   (stepper neighbours #{3} #{2 3})
-  (conway-stepper (create-world 10 10 [(patterns :eater)]))
-  (println (draw-world (create-world 9 6 [(patterns :glider)])))
-  (println (draw-world (conway-stepper (create-world 9 6 [(patterns :glider)]))))
-  (prepare-output (create-world 10 10 [(patterns :eater)])))
+  (conway-stepper (create-board 10 10 [(patterns :eater)]))
+  (println (draw-board (create-board 9 6 [(patterns :glider)])))
+  (println (draw-board (conway-stepper (create-board 9 6 [(patterns :glider)]))))
+  (prepare-output (create-board 10 10 [(patterns :eater)])))
