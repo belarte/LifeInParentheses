@@ -4,9 +4,11 @@
 
 (deftest life-is-evolving
   (testing "Still life remains the same"
-    (let [stepper life/conway-stepper]
-      (is (= (life/patterns :square) (stepper (life/patterns :square))))
-      (is (= (life/patterns :eater) (stepper (life/patterns :eater))))))
+    (let [stepper life/conway-stepper
+          eater (life/create-world 9 6 [(life/patterns :eater)])
+          square (life/create-world 2 2 [(life/patterns :square)])]
+      (is (= square (stepper square)))
+      (is (= eater (stepper eater)))))
   (testing "Glider evolves as expected"
     (let [stepper life/conway-stepper
           glider (life/create-world 4 4 [(life/patterns :glider)])
