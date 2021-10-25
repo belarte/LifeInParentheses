@@ -34,12 +34,12 @@
      :height height
      :alive-cells cells}))
 
-(defn neighbours
+(defn- neighbours
   [[x y]]
   (for [dx [-1 0 1] dy [-1 0 1] :when (not= 0 dx dy)]
     [(+ dx x) (+ dy y)]))
 
-(defn stepper
+(defn- stepper
   [neighbours birth? survive?]
   (fn [board]
     {:width (board :width)
@@ -51,18 +51,18 @@
 
 (def conway-stepper (stepper neighbours #{3} #{2 3}))
 
-(defn extract-x-axis [entry]
+(defn- extract-x-axis [entry]
   (->> entry
        (map first)
        (set)))
 
-(defn prepare-output [board]
+(defn- prepare-output [board]
   (->> (board :alive-cells)
        (group-by second)
        (map (fn [[key value]] [key (extract-x-axis value)]))
        (into {})))
 
-(defn draw-line [width array]
+(defn- draw-line [width array]
   (str/join (map #(if (contains? array %) "#" "-") (range width))))
 
 (defn draw-board [board]
