@@ -72,7 +72,11 @@
                               (draw-line (board :width) (output %))
                               (str/join (repeat (board :width) "-"))) y-axis))))
 
+(defn offset [pattern coordinate]
+  (set (map #(vector (+ (first %) (first coordinate)) (+ (second %) (second coordinate))) pattern)))
+
 (comment
+  (offset (patterns :glider) [1 2])
   (stepper neighbours #{3} #{2 3})
   (conway-stepper (create-world 10 10 [(patterns :eater)]))
   (println (draw-world (create-world 9 6 [(patterns :glider)])))

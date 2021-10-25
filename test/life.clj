@@ -20,3 +20,9 @@
           after-one-step (life/create-world 3 3 [#{[1 0] [1 1] [1 2]}])]
       (is (= after-one-step (stepper blinker)))
       (is (= blinker (stepper (stepper blinker)))))))
+
+(deftest offset-pattern
+  (testing "Offset glider"
+    (is (= (life/offset (life/patterns :glider) [1 2]) #{[2 2] [3 3] [3 4] [1 4] [2 4]})))
+  (testing "Offset square"
+    (is (= (life/offset (life/patterns :square) [3 3]) #{[3 3] [3 4] [4 3] [4 4]}))))
