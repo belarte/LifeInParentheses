@@ -49,34 +49,23 @@
 
 (def conway-stepper (stepper neighbours #{3} #{2 3}))
 
-(defn- extract-x-axis [entry]
-  (->> entry
-       (map first)
-       (set)))
-
-(defn- prepare-output [board]
-  (->> (board :alive-cells)
-       (group-by second)
-       (map (fn [[key value]] [key (extract-x-axis value)]))
-       (into {})))
-
-(defn- draw-line [width array]
-  (str/join (map #(if (contains? array %) "#" "-") (range width))))
+(defn shape-output [board alive dead]
+  (for [y (range (board :height))]
+    (for [x (range (board :width))]
+      (if (contains? (board :alive-cells) [x y]) alive dead))))
 
 (defn draw-board [board]
-  (let [y-axis (range (board :height))
-        output (prepare-output board)]
-    (str/join \newline (map #(if (contains? output %)
-                              (draw-line (board :width) (output %))
-                              (str/join (repeat (board :width) "-"))) y-axis))))
+  (let [output (shape-output board "#" "-")]
+    (str/join \newline (map str/join output))))
 
 (defn offset [pattern coordinate]
   (set (map #(vector (+ (first %) (first coordinate)) (+ (second %) (second coordinate))) pattern)))
 
 (comment
+  (let [board (create-board 4 4 [(patterns :glider)])]
+    (shape-output board "#" "-"))
   (offset (patterns :glider) [1 2])
   (stepper neighbours #{3} #{2 3})
   (conway-stepper (create-board 10 10 [(patterns :eater)]))
   (println (draw-board (create-board 9 6 [(patterns :glider)])))
-  (println (draw-board (conway-stepper (create-board 9 6 [(patterns :glider)]))))
-  (prepare-output (create-board 10 10 [(patterns :eater)])))
+  (println (draw-board (conway-stepper (create-board 9 6 [(patterns :glider)])))))
