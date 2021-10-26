@@ -28,11 +28,9 @@
    #{[0 0] [1 0] [0 1] [1 1]}})
 
 (defn create-board [width height patterns]
-  (let [cells (->> patterns
-                   (apply set/union))]
-    {:width width
-     :height height
-     :alive-cells cells}))
+  {:width width
+   :height height
+   :alive-cells (apply set/union patterns)})
 
 (defn- neighbours
   [[x y]]
