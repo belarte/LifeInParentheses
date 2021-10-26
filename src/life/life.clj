@@ -43,9 +43,9 @@
     {:width (board :width)
      :height (board :height)
      :alive-cells
-      (set (for [[loc n] (frequencies (mapcat neighbours (board :alive-cells)))
-                 :when (if ((board :alive-cells) loc) (survive? n) (birth? n))]
-             loc))}))
+      (set (for [[coord n] (frequencies (mapcat neighbours (board :alive-cells)))
+                 :when (if ((board :alive-cells) coord) (survive? n) (birth? n))]
+             coord))}))
 
 (def conway-stepper (stepper neighbours #{3} #{2 3}))
 
