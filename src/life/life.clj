@@ -1,4 +1,4 @@
-(ns life
+(ns life.life
   (:require [clojure.set :as set]
             [clojure.string :as str]))
 

@@ -1,6 +1,6 @@
-(ns life-test
+(ns life.life-test
   (:require [clojure.test :refer [deftest testing is]]
-            [life]))
+            [life.life :as life]))
 
 (deftest life-is-evolving
   (testing "Still life remains the same"
