@@ -61,6 +61,10 @@
 (defn offset [pattern coordinate]
   (set (map #(vector (+ (first %) (first coordinate)) (+ (second %) (second coordinate))) pattern)))
 
+(defn flip-x [pattern]
+  (let [max-x (apply max (map first pattern))]
+    (set (map #(vector (- max-x (first %)) (second %)) pattern))))
+
 (comment
   (let [board (create-board 4 4 [(patterns :glider)])]
     (shape-output board "#" "-"))
@@ -68,4 +72,5 @@
   (stepper neighbours #{3} #{2 3})
   (conway-stepper (create-board 10 10 [(patterns :eater)]))
   (println (draw-board (create-board 9 6 [(patterns :glider)])))
+  (println (draw-board (create-board 9 6 [(flip-x (patterns :eater))])))
   (println (draw-board (conway-stepper (create-board 9 6 [(patterns :glider)])))))

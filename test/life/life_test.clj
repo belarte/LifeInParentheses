@@ -26,3 +26,7 @@
     (is (= (life/offset (life/patterns :glider) [1 2]) #{[2 2] [3 3] [3 4] [1 4] [2 4]})))
   (testing "Offset square"
     (is (= (life/offset (life/patterns :square) [3 3]) #{[3 3] [3 4] [4 3] [4 4]}))))
+
+(deftest flip-x
+  (testing "Flipping glider on the x axis"
+    (is (= #{[1 0] [0 1] [0 2] [1 2] [2 2]} (life/flip-x (life/patterns :glider))))))
