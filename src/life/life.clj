@@ -49,6 +49,11 @@
 
 (def conway-stepper (stepper neighbours #{3} #{2 3}))
 
+(defn simulate [board iterations]
+  (->> (iterate conway-stepper board)
+       (take (inc iterations))
+       (last)))
+
 (defn shape-output [board alive dead]
   (for [y (range (board :height))]
     (for [x (range (board :width))]

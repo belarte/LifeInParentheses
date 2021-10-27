@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest testing is]]
             [life.life :as life]))
 
-(deftest life-is-evolving
+(deftest life-is-evolving-one-step-at-a-time
   (testing "Still life remains the same"
     (let [stepper life/conway-stepper
           eater (life/create-board 9 6 [(life/patterns :eater)])
@@ -20,6 +20,12 @@
           after-one-step (life/create-board 3 3 [#{[1 0] [1 1] [1 2]}])]
       (is (= after-one-step (stepper blinker)))
       (is (= blinker (stepper (stepper blinker)))))))
+
+(deftest life-is-evolving
+  (testing "Glider keeps its shape after 4 steps"
+    (let [before (life/create-board 4 4 [(life/patterns :glider)])
+          after (life/create-board 4 4 [(life/offset (life/patterns :glider) [1 1])])]
+      (is (= after (life/simulate before 4))))))
 
 (deftest offset-pattern
   (testing "Offset glider"
