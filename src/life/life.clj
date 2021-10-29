@@ -1,31 +1,7 @@
 (ns life.life
   (:require [clojure.set :as set]
-            [clojure.string :as str]))
-
-(def patterns
-  {
-   ;; -o-
-   ;; --o
-   ;; ooo
-   :glider
-   #{[1 0] [2 1] [0 2] [1 2] [2 2]}
-
-   ;; ---oo--oo
-   ;; o---o--oo
-   ;; oooo-----
-   ;; ---------
-   ;; oo-------
-   ;; oo-------
-   :eater
-   #{[3 0] [4 0] [7 0] [8 0]
-     [0 1] [4 1] [7 1] [8 1]
-     [0 2] [1 2] [2 2] [3 2]
-     [0 4] [1 4] [0 5] [1 5]}
-
-   ;; oo
-   ;; oo
-   :square
-   #{[0 0] [1 0] [0 1] [1 1]}})
+            [clojure.string :as str]
+            [life.patterns :as patterns]))
 
 (defn create-board
   "Creates a Game Of Life board. Requires a sequence of patterns."
@@ -83,11 +59,11 @@
     (set (map #(vector (- max-x (first %)) (second %)) pattern))))
 
 (comment
-  (let [board (create-board 4 4 [(patterns :glider)])]
+  (let [board (create-board 4 4 [patterns/glider])]
     (shape-output board "#" "-"))
-  (offset (patterns :glider) [1 2])
+  (offset patterns/glider [1 2])
   (stepper neighbours #{3} #{2 3})
-  (conway-stepper (create-board 10 10 [(patterns :eater)]))
-  (println (draw-board (create-board 9 6 [(patterns :glider)])))
-  (println (draw-board (create-board 9 6 [(flip-x (patterns :eater))])))
-  (println (draw-board (conway-stepper (create-board 9 6 [(patterns :glider)])))))
+  (conway-stepper (create-board 10 10 [patterns/eater]))
+  (println (draw-board (create-board 9 6 [patterns/glider])))
+  (println (draw-board (create-board 9 6 [(flip-x patterns/eater)])))
+  (println (draw-board (conway-stepper (create-board 9 6 [patterns/glider])))))
