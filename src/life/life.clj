@@ -33,8 +33,7 @@
   "Simulates n iterations of Conway's Game Of Life. Returns a sequence of all steps, including the initial board."
   [board iterations]
   (->> (iterate conway-stepper board)
-       (take (inc iterations))
-       (last)))
+       (take (inc iterations))))
 
 (defn- shape-output [board alive dead]
   (for [y (range (board :height))]
@@ -61,6 +60,10 @@
 (comment
   (let [board (create-board 4 4 [patterns/glider])]
     (shape-output board "#" "-"))
+  (let [board (create-board 9 9 [patterns/glider])]
+    (->> (simulate board 16)
+         (map draw-board)
+         (map println)))
   (offset patterns/glider [1 2])
   (stepper neighbours #{3} #{2 3})
   (conway-stepper (create-board 10 10 [patterns/eater]))
