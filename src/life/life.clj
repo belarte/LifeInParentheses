@@ -46,10 +46,15 @@
   (let [output (shape-output board "#" "-")]
     (str/join \newline (map str/join output))))
 
+(defn add-coords
+  "Adds two coordinates."
+  [left right]
+  (vector (+ (first left) (first right)) (+ (second left) (second right))))
+
 (defn offset
   "Offset a pattern with the given coordinate."
   [pattern coordinate]
-  (set (map #(vector (+ (first %) (first coordinate)) (+ (second %) (second coordinate))) pattern)))
+  (set (map (partial add-coords coordinate) pattern)))
 
 (defn flip-x
   "Flip a pattern on the X axis."
