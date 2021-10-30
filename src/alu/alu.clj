@@ -26,13 +26,13 @@
 (defn wire
   "Allow transmission of one bit over a distance."
   [expression distance]
-  (let [{:keys [origin width height output pattern]} expression
+  (let [{:keys [origin width height output steps pattern]} expression
         new-output (life/add-coords output (vector distance distance))]
     {:origin origin
      :width (max width (+ 2 (- (first output) (first origin))))
      :height (max height (+ 2 (- (second output) (second origin))))
      :output new-output
-     :steps (* 4 distance)
+     :steps (+ steps (* 4 distance))
      :pattern pattern}))
 
 (comment
