@@ -17,21 +17,23 @@
 (defn output
   "Reads a single bit as the output of an expression."
   [expression]
-  (let [board (life/create-board (expression :width) (expression :height) [(expression :pattern)])
-        steps (life/simulate board (expression :steps))
-        last (last steps)]
-    (if (contains? (last :alive-cells) (expression :output)) 1 0)))
+  (let [{:keys [width height steps output pattern]} expression
+        board (life/create-board width height [pattern])
+        iterations (life/simulate board steps)
+        last-iteration (last iterations)]
+    (if (contains? (last-iteration :alive-cells) output) 1 0)))
 
 (defn wire
   "Allow transmission of one bit over a distance."
   [expression distance]
-  (let [output (life/add-coords (expression :output) (vector distance distance))]
-    {:origin (expression :origin)
-     :width (max (expression :width) (+ 2 (- (first output) (first (expression :origin)))))
-     :height (max (expression :height) (+ 2 (- (second output) (second (expression :origin)))))
-     :output output
+  (let [{:keys [origin width height output pattern]} expression
+        new-output (life/add-coords output (vector distance distance))]
+    {:origin origin
+     :width (max width (+ 2 (- (first output) (first origin))))
+     :height (max height (+ 2 (- (second output) (second origin))))
+     :output new-output
      :steps (* 4 distance)
-     :pattern (expression :pattern)}))
+     :pattern pattern}))
 
 (comment
   (let [test (wire (bit 1) 3)
