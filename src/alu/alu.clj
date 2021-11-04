@@ -29,8 +29,8 @@
   (let [{:keys [origin width height output steps pattern]} expression
         new-output (life/add-coords output (vector distance distance))]
     {:origin origin
-     :width (max width (+ 2 (- (first output) (first origin))))
-     :height (max height (+ 2 (- (second output) (second origin))))
+     :width (max width (+ 2 (- (first new-output) (first origin))))
+     :height (max height (+ 2 (- (second new-output) (second origin))))
      :output new-output
      :steps (+ steps (* 4 distance))
      :pattern pattern}))
