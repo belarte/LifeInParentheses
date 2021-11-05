@@ -2,8 +2,8 @@
 
 (defn add
   "Adds two coordinates."
-  [left right]
-  (vector (+ (first left) (first right)) (+ (second left) (second right))))
+  [[x0 y0] [x1 y1]]
+  [(+ x0 x1) (+ y0 y1)])
 
 (defn sub
   "Substract two coordinates."
