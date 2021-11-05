@@ -1,6 +1,7 @@
 (ns life.life
   (:require [clojure.set :as set]
             [clojure.string :as str]
+            [life.coords :as coords]
             [life.patterns :as patterns]))
 
 (defn create-board
@@ -9,11 +10,6 @@
   {:width width
    :height height
    :alive-cells (apply set/union patterns)})
-
-(defn- neighbours
-  [[x y]]
-  (for [dx [-1 0 1] dy [-1 0 1] :when (not= 0 dx dy)]
-    [(+ dx x) (+ dy y)]))
 
 (defn- stepper
   [neighbours birth? survive?]
@@ -27,7 +23,7 @@
 
 (def conway-stepper
   "Returns a default Conway's Game Of Life step function."
-  (stepper neighbours #{3} #{2 3}))
+  (stepper coords/neighbours #{3} #{2 3}))
 
 (defn simulate
   "Simulates n iterations of Conway's Game Of Life. Returns a sequence of all steps, including the initial board."
@@ -46,15 +42,10 @@
   (let [output (shape-output board "#" "-")]
     (str/join \newline (map str/join output))))
 
-(defn add-coords
-  "Adds two coordinates."
-  [left right]
-  (vector (+ (first left) (first right)) (+ (second left) (second right))))
-
 (defn offset
   "Offset a pattern with the given coordinate."
   [pattern coordinate]
-  (set (map (partial add-coords coordinate) pattern)))
+  (set (map (partial coords/add coordinate) pattern)))
 
 (defn flip-x
   "Flip a pattern on the X axis."
@@ -72,7 +63,7 @@
          (map draw-board)
          (map println)))
   (offset patterns/glider [1 2])
-  (stepper neighbours #{3} #{2 3})
+  (stepper coords/neighbours #{3} #{2 3})
   (conway-stepper (create-board 10 10 [patterns/eater]))
   (println (draw-board (create-board 9 6 [patterns/glider])))
   (println (draw-board (create-board 9 6 [(flip-x patterns/eater)])))
