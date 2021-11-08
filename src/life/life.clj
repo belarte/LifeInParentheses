@@ -50,10 +50,10 @@
 (defn flip-x
   "Flip a pattern on the X axis."
   ([pattern]
-   (let [max-x (apply max (map first pattern))]
-     (flip-x pattern max-x)))
-  ([pattern max-x]
-   (set (map #(vector (- max-x (first %)) (second %)) pattern))))
+   (let [x-max (apply max (map first pattern))]
+     (flip-x pattern 0 (inc x-max))))
+  ([pattern x0 w]
+   (set (map #(coords/flip-x % x0 w) pattern))))
 
 (comment
   (let [board (create-board 4 4 [patterns/glider])]
