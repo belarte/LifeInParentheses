@@ -12,6 +12,7 @@
      :width 5
      :height 5
      :output [3 3]
+     :direction :bottom-right
      :steps 0
      :pattern pattern}))
 
@@ -27,12 +28,13 @@
 (defn wire
   "Allow transmission of one bit over a distance."
   [expression distance]
-  (let [{:keys [origin width height output steps pattern]} expression
+  (let [{:keys [origin width height output direction steps pattern]} expression
         new-output (coords/add output (vector distance distance))]
     {:origin origin
      :width (max width (+ 2 (- (first new-output) (first origin))))
      :height (max height (+ 2 (- (second new-output) (second origin))))
      :output new-output
+     :direction direction
      :steps (+ steps (* 4 distance))
      :pattern pattern}))
 
