@@ -6,12 +6,12 @@
 (def stepper life/conway-stepper)
 
 (def glider-board (life/create-board 4 4 [patterns/glider]))
-(def square-board (life/create-board 2 2 [patterns/square]))
+(def block-board (life/create-board 2 2 [patterns/block]))
 (def eater-board (life/create-board 9 6 [patterns/eater]))
 
 (deftest life-is-evolving-one-step-at-a-time
   (testing "Still life remains the same"
-    (is (= square-board (stepper square-board)))
+    (is (= block-board (stepper block-board)))
     (is (= eater-board (stepper eater-board))))
   (testing "Glider evolves as expected"
     (let [expected (life/create-board 4 4 [#{[0 1] [2 1] [1 2] [2 2] [1 3]}])]
@@ -32,9 +32,9 @@
   (testing "Offset glider"
     (let [expected #{[2 2] [3 3] [3 4] [1 4] [2 4]}]
       (is (= expected (life/offset patterns/glider [1 2])))))
-  (testing "Offset square"
+  (testing "Offset block"
     (let [expected #{[3 3] [3 4] [4 3] [4 4]}]
-      (is (= expected (life/offset patterns/square [3 3]))))))
+      (is (= expected (life/offset patterns/block [3 3]))))))
 
 (deftest flip-x
   (testing "Flipping glider on the x axis"
