@@ -8,33 +8,35 @@
   [value]
   {:pre [(or (= 1 value) (= 0 value))]}
   (let [pattern (if (zero? value) #{} (life/offset patterns/glider [1 1]))]
-    {:origin [0 0]
-     :width 5
-     :height 5
-     :output [3 3]
-     :direction :bottom-right
+    {:dimensions {:origin [0 0]
+                  :width 5
+                  :height 5}
+     :output {:position [3 3]
+              :direction :bottom-right}
      :steps 0
      :pattern pattern}))
 
 (defn output
   "Reads a single bit as the output of an expression."
   [expression]
-  (let [{:keys [width height steps output pattern]} expression
-        board (life/create-board width height [pattern])
+  (let [{:keys [dimensions steps output pattern]} expression
+        board (life/create-board (dimensions :width) (dimensions :height) [pattern])
         iterations (life/simulate board steps)
         last-iteration (last iterations)]
-    (if (contains? (last-iteration :alive-cells) output) 1 0)))
+    (if (contains? (last-iteration :alive-cells) (output :position)) 1 0)))
 
 (defn wire
   "Allow transmission of one bit over a distance."
   [expression distance]
-  (let [{:keys [origin width height output direction steps pattern]} expression
-        new-output (coords/add output (vector distance distance))]
-    {:origin origin
-     :width (max width (+ 2 (- (first new-output) (first origin))))
-     :height (max height (+ 2 (- (second new-output) (second origin))))
-     :output new-output
-     :direction direction
+  (let [{:keys [steps pattern]
+         {:keys [origin width height]} :dimensions
+         {:keys [position direction]} :output} expression
+        new-output (coords/add position (vector distance distance))]
+    {:dimensions {:origin origin
+                  :width (max width (+ 2 (- (first new-output) (first origin))))
+                  :height (max height (+ 2 (- (second new-output) (second origin))))}
+     :output {:position new-output
+              :direction direction}
      :steps (+ steps (* 4 distance))
      :pattern pattern}))
 
