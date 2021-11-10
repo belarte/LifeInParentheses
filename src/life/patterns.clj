@@ -1,4 +1,5 @@
-(ns life.patterns)
+(ns life.patterns
+  (:require [life.coords :as coords]))
 
 (def glider
   "-o-
@@ -22,3 +23,19 @@
    "oo
     oo"
    #{[0 0] [1 0] [0 1] [1 1]})
+
+(defn offset
+  "Offset a pattern with the given coordinate."
+  [pattern coordinate]
+  (set (map (partial coords/add coordinate) pattern)))
+
+(defn flip-x
+  "Flip a pattern on the X axis."
+  ([pattern]
+   (let [x-max (apply max (map first pattern))]
+     (flip-x pattern 0 (inc x-max))))
+  ([pattern x0 w]
+   (set (map #(coords/flip-x % x0 w) pattern))))
+
+(comment
+  (offset glider [1 2]))

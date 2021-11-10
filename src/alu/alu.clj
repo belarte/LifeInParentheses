@@ -7,7 +7,7 @@
   "Represents a single bit as an input to an expression."
   [value]
   {:pre [(or (= 1 value) (= 0 value))]}
-  (let [pattern (if (zero? value) #{} (life/offset patterns/glider [1 1]))]
+  (let [pattern (if (zero? value) #{} (patterns/offset patterns/glider [1 1]))]
     {:dimensions {:origin [0 0]
                   :width 5
                   :height 5}

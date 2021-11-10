@@ -25,18 +25,5 @@
 (deftest life-is-evolving
   (testing "Glider keeps its shape after 4 steps"
     (let [output (last (life/simulate glider-board 4))
-          expected (life/create-board 4 4 [(life/offset patterns/glider [1 1])])]
+          expected (life/create-board 4 4 [(patterns/offset patterns/glider [1 1])])]
       (is (= expected output)))))
-
-(deftest offset-pattern
-  (testing "Offset glider"
-    (let [expected #{[2 2] [3 3] [3 4] [1 4] [2 4]}]
-      (is (= expected (life/offset patterns/glider [1 2])))))
-  (testing "Offset block"
-    (let [expected #{[3 3] [3 4] [4 3] [4 4]}]
-      (is (= expected (life/offset patterns/block [3 3]))))))
-
-(deftest flip-x
-  (testing "Flipping glider on the x axis"
-    (let [expected #{[1 0] [0 1] [0 2] [1 2] [2 2]}]
-      (is (= expected (life/flip-x patterns/glider))))))

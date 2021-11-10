@@ -42,19 +42,6 @@
   (let [output (shape-output board "#" "-")]
     (str/join \newline (map str/join output))))
 
-(defn offset
-  "Offset a pattern with the given coordinate."
-  [pattern coordinate]
-  (set (map (partial coords/add coordinate) pattern)))
-
-(defn flip-x
-  "Flip a pattern on the X axis."
-  ([pattern]
-   (let [x-max (apply max (map first pattern))]
-     (flip-x pattern 0 (inc x-max))))
-  ([pattern x0 w]
-   (set (map #(coords/flip-x % x0 w) pattern))))
-
 (comment
   (let [board (create-board 4 4 [patterns/glider])]
     (shape-output board "#" "-"))
@@ -62,9 +49,7 @@
     (->> (simulate board 16)
          (map draw-board)
          (map println)))
-  (offset patterns/glider [1 2])
   (stepper coords/neighbours #{3} #{2 3})
   (conway-stepper (create-board 10 10 [patterns/eater]))
   (println (draw-board (create-board 9 6 [patterns/glider])))
-  (println (draw-board (create-board 9 6 [(flip-x patterns/eater)])))
   (println (draw-board (conway-stepper (create-board 9 6 [patterns/glider])))))
