@@ -6,7 +6,7 @@
   "Flip exprssion on the X axis."
   [expression]
   (let [{:keys [pattern]
-         {:keys [origin width]} :dimension
+         {:keys [origin width]} :dimensions
          {:keys [position direction]} :output} expression
         [x0] origin
         new-direction (if (= direction :bottom-right) :bottom-left :bottom-left)
