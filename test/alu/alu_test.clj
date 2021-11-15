@@ -10,8 +10,8 @@
 
 (deftest wire-traversal
   (testing "A bit can be read after traversing a wire"
-    (is (= 0 (alu/output (alu/wire (alu/bit 0) 3))))
-    (is (= 1 (alu/output (alu/wire (alu/bit 1) 3))))
-    (is (= 1 (alu/output (alu/wire (alu/wire (alu/bit 1) 2) 3)))))
+    (is (= 0 (alu/output (layout/wire (alu/bit 0) 3))))
+    (is (= 1 (alu/output (layout/wire (alu/bit 1) 3))))
+    (is (= 1 (alu/output (layout/wire (layout/wire (alu/bit 1) 2) 3)))))
   (testing "A wire can extend a flipped pattern"
-    (is (= 1 (alu/output (alu/wire (layout/flip-x (alu/bit 1)) 4))))))
+    (is (= 1 (alu/output (layout/wire (layout/flip-x (alu/bit 1)) 4))))))

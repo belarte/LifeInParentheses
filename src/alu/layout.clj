@@ -16,3 +16,20 @@
         (assoc-in [:output :direction] new-direction)
         (assoc-in [:output :position] new-position)
         (assoc :pattern new-pattern))))
+
+(defn wire
+  "Allow transmission of one bit over a distance."
+  [expression distance]
+  (let [{:keys [steps pattern]
+         {:keys [origin width height]} :dimensions
+         {:keys [position direction]} :output} expression
+        new-output (coords/add position (vector distance distance))]
+    (if (= direction :bottom-left)
+      (flip-x (wire (flip-x expression) distance))
+      {:dimensions {:origin origin
+                    :width (max width (+ 2 (- (first new-output) (first origin))))
+                    :height (max height (+ 2 (- (second new-output) (second origin))))}
+       :output {:position new-output
+                :direction direction}
+       :steps (+ steps (* 4 distance))
+       :pattern pattern})))

@@ -1,7 +1,6 @@
 (ns alu.alu
   (:require [alu.layout :as layout]
             [life.life :as life]
-            [life.coords :as coords]
             [life.patterns :as patterns]))
 
 (defn bit
@@ -26,30 +25,10 @@
         last-iteration (last iterations)]
     (if (contains? (last-iteration :alive-cells) (output :position)) 1 0)))
 
-(defn wire
-  "Allow transmission of one bit over a distance."
-  [expression distance]
-  (let [{:keys [steps pattern]
-         {:keys [origin width height]} :dimensions
-         {:keys [position direction]} :output} expression
-        new-output (coords/add position (vector distance distance))]
-    (if (= direction :bottom-left)
-      (layout/flip-x (wire (layout/flip-x expression) distance))
-      {:dimensions {:origin origin
-                    :width (max width (+ 2 (- (first new-output) (first origin))))
-                    :height (max height (+ 2 (- (second new-output) (second origin))))}
-       :output {:position new-output
-                :direction direction}
-       :steps (+ steps (* 4 distance))
-       :pattern pattern})))
-
 (comment
-  (let [test (wire (bit 1) 3)
-        board (life/create-board (test :width) (test :height) [(test :pattern)])]
-    (println (life/draw-board board)))
   (let [one (bit 1)
         flipped (layout/flip-x one)
-        wired (wire flipped 2)
+        wired (layout/wire flipped 2)
         b1 (life/create-board ((one :dimensions) :width) ((one :dimensions) :height) [(one :pattern)])
         b2 (life/create-board ((flipped :dimensions) :width) ((flipped :dimensions) :height) [(flipped :pattern)])
         b3 (life/create-board ((wired :dimensions) :width) ((wired :dimensions) :height) [(wired :pattern)])]
