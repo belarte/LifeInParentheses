@@ -72,7 +72,7 @@
   If both expression have a non zero output, they will cancel each other when intersecting.
   First output will face bottom-right and second output will face bottom-left."
   [left right]
-  {:pre [(not= ((left :output) :direction) ((right :output) :direction))]}
+  {:pre [(not= (get-in left [:output :direction]) (get-in right [:output :direction]))]}
   (if (= :bottom-left (get-in left [:output :direction]))
     (align-for-intersection right left)
     (let [[l r] (delay-expression left right)
