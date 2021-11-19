@@ -1,5 +1,6 @@
 (ns alu.layout
-  (:require [life.patterns :as patterns]
+  (:require [clojure.set :as set]
+            [life.patterns :as patterns]
             [life.coords :as coords]))
 
 (defn flip-x
@@ -80,6 +81,24 @@
           x-offset (if (even? (+ x-min x-diff)) (inc x-min) x-min)
           y-offset (y-offset-at-output l r)]
       [l (shift r [x-offset y-offset])])))
+
+(defn merge-expressions
+  "Merge two expressions into one, disregarding :output and :step."
+  [left right]
+  (let [[x0 y0] (get-in left [:dimensions :origin])
+        [x1 y1] (get-in right [:dimensions :origin])
+        w0 (get-in left [:dimensions :width])
+        h0 (get-in left [:dimensions :height])
+        w1 (get-in right [:dimensions :width])
+        h1 (get-in right [:dimensions :height])
+        x-min (min x0 x1)
+        y-min (min y0 y1)
+        x-max (max (+ x0 w0) (+ x1 w1))
+        y-max (max (+ y0 h0) (+ y1 h1))]
+    {:dimensions {:origin [x-min y-min]
+                  :width (- x-max x-min)
+                  :height (- y-max y-min)}
+     :pattern (set/union (left :pattern) (right :pattern))}))
 
 (comment
   (let [init {:dimensions {:origin [0 0]

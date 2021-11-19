@@ -61,3 +61,21 @@
     (testing "Organise epressions so first is going bottom-right and second bottom-left"
       (is (= :bottom-right (get-in left-output [:output :direction])))
       (is (= :bottom-left (get-in right-output [:output :direction]))))))
+
+(deftest merge-expressions
+  (let [left {:dimensions {:origin [1 2]
+                           :width 5
+                           :height 4}
+              :pattern #{[1 5] [5 2]}}
+        right {:dimensions {:origin [7 1]
+                            :width 4
+                            :height 3}
+               :pattern #{[7 1] [10 3]}}
+        output (layout/merge-expressions left right)]
+    (testing "Merging expressions"
+      (is (= [1 1] (get-in output [:dimensions :origin])))
+      (is (= 10 (get-in output [:dimensions :width])))
+      (is (= 5 (get-in output [:dimensions :height])))
+      (is (= #{[1 5] [5 2] [7 1] [10 3]} (output :pattern))))
+    (testing "Order does not matter"
+      (is (= (layout/merge-expressions left right) (layout/merge-expressions right left))))))
