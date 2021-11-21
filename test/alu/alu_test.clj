@@ -15,3 +15,8 @@
     (is (= 1 (alu/output (layout/wire (layout/wire (alu/bit 1) 2) 3)))))
   (testing "A wire can extend a flipped pattern"
     (is (= 1 (alu/output (layout/wire (layout/flip-x (alu/bit 1)) 4))))))
+
+(deftest negation
+  (testing "Can negate a single bit"
+    (is (= 1 (alu/output (alu/not-e (alu/bit 0)))))
+    (is (= 0 (alu/output (alu/not-e (alu/bit 1)))))))

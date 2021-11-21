@@ -1,5 +1,6 @@
 (ns alu.alu
   (:require [alu.layout :as layout]
+            [life.coords :as coords]
             [life.life :as life]
             [life.patterns :as patterns]))
 
@@ -25,6 +26,20 @@
         last-iteration (last iterations)]
     (if (contains? (last-iteration :alive-cells) (output :position)) 1 0)))
 
+(defn not-e
+  "Negates an expression."
+  [expression]
+  (let [complement (layout/flip-x (bit 1))
+        [l r] (layout/align-for-intersection expression complement)
+        [x-lo _] (get-in l [:output :position])
+        [x-ro y-ro] (get-in r [:output :position])
+        x-diff (+ (int (/ (- x-ro x-lo) 2)) 5)
+        steps (+ (r :steps) (* 4 x-diff))]
+    (-> (layout/merge-expressions l r)
+        (assoc-in [:output :direction] :bottom-left)
+        (assoc-in [:output :position] (coords/add [x-ro y-ro] [(- x-diff) x-diff]))
+        (assoc :steps steps))))
+
 (comment
   (let [one (bit 1)
         flipped (layout/flip-x one)
@@ -38,4 +53,5 @@
     (println (life/draw-board b2))
     (println wired)
     (println (life/draw-board b3)))
-  (output (bit 1)))
+  (output (bit 1))
+  (not-e (bit 1)))
