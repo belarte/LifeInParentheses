@@ -19,4 +19,13 @@
 (deftest negation
   (testing "Can negate a single bit"
     (is (= 1 (alu/output (alu/not-e (alu/bit 0)))))
-    (is (= 0 (alu/output (alu/not-e (alu/bit 1)))))))
+    (is (= 0 (alu/output (alu/not-e (alu/bit 1))))))
+  (testing "Can negate a flipped bit"
+    (is (= 1 (alu/output (alu/not-e (layout/flip-x (alu/bit 0))))))
+    (is (= 0 (alu/output (alu/not-e (layout/flip-x (alu/bit 1)))))))
+  (testing "Can negate a wired bit"
+    (is (= 1 (alu/output (alu/not-e (layout/wire (alu/bit 0) 5)))))
+    (is (= 0 (alu/output (alu/not-e (layout/wire (alu/bit 1) 5))))))
+  (testing "Some combination"
+    (is (= 1 (alu/output (alu/not-e (layout/flip-x (layout/wire (alu/bit 0) 5))))))
+    (is (= 0 (alu/output (alu/not-e (layout/flip-x (layout/wire (alu/bit 1) 5))))))))

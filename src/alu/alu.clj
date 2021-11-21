@@ -29,16 +29,19 @@
 (defn not-e
   "Negates an expression."
   [expression]
-  (let [complement (layout/flip-x (bit 1))
-        [l r] (layout/align-for-intersection expression complement)
-        [x-lo _] (get-in l [:output :position])
-        [x-ro y-ro] (get-in r [:output :position])
-        x-diff (+ (int (/ (- x-ro x-lo) 2)) 5)
-        steps (+ (r :steps) (* 4 x-diff))]
-    (-> (layout/merge-expressions l r)
-        (assoc-in [:output :direction] :bottom-left)
-        (assoc-in [:output :position] (coords/add [x-ro y-ro] [(- x-diff) x-diff]))
-        (assoc :steps steps))))
+  (let [direction (get-in expression [:output :direction])]
+    (if (= direction :bottom-left)
+      (layout/flip-x (not-e (layout/flip-x expression)))
+      (let [complement (layout/flip-x (bit 1))
+            [l r] (layout/align-for-intersection expression complement)
+            [x-lo _] (get-in l [:output :position])
+            [x-ro y-ro] (get-in r [:output :position])
+            x-diff (+ (int (/ (- x-ro x-lo) 2)) 5)
+            steps (+ (r :steps) (* 4 x-diff))]
+        (-> (layout/merge-expressions l r)
+            (assoc-in [:output :direction] :bottom-left)
+            (assoc-in [:output :position] (coords/add [x-ro y-ro] [(- x-diff) x-diff]))
+            (assoc :steps steps))))))
 
 (comment
   (let [one (bit 1)
