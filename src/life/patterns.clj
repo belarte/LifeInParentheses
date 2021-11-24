@@ -1,5 +1,8 @@
 (ns life.patterns
-  (:require [life.coords :as coords]))
+  (:require [clojure.spec.alpha :as s]
+            [life.coords :as coords]))
+
+(s/def :patterns/pattern (s/coll-of :coords/coords :kind set? :distinct true))
 
 (def glider
   "-o-
@@ -38,4 +41,5 @@
    (set (map #(coords/flip-x % x0 w) pattern))))
 
 (comment
+  (s/explain :patterns/pattern #{[1 2] [1 3]})
   (offset glider [1 2]))
