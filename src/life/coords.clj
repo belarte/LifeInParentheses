@@ -1,4 +1,7 @@
-(ns life.coords)
+(ns life.coords
+  (:require [clojure.spec.alpha :as s]))
+
+(s/def :coords/coords (s/tuple int? int?))
 
 (defn add
   "Adds two coordinates."
@@ -21,3 +24,5 @@
   [[x y] x0 w]
   [(dec (+ x0 (- w (- x x0)))) y])
 
+(comment
+  (s/explain :coords/coords [1 2]))
