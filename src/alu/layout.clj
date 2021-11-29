@@ -29,8 +29,8 @@
     (if (= direction :bottom-left)
       (flip-x (wire (flip-x expression) distance))
       (-> expression
-          (assoc-in [:alu/dimension :alu/width] (max width (+ 2 (- x x0))))
-          (assoc-in [:alu/dimension :alu/height] (max height (+ 2 (- y y0))))
+          (assoc-in [:alu/dimensions :alu/width] (max width (+ 2 (- x x0))))
+          (assoc-in [:alu/dimensions :alu/height] (max height (+ 2 (- y y0))))
           (assoc-in [:alu/output :alu/position] [x y])
           (assoc :alu/steps (+ steps (* 4 distance)))))))
 

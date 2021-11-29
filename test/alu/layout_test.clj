@@ -10,6 +10,19 @@
                  :alu/steps 16
                  :alu/pattern #{[1 1] [2 3] [6 4]}})
 
+(def left {:alu/dimensions {:alu/origin [2 2]
+                            :alu/width 6
+                            :alu/height 5}
+           :alu/output {:alu/position [4 5]
+                        :alu/direction :bottom-left}
+           :alu/steps 24})
+(def right {:alu/dimensions {:alu/origin [4 1]
+                             :alu/width 4
+                             :alu/height 4}
+            :alu/output {:alu/position [6 3]
+                         :alu/direction :bottom-right}
+            :alu/steps 16})
+
 (deftest flip-x
   (testing "Flipping twice returns copy of input"
     (is (= expression (layout/flip-x (layout/flip-x expression)))))
@@ -24,20 +37,26 @@
       (is (= 16 steps))
       (is (= #{[6 1] [5 3] [1 4]} pattern)))))
 
+(deftest wire
+  (testing "Check left facing expression"
+    (let [output (layout/wire left 3)]
+      (is (= [2 2] (get-in output [:alu/dimensions :alu/origin])))
+      (is (= 8 (get-in output [:alu/dimensions :alu/width])))
+      (is (= 8 (get-in output [:alu/dimensions :alu/height])))
+      (is (= [3 8] (get-in output [:alu/output :alu/position])))
+      (is (= :bottom-left (get-in output [:alu/output :alu/direction])))
+      (is (= 36 (output :alu/steps)))))
+  (testing "Check right facing expression"
+    (let [output (layout/wire right 3)]
+      (is (= [4 1] (get-in output [:alu/dimensions :alu/origin])))
+      (is (= 7 (get-in output [:alu/dimensions :alu/width])))
+      (is (= 7 (get-in output [:alu/dimensions :alu/height])))
+      (is (= [9 6] (get-in output [:alu/output :alu/position])))
+      (is (= :bottom-right (get-in output [:alu/output :alu/direction])))
+      (is (= 28 (output :alu/steps))))))
+
 (deftest align-for-intesection
-  (let [left {:alu/dimensions {:alu/origin [2 2]
-                               :alu/width 6
-                               :alu/height 5}
-              :alu/output {:alu/position [4 5]
-                           :alu/direction :bottom-left}
-              :alu/steps 24}
-        right {:alu/dimensions {:alu/origin [4 1]
-                                :alu/width 4
-                                :alu/height 4}
-               :alu/output {:alu/position [6 3]
-                            :alu/direction :bottom-right}
-               :alu/steps 16}
-        [left-output right-output] (layout/align-for-intersection left right)]
+  (let [[left-output right-output] (layout/align-for-intersection left right)]
     (testing "Result expressions do not overlap"
       (let [[xl] (get-in left-output [:alu/dimensions :alu/origin])
             [xr] (get-in right-output [:alu/dimensions :alu/origin])
