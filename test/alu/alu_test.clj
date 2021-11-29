@@ -28,4 +28,7 @@
     (is (= 0 (alu/output (alu/not-e (layout/wire (alu/bit 1) 5))))))
   (testing "Some combination"
     (is (= 1 (alu/output (alu/not-e (layout/flip-x (layout/wire (alu/bit 0) 5))))))
-    (is (= 0 (alu/output (alu/not-e (layout/flip-x (layout/wire (alu/bit 1) 5))))))))
+    (is (= 0 (alu/output (alu/not-e (layout/flip-x (layout/wire (alu/bit 1) 5)))))))
+  (testing "Double negation returns original value"
+    (is (= 0 (alu/output (alu/not-e (alu/not-e (alu/bit 0))))))
+    (is (= 1 (alu/output (alu/not-e (alu/not-e (alu/bit 1))))))))
