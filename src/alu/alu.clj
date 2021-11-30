@@ -36,24 +36,25 @@
      :alu/steps 0
      :alu/pattern pattern}))
 
+(defn- evaluate [expression]
+  (let [{:keys [alu/dimensions alu/steps alu/pattern]} expression
+        board (life/create-board (dimensions :alu/width) (dimensions :alu/height) [pattern])]
+    (life/simulate board steps)))
+
 (defn output
   "Reads a single bit as the output of an expression."
   [expression]
   {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
-  (let [{:keys [alu/dimensions alu/steps alu/output alu/pattern]} expression
-        board (life/create-board (dimensions :alu/width) (dimensions :alu/height) [pattern])
-        iterations (life/simulate board steps)
-        last-iteration (last iterations)]
-    (if (contains? (last-iteration :alive-cells) (output :alu/position)) 1 0)))
+  (let [output (get-in expression [:alu/output :alu/position])
+        last-iteration (last (evaluate expression))]
+    (if (contains? (last-iteration :alive-cells) output) 1 0)))
 
 (defn print-e
   "Prints all steps generated."
   [expression]
   {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
-  (let [{:keys [alu/dimensions alu/steps alu/pattern]} expression
-        board (life/create-board (dimensions :alu/width) (dimensions :alu/height) [pattern])
-        iterations (life/simulate board steps)]
-    (run! #(do (println %) (println (life/draw-board %))) iterations)))
+  (run! #(do (println %) (println (life/draw-board %)))
+        (evaluate expression)))
 
 (defn not-e
   "Negates an expression."
