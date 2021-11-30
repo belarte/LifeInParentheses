@@ -1,5 +1,5 @@
 (ns alu.layout-test
-  (:require [clojure.test :refer [deftest testing is]]
+  (:require [clojure.test :refer [deftest testing is are]]
             [alu.layout :as layout]))
 
 (def expression {:alu/dimensions {:alu/origin [1 1]
@@ -22,6 +22,22 @@
             :alu/output {:alu/position [6 3]
                          :alu/direction :bottom-right}
             :alu/steps 16})
+
+(defn within-bounds-test-helper [pattern]
+  {:alu/dimensions {:alu/origin [2 2]
+                    :alu/width 5
+                    :alu/height 4}
+   :alu/pattern pattern})
+
+(deftest within-bounds
+  (testing "Expression is within the bounds"
+    (is (true? (layout/within-bounds? (within-bounds-test-helper #{[2 2] [6 2] [5 2] [6 5]})))))
+  (testing "Expression are not within the bounds"
+    (are [pattern] (false? (layout/within-bounds? (within-bounds-test-helper pattern)))
+         #{[1 2]}
+         #{[2 1]}
+         #{[7 5]}
+         #{[6 6]})))
 
 (deftest flip-x
   (testing "Flipping twice returns copy of input"

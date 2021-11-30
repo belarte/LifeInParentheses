@@ -3,6 +3,20 @@
             [life.patterns :as patterns]
             [life.coords :as coords]))
 
+(defn within-bounds?
+  ([expression]
+   (let [origin (get-in expression [:alu/dimensions :alu/origin])
+         width (get-in expression [:alu/dimensions :alu/width])
+         height (get-in expression [:alu/dimensions :alu/height])
+         pattern (expression :alu/pattern)]
+     (within-bounds? pattern origin width height)))
+  ([pattern [x0 y0] w h]
+   (let [x1 (+ x0 w)
+         y1 (+ y0 h)]
+     (every? identity (map
+                        (fn [[x y]] (and (>= x x0) (>= y y0) (< x x1) (< y y1)))
+                        pattern)))))
+
 (defn flip-x
   "Flip exprssion on the X axis."
   [expression]
@@ -101,6 +115,7 @@
      :alu/pattern (set/union (left :alu/pattern) (right :alu/pattern))}))
 
 (comment
+  (within-bounds? #{[1 1] [1 2] [2 3] [3 4] [4 4]} [1 2] 5 5)
   (let [init {:alu/dimensions {:alu/origin [0 0]
                                :alu/width 5
                                :alu/height 5}

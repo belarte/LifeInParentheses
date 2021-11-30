@@ -80,4 +80,4 @@
     (println wired)
     (println (life/draw-board b3)))
   (output (bit 1))
-  (not-e (bit 1)))
+  (layout/within-bounds? (bit 1)))
