@@ -46,6 +46,15 @@
         last-iteration (last iterations)]
     (if (contains? (last-iteration :alive-cells) (output :alu/position)) 1 0)))
 
+(defn print-e
+  "Prints all steps generated."
+  [expression]
+  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
+  (let [{:keys [alu/dimensions alu/steps alu/pattern]} expression
+        board (life/create-board (dimensions :alu/width) (dimensions :alu/height) [pattern])
+        iterations (life/simulate board steps)]
+    (run! #(do (println %) (println (life/draw-board %))) iterations)))
+
 (defn not-e
   "Negates an expression."
   [expression]
@@ -67,6 +76,7 @@
 
 (comment
   (s/explain :alu/expression (bit 1))
+  (print-e (not-e (layout/wire (bit 1) 3)))
   (let [one (bit 1)
         flipped (layout/flip-x one)
         wired (layout/wire flipped 2)
