@@ -26,7 +26,7 @@
   "Represents a single bit as an input to an expression."
   [value]
   {:pre [(or (= 1 value) (= 0 value))]
-   :post [(s/valid? :alu/expression %)]}
+   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
   (let [pattern (if (zero? value) #{} (patterns/offset patterns/glider [1 1]))]
     {:alu/dimensions {:alu/origin [0 0]
                       :alu/width 5
@@ -39,7 +39,7 @@
 (defn output
   "Reads a single bit as the output of an expression."
   [expression]
-  {:pre [(s/valid? :alu/expression expression)]}
+  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
   (let [{:keys [alu/dimensions alu/steps alu/output alu/pattern]} expression
         board (life/create-board (dimensions :alu/width) (dimensions :alu/height) [pattern])
         iterations (life/simulate board steps)
@@ -49,8 +49,8 @@
 (defn not-e
   "Negates an expression."
   [expression]
-  {:pre [(s/valid? :alu/expression expression)]
-   :post [(s/valid? :alu/expression %)]}
+  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
+   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
   (let [direction (get-in expression [:alu/output :alu/direction])]
     (if (= direction :bottom-left)
       (layout/flip-x (not-e (layout/flip-x expression)))
