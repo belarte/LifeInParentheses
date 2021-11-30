@@ -92,7 +92,7 @@
     (let [[l r] (delay-expression left right)
           x-min (x-offset-at-origin l r)
           x-diff (x-offset-at-output l r)
-          x-offset (if (even? (+ x-min x-diff)) (inc x-min) x-min)
+          x-offset (if (odd? (+ x-min x-diff)) (inc x-min) x-min)
           y-offset (y-offset-at-output l r)]
       [l (shift r [x-offset y-offset])])))
 

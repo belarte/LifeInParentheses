@@ -78,10 +78,10 @@
             [xr] (get-in right-output [:alu/dimensions :alu/origin])
             w (get-in left-output [:alu/dimensions :alu/width])]
         (is (>= xr (+ xl w)))))
-    (testing "X origin coordinates are separated by an even number of cells"
+    (testing "X origin coordinates are separated by an odd number of cells"
       (let [[xl] (get-in left-output [:alu/output :alu/position])
             [xr] (get-in right-output [:alu/output :alu/position])]
-        (is (odd? (- xr xl)))))
+        (is (odd? (- xr xl 1)))))
     (testing "Both result expressiona have same number of steps"
       (let [left-steps (left-output :alu/steps)
             right-steps (right-output :alu/steps)]
