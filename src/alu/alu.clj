@@ -103,6 +103,15 @@
             (assoc :alu/steps steps)
             (update :alu/pattern set/union eater))))))
 
+(defn or-e
+  "Combine left and right expressions to form an 'or' statement."
+  [left right]
+  {:pre [(s/valid? :alu/expression left) (layout/within-bounds? left)
+         (s/valid? :alu/expression right) (layout/within-bounds? right)
+         (= (get-in left [:alu/output :alu/direction]) (get-in right [:alu/output :alu/direction]))]
+   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
+  (not-e (and-e (not-e left) (not-e right))))
+
 (comment
   (s/explain :alu/expression (bit 1))
   (print-e (not-e (layout/wire (bit 1) 3)))
