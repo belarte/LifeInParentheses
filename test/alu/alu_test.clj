@@ -1,5 +1,5 @@
 (ns alu.alu-test
-  (:require [clojure.test :refer [deftest testing is]]
+  (:require [clojure.test :refer [deftest testing is are]]
             [alu.layout :as layout]
             [alu.alu :as alu]))
 
@@ -32,3 +32,28 @@
   (testing "Double negation returns original value"
     (is (= 0 (alu/output (alu/not-e (alu/not-e (alu/bit 0))))))
     (is (= 1 (alu/output (alu/not-e (alu/not-e (alu/bit 1))))))))
+
+(defn and-e-test-helper [f-left f-right]
+  (are [result l r] (= result (alu/output (alu/and-e (f-left l) (f-right r))))
+       0 0 0
+       0 1 0
+       0 0 1
+       1 1 1))
+
+(deftest and-e
+  (testing "And with single bits"
+    (and-e-test-helper alu/bit alu/bit))
+  (testing "And with wired bits"
+    (and-e-test-helper #(layout/wire (alu/bit %) 4) alu/bit)
+    (and-e-test-helper alu/bit #(layout/wire (alu/bit %) 4)))
+  (testing "And with flipped bits"
+    (and-e-test-helper #(layout/flip-x (alu/bit %)) #(layout/flip-x (alu/bit %))))
+  (testing "Nested ands"
+    (are [result a b c d] (= result (alu/output (alu/and-e (alu/and-e (alu/bit a) (alu/bit b)) (alu/and-e (alu/bit c) (alu/bit d)))))
+         0 0 0 0 0, 0 0 0 0 1, 0 0 0 1 0, 0 0 0 1 1,
+         0 0 1 0 0, 0 0 1 0 1, 0 0 1 1 0, 0 0 1 1 1,
+         0 1 0 0 0, 0 1 0 0 1, 0 1 0 1 0, 0 1 0 1 1,
+         0 1 1 0 0, 0 1 1 0 1, 0 1 1 1 0, 1 1 1 1 1))
+  (testing "Throws when expressions are not facing same direction"
+    (is (thrown? AssertionError (alu/and-e (alu/bit 0) (layout/flip-x (alu/bit 0)))))
+    (is (thrown? AssertionError (alu/and-e (layout/flip-x (alu/bit 0)) (alu/bit 0))))))
