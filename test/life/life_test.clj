@@ -7,7 +7,7 @@
 
 (def glider-board (life/create-board 4 4 [patterns/glider]))
 (def block-board (life/create-board 2 2 [patterns/block]))
-(def eater-board (life/create-board 9 6 [patterns/eater]))
+(def eater-board (life/create-board 4 4 [patterns/eater]))
 
 (deftest life-is-evolving-one-step-at-a-time
   (testing "Still life remains the same"
@@ -27,3 +27,11 @@
     (let [output (last (life/simulate glider-board 4))
           expected (life/create-board 4 4 [(patterns/offset patterns/glider [1 1])])]
       (is (= expected output)))))
+
+(deftest glider-is-eaten
+  (testing "Glider is eaten by eater"
+    (let [glider patterns/glider
+          eater (patterns/offset patterns/eater [5 6])
+          board (life/create-board 10 10 [glider eater])
+          pattern (:alive-cells (last (life/simulate board 12)))]
+      (is (= eater pattern)))))
