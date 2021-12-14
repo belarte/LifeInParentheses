@@ -114,6 +114,18 @@
                       :alu/height (- y-max y-min)}
      :alu/pattern (set/union (left :alu/pattern) (right :alu/pattern))}))
 
+(defn spread-x
+  "Spreads expressions on the X axis so they are adjacent and do not overlap."
+  [expressions]
+  (let [origin (get-in (expressions 0) [:alu/dimensions :alu/origin 0])]
+    (->> (map #(get-in % [:alu/dimensions :alu/width]) expressions)
+         (reductions +)
+         drop-last
+         (cons 0)
+         (map (partial + origin))
+         (map vector expressions)
+         (map (fn [[e x]] (assoc-in e [:alu/dimensions :alu/origin 0] x))))))
+
 (comment
   (within-bounds? #{[1 1] [1 2] [2 3] [3 4] [4 4]} [1 2] 5 5)
   (let [init {:alu/dimensions {:alu/origin [0 0]
