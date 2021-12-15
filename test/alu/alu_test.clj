@@ -18,20 +18,20 @@
 
 (deftest negation
   (testing "Can negate a single bit"
-    (is (= 1 (alu/read-bit (alu/not-e (alu/bit 0)))))
-    (is (= 0 (alu/read-bit (alu/not-e (alu/bit 1))))))
+    (is (= 1 (alu/read-bit (alu/not-bit (alu/bit 0)))))
+    (is (= 0 (alu/read-bit (alu/not-bit (alu/bit 1))))))
   (testing "Can negate a flipped bit"
-    (is (= 1 (alu/read-bit (alu/not-e (layout/flip-x (alu/bit 0))))))
-    (is (= 0 (alu/read-bit (alu/not-e (layout/flip-x (alu/bit 1)))))))
+    (is (= 1 (alu/read-bit (alu/not-bit (layout/flip-x (alu/bit 0))))))
+    (is (= 0 (alu/read-bit (alu/not-bit (layout/flip-x (alu/bit 1)))))))
   (testing "Can negate a wired bit"
-    (is (= 1 (alu/read-bit (alu/not-e (layout/wire (alu/bit 0) 5)))))
-    (is (= 0 (alu/read-bit (alu/not-e (layout/wire (alu/bit 1) 5))))))
+    (is (= 1 (alu/read-bit (alu/not-bit (layout/wire (alu/bit 0) 5)))))
+    (is (= 0 (alu/read-bit (alu/not-bit (layout/wire (alu/bit 1) 5))))))
   (testing "Some combination"
-    (is (= 1 (alu/read-bit (alu/not-e (layout/flip-x (layout/wire (alu/bit 0) 5))))))
-    (is (= 0 (alu/read-bit (alu/not-e (layout/flip-x (layout/wire (alu/bit 1) 5)))))))
+    (is (= 1 (alu/read-bit (alu/not-bit (layout/flip-x (layout/wire (alu/bit 0) 5))))))
+    (is (= 0 (alu/read-bit (alu/not-bit (layout/flip-x (layout/wire (alu/bit 1) 5)))))))
   (testing "Double negation returns original value"
-    (is (= 0 (alu/read-bit (alu/not-e (alu/not-e (alu/bit 0))))))
-    (is (= 1 (alu/read-bit (alu/not-e (alu/not-e (alu/bit 1))))))))
+    (is (= 0 (alu/read-bit (alu/not-bit (alu/not-bit (alu/bit 0))))))
+    (is (= 1 (alu/read-bit (alu/not-bit (alu/not-bit (alu/bit 1))))))))
 
 (defn and-e-test-helper [f-left f-right]
   (are [result l r] (= result (alu/read-bit (alu/and-e (f-left l) (f-right r))))

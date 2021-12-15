@@ -57,14 +57,14 @@
   (run! #(do (println %) (println (life/draw-board %)))
         (evaluate expression)))
 
-(defn not-e
-  "Negates an expression."
+(defn not-bit
+  "Negates a single bit."
   [expression]
   {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
   (let [direction (get-in expression [:alu/output :alu/direction])]
     (if (= direction :bottom-left)
-      (layout/flip-x (not-e (layout/flip-x expression)))
+      (layout/flip-x (not-bit (layout/flip-x expression)))
       (let [complement (layout/flip-x (bit 1))
             [l r] (layout/align-for-intersection expression complement)
             [x-lo y-lo] (get-in l [:alu/output :alu/position])
@@ -88,7 +88,7 @@
   (let [direction (get-in left [:alu/output :alu/direction])]
     (if (= direction :bottom-left)
       (layout/flip-x (and-e (layout/flip-x left) (layout/flip-x right)))
-      (let [not-right (not-e right)
+      (let [not-right (not-bit right)
             [l r] (layout/align-for-intersection left not-right)
             [x-lo y-lo] (get-in l [:alu/output :alu/position])
             [x-ro _] (get-in r [:alu/output :alu/position])
@@ -110,11 +110,11 @@
          (s/valid? :alu/expression right) (layout/within-bounds? right)
          (= (get-in left [:alu/output :alu/direction]) (get-in right [:alu/output :alu/direction]))]
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (not-e (and-e (not-e left) (not-e right))))
+  (not-bit (and-e (not-bit left) (not-bit right))))
 
 (comment
   (s/explain :alu/expression (bit 1))
-  (print-e (not-e (layout/wire (bit 1) 3)))
+  (print-e (not-bit (layout/wire (bit 1) 3)))
   (print-e (and-e (bit 0) (bit 0)))
   (let [exp (and-e (bit 1) (bit 1))
         board (life/create-board ((exp :alu/dimensions) :alu/width) ((exp :alu/dimensions) :alu/height) [(exp :alu/pattern)])]
