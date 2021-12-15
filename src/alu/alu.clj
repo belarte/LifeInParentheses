@@ -42,7 +42,7 @@
         board (life/create-board (dimensions :alu/width) (dimensions :alu/height) [pattern])]
     (life/simulate board steps)))
 
-(defn output
+(defn read-bit
   "Reads a single bit as the output of an expression."
   [expression]
   {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
@@ -120,5 +120,5 @@
         board (life/create-board ((exp :alu/dimensions) :alu/width) ((exp :alu/dimensions) :alu/height) [(exp :alu/pattern)])]
     (println exp)
     (println (life/draw-board board)))
-  (output (bit 1))
+  (read-bit (bit 1))
   (layout/within-bounds? (bit 1)))
