@@ -78,7 +78,7 @@
             (assoc-in [:alu/output :alu/position] (coords/add [x-ro y-ro] [(- x-diff) x-diff]))
             (assoc :alu/steps steps))))))
 
-(defn and-e
+(defn and-bit
   "Combine left and right expressions to form an 'and' statement."
   [left right]
   {:pre [(s/valid? :alu/expression left) (layout/within-bounds? left)
@@ -87,7 +87,7 @@
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
   (let [direction (get-in left [:alu/output :alu/direction])]
     (if (= direction :bottom-left)
-      (layout/flip-x (and-e (layout/flip-x left) (layout/flip-x right)))
+      (layout/flip-x (and-bit (layout/flip-x left) (layout/flip-x right)))
       (let [not-right (not-bit right)
             [l r] (layout/align-for-intersection left not-right)
             [x-lo y-lo] (get-in l [:alu/output :alu/position])
@@ -110,13 +110,13 @@
          (s/valid? :alu/expression right) (layout/within-bounds? right)
          (= (get-in left [:alu/output :alu/direction]) (get-in right [:alu/output :alu/direction]))]
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (not-bit (and-e (not-bit left) (not-bit right))))
+  (not-bit (and-bit (not-bit left) (not-bit right))))
 
 (comment
   (s/explain :alu/expression (bit 1))
   (print-e (not-bit (layout/wire (bit 1) 3)))
-  (print-e (and-e (bit 0) (bit 0)))
-  (let [exp (and-e (bit 1) (bit 1))
+  (print-e (and-bit (bit 0) (bit 0)))
+  (let [exp (and-bit (bit 1) (bit 1))
         board (life/create-board ((exp :alu/dimensions) :alu/width) ((exp :alu/dimensions) :alu/height) [(exp :alu/pattern)])]
     (println exp)
     (println (life/draw-board board)))
