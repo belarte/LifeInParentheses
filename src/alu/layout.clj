@@ -48,7 +48,9 @@
           (assoc-in [:alu/output :alu/position] [x y])
           (assoc :alu/steps (+ steps (* 4 distance)))))))
 
-(defn- shift [expression offset]
+(defn shift
+  "Shifts an expression with the given offset."
+  [expression offset]
   (let [origin (get-in expression [:alu/dimensions :alu/origin])
         position (get-in expression [:alu/output :alu/position])
         pattern (get expression :alu/pattern)]
