@@ -126,17 +126,34 @@
       (is (= (layout/merge-expressions left right) (layout/merge-expressions right left))))))
 
 (deftest spread-on-x-axis
-  (testing "Spreaded expressions do no overlap"
-    (let [e1 {:alu/dimensions {:alu/origin [-1 0]
-                               :alu/width 4}}
-          e2 {:alu/dimensions {:alu/origin [2 0]
-                               :alu/width 5}}
-          e3 {:alu/dimensions {:alu/origin [12 0]
-                               :alu/width 3}}
-          e4 {:alu/dimensions {:alu/origin [11 0]
-                               :alu/width 2}}
-          [o1 o2 o3 o4] (layout/spread-x [e1 e2 e3 e4])]
+  (let [e1 {:alu/dimensions {:alu/origin [-1 0]
+                             :alu/width 4
+                             :alu/height 4}
+            :alu/output {:alu/position [2 3]}
+            :alu/pattern #{[-1 0] [2 3]}}
+        e2 {:alu/dimensions {:alu/origin [2 0]
+                             :alu/width 5
+                             :alu/height 4}
+            :alu/output {:alu/position [6 3]}
+            :alu/pattern #{[2 0] [6 3]}}
+        e3 {:alu/dimensions {:alu/origin [12 0]
+                             :alu/width 2
+                             :alu/height 4}
+            :alu/output {:alu/position [13 3]}
+            :alu/pattern #{[12 0] [13 3]}}
+        e4 {:alu/dimensions {:alu/origin [11 0]
+                             :alu/width 2
+                             :alu/height 4}
+            :alu/output {:alu/position [12 3]}
+            :alu/pattern #{[11 0] [12 3]}}
+        [o1 o2 o3 o4] (layout/spread-x [e1 e2 e3 e4])]
+    (testing "Spreaded expressions do no overlap"
       (is (= -1 (get-in o1 [:alu/dimensions :alu/origin 0])))
       (is (= 3 (get-in o2 [:alu/dimensions :alu/origin 0])))
       (is (= 8 (get-in o3 [:alu/dimensions :alu/origin 0])))
-      (is (= 11 (get-in o4 [:alu/dimensions :alu/origin 0]))))))
+      (is (= 10 (get-in o4 [:alu/dimensions :alu/origin 0]))))
+    (testing "Spreaded expressions are still within bounds"
+      (is (layout/within-bounds? o1))
+      (is (layout/within-bounds? o2))
+      (is (layout/within-bounds? o3))
+      (is (layout/within-bounds? o4)))))

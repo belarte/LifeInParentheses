@@ -119,14 +119,15 @@
 (defn spread-x
   "Spreads expressions on the X axis so they are adjacent and do not overlap."
   [expressions]
-  (let [origin (get-in (expressions 0) [:alu/dimensions :alu/origin 0])]
-    (->> (map #(get-in % [:alu/dimensions :alu/width]) expressions)
-         (reductions +)
-         drop-last
-         (cons 0)
-         (map (partial + origin))
-         (map vector expressions)
-         (map (fn [[e x]] (assoc-in e [:alu/dimensions :alu/origin 0] x))))))
+  (let [x0 (get-in (first expressions) [:alu/dimensions :alu/origin 0])
+        old-origins (map #(get-in % [:alu/dimensions :alu/origin 0]) expressions)
+        new-origins (->> (map #(get-in % [:alu/dimensions :alu/width]) expressions)
+                         (reductions +)
+                         drop-last
+                         (cons 0)
+                         (map (partial + x0)))
+        x-offsets (map #(apply - %) (map vector new-origins old-origins))]
+    (map (fn [[e x]] (shift e [x 0])) (map vector expressions x-offsets))))
 
 (comment
   (within-bounds? #{[1 1] [1 2] [2 3] [3 4] [4 4]} [1 2] 5 5)
