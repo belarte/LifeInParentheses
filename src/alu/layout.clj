@@ -59,6 +59,13 @@
         (assoc-in [:alu/output :alu/position] (coords/add position offset))
         (assoc :alu/pattern (patterns/offset pattern offset)))))
 
+(defn align-with-origin
+  "Aligns the given expression so its origin is [0 0]."
+  [expression]
+  (let [[x y] (get-in expression [:alu/dimensions :alu/origin])
+        offset [(- x) (- y)]]
+    (shift expression offset)))
+
 (defn- x-offset-at-origin [left right]
   (let [x1 (get-in left [:alu/dimensions :alu/origin 0])
         x2 (get-in right [:alu/dimensions :alu/origin 0])

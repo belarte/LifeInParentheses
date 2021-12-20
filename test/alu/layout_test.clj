@@ -81,6 +81,20 @@
       (is (= [6 8] (get-in shifted [:alu/output :alu/position])))
       (is (= #{[2 4] [3 5] [4 6] [5 7]} (shifted :alu/pattern))))))
 
+(deftest align-with-origin
+  (let [e {:alu/dimensions {:alu/origin [1 2]
+                            :alu/width 5
+                            :alu/height 5}
+           :alu/output {:alu/position [5 6]}
+           :alu/pattern #{[1 2] [2 3] [3 4] [4 5]}}
+        aligned (layout/align-with-origin e)]
+    (testing "Check new origin is [0 0]"
+      (is (= [0 0] (get-in aligned [:alu/dimensions :alu/origin]))))
+    (testing "New output is correct"
+      (is (= [4 4] (get-in aligned [:alu/output :alu/position]))))
+    (testing "Aligned expression is still within bounds"
+      (is (layout/within-bounds? aligned)))))
+
 (deftest align-for-intesection
   (let [[left-output right-output] (layout/align-for-intersection left right)]
     (testing "Result expressions do not overlap"
