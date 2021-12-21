@@ -5,17 +5,18 @@
 
 (defn within-bounds?
   ([expression]
-   (let [origin (get-in expression [:alu/dimensions :alu/origin])
-         width (get-in expression [:alu/dimensions :alu/width])
-         height (get-in expression [:alu/dimensions :alu/height])
+   (let [origin  (-> expression :alu/dimensions :alu/origin)
+         width   (-> expression :alu/dimensions :alu/width)
+         height  (-> expression :alu/dimensions :alu/height)
+         output  (-> expression :alu/output :alu/position)
          pattern (expression :alu/pattern)]
-     (within-bounds? pattern origin width height)))
-  ([pattern [x0 y0] w h]
+     (within-bounds? pattern output origin width height)))
+  ([pattern output [x0 y0] w h]
    (let [x1 (+ x0 w)
-         y1 (+ y0 h)]
-     (every? identity (map
-                        (fn [[x y]] (and (>= x x0) (>= y y0) (< x x1) (< y y1)))
-                        pattern)))))
+         y1 (+ y0 h)
+         check (fn [[x y]] (and (>= x x0) (>= y y0) (< x x1) (< y y1)))]
+     (and (check output)
+          (every? identity (map check pattern))))))
 
 (defn flip-x
   "Flip exprssion on the X axis."
@@ -160,7 +161,7 @@
     (map (fn [[e x]] (shift e [x 0])) (map vector expressions x-offsets))))
 
 (comment
-  (within-bounds? #{[1 1] [1 2] [2 3] [3 4] [4 4]} [1 2] 5 5)
+  (within-bounds? #{[1 1] [1 2] [2 3] [3 4] [4 4]} [1 2] [1 2] 5 5)
   (let [init {:alu/dimensions {:alu/origin [0 0]
                                :alu/width 5
                                :alu/height 5}

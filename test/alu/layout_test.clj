@@ -31,21 +31,28 @@
                          :alu/direction :bottom-right}
             :alu/steps 16})
 
-(defn within-bounds-test-helper [pattern]
+(defn within-bounds-test-helper [pattern output]
   {:alu/dimensions {:alu/origin [2 2]
                     :alu/width 5
                     :alu/height 4}
+   :alu/output {:alu/position output}
    :alu/pattern pattern})
 
 (deftest within-bounds
   (testing "Expression is within the bounds"
-    (is (true? (layout/within-bounds? (within-bounds-test-helper #{[2 2] [6 2] [5 2] [6 5]})))))
-  (testing "Expression are not within the bounds"
-    (are [pattern] (false? (layout/within-bounds? (within-bounds-test-helper pattern)))
+    (is (true? (layout/within-bounds? (within-bounds-test-helper #{[2 2] [6 2] [5 2] [6 5]} [6 5])))))
+  (testing "Patterns are not within the bounds"
+    (are [pattern] (false? (layout/within-bounds? (within-bounds-test-helper pattern [6 5])))
          #{[1 2]}
          #{[2 1]}
          #{[7 5]}
-         #{[6 6]})))
+         #{[6 6]}))
+  (testing "Outputs are not within the bounds"
+    (are [output] (false? (layout/within-bounds? (within-bounds-test-helper #{} output)))
+         [1 2]
+         [2 1]
+         [7 5]
+         [6 6])))
 
 (deftest flip-x
   (testing "Flipping twice returns copy of input"
