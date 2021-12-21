@@ -112,7 +112,37 @@
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
   (not-bit (and-bit (not-bit left) (not-bit right))))
 
+(defn- to-base-2 [n]
+  (loop [n n
+         acc []]
+    (if (zero? n)
+      (take 8 (concat acc (repeat 0)))
+      (recur (int (/ n 2)) (conj acc (mod n 2))))))
+
+(defn- from-base-2 [n]
+  (->> n
+       (map vector [1 2 4 8 16 32 64 128])
+       (map #(apply * %))
+       (reduce +)))
+
+(defn write-byte
+  "Represents byte as a sequence of expressions. Little-endian representation."
+  [n]
+  {:pre [(>= n 0) (< n 256)]}
+  (->> (to-base-2 n)
+       (map bit)
+       layout/spread-x))
+
+(defn read-byte
+  "Reads a bit as the output of a  sequence of expressions."
+  [expressions]
+  {:pre [(= 8 (count expressions))]}
+  (->> expressions
+       (map read-bit)
+       from-base-2))
+
 (comment
+  (read-byte (write-byte 12))
   (s/explain :alu/expression (bit 1))
   (print-e (not-bit (layout/wire (bit 1) 3)))
   (print-e (layout/align-with-origin (and-bit (bit 1) (bit 1))))
