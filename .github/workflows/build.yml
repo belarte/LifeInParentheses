@@ -15,6 +15,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: maven
 
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@3.7
