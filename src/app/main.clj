@@ -1,17 +1,17 @@
 (ns app.main
   (:require [clojure.tools.logging :as log]
-            [clojure.repl :as repl])
+            [clojure.repl :as repl]
+            [server.server :as server])
   (:gen-class))
 
 (defn shutdown!
   [& _]
   (log/info "Received SIGINT, Shutting down")
+  (server/stop)
   (shutdown-agents)
   (System/exit 0))
 
 (defn -main
   [& _]
   (repl/set-break-handler! shutdown!)
-  (println (+ 1 2))
-  (Thread/sleep 5000)
-  (println "Done"))
+  (server/start))
