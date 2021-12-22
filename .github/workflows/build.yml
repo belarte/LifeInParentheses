@@ -24,3 +24,7 @@ jobs:
       - name: Run tests
         run: clojure -M:test
         shell: bash
+
+      - name: Build app
+        run: clojure -T:build uber
+        shell: bash
