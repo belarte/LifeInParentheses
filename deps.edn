@@ -1,18 +1,17 @@
 {:paths ["src"]
- :deps {org.clojure/tools.logging {:mvn/version "1.2.3"}
-        metosin/reitit-core {:mvn/version "0.5.15"}
-        metosin/reitit-http {:mvn/version "0.5.15"}
-        metosin/reitit-ring {:mvn/version "0.5.15"}
+ :deps {org.clojure/tools.logging   {:mvn/version "1.2.3"}
+        metosin/reitit-core         {:mvn/version "0.5.15"}
+        metosin/reitit-http         {:mvn/version "0.5.15"}
+        metosin/reitit-ring         {:mvn/version "0.5.15"}
         metosin/reitit-interceptors {:mvn/version "0.5.15"}
-        metosin/reitit-malli {:mvn/version "0.5.15"}
-        metosin/reitit-sieppari {:mvn/version "0.5.15"}
-        metosin/muuntaja {:mvn/version "0.6.8"}
-        ring/ring-jetty-adapter {:mvn/version "1.9.4"}}
- :aliases {:run {:exec-fn app.main/-main}
-           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.7.2" :git/sha "0361dde"}}
+        metosin/reitit-malli        {:mvn/version "0.5.15"}
+        metosin/reitit-sieppari     {:mvn/version "0.5.15"}
+        metosin/muuntaja            {:mvn/version "0.6.8"}
+        ring/ring-jetty-adapter     {:mvn/version "1.9.4"}}
+ :aliases {:run   {:exec-fn app.main/-main}
+           :build {:deps       {io.github.clojure/tools.build {:git/tag "v0.7.2" :git/sha "0361dde"}}
                    :ns-default build}
-           :test {:extra-paths ["test"]
-                  :extra-deps {io.github.cognitect-labs/test-runner
-                               {:git/tag "v0.5.0" :git/sha "b3fd0d2"}}
-                  :main-opts ["-m" "cognitect.test-runner"]
-                  :exec-fn cognitect.test-runner.api/test}}}
+           :test  {:extra-paths ["test"]
+                   :extra-deps  {io.github.cognitect-labs/test-runner {:git/tag "v0.5.0" :git/sha "b3fd0d2"}}
+                   :main-opts   ["-m" "cognitect.test-runner"]
+                   :exec-fn     cognitect.test-runner.api/test}}}
