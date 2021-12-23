@@ -2,7 +2,10 @@
   (:require [clojure.tools.logging :as log]
             [reitit.ring :as ring]
             [reitit.http :as http]
+            [reitit.http.coercion :as coercion]
             [reitit.coercion.malli :as malli]
+            [reitit.http.interceptors.exception :as exception]
+            [reitit.http.interceptors.parameters :as parameters]
             [reitit.http.interceptors.muuntaja :as muuntaja]
             [reitit.interceptor.sieppari :as sieppari]
             [muuntaja.core :as m]
@@ -19,15 +22,28 @@
   [_]
   (respond "Ok"))
 
+(defn calculate
+  [{{{:keys [expression]} :query} :parameters}]
+  (respond (str "calculate " expression)))
+
 (def routes
-  [["/health" {:get {:handler health-check}}]])
+  [["/health"    {:get {:handler health-check}}]
+   ["/calculate" {:get {:parameters {:query [:map [:expression string?]]}
+                        :handler calculate}}]])
 
 (def server
   (http/ring-handler
     (http/router routes
                  {:data {:coercion malli/coercion
                          :muuntaja m/instance
-                         :interceptors [(muuntaja/format-response-interceptor)]}})
+                         :interceptors [(exception/exception-interceptor)
+                                        (parameters/parameters-interceptor)
+                                        (muuntaja/format-negotiate-interceptor)
+                                        (muuntaja/format-response-interceptor)
+                                        (muuntaja/format-request-interceptor)
+                                        (coercion/coerce-exceptions-interceptor)
+                                        (coercion/coerce-response-interceptor)
+                                        (coercion/coerce-request-interceptor)]}})
     (ring/routes
       (ring/create-default-handler
         {:not-found (constantly {:status  404
