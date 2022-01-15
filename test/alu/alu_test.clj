@@ -3,6 +3,17 @@
             [alu.layout :as layout]
             [alu.alu :as alu]))
 
+(deftest bit-is-properly-formed
+  (testing "A bit is properly formed"
+    (let [expected {:alu/dimensions {:alu/origin [0 0]
+                                     :alu/width 5
+                                     :alu/height 5}
+                    :alu/output {:alu/position [3 3]
+                                 :alu/direction :bottom-right}
+                    :alu/steps 0
+                    :alu/pattern #{[2 1] [3 2] [1 3] [2 3] [3 3]}}]
+      (is (= expected (alu/bit 1))))))
+
 (deftest write-and-read-bit
   (testing "A bit in input can be read as output"
     (is (= 0 (alu/read-bit (alu/bit 0))))
