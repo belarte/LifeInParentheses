@@ -37,7 +37,16 @@
       (is (= [1 8]        (-> output :alu/output :alu/position)))
       (is (= :bottom-left (-> output :alu/output :alu/direction)))
       (is (= 24           (output :alu/steps)))
-      (is (set/subset? #{[3 3] [7 2]} (output :alu/pattern))))))
+      (is (set/subset? #{[3 3] [7 2]} (output :alu/pattern)))))
+  (testing "A double negation is properly formed"
+    (let [output (alu/not-bit (alu/not-bit (alu/bit 1)))]
+      (is (= [0 -2]       (-> output :alu/dimensions :alu/origin)))
+      (is (= 23           (-> output :alu/dimensions :alu/width)))
+      (is (= 17           (-> output :alu/dimensions :alu/height)))
+      (is (= [7 13]       (-> output :alu/output :alu/position)))
+      (is (= :bottom-left (-> output :alu/output :alu/direction)))
+      (is (= 48           (output :alu/steps)))
+      (is (set/subset? #{[3 2] [7 3] [19 1]} (output :alu/pattern))))))
 
 (deftest negation
   (testing "Can negate a single bit"

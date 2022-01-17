@@ -58,25 +58,24 @@
         (evaluate expression)))
 
 (defn not-bit
-  "Negates a single bit."
+  "Negates a single bit. Expects the input to be facing bottom right, if not the input will be flipped."
   [expression]
   ;{:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
   ; :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]]
-  (let [direction (get-in expression [:alu/output :alu/direction])]
-    (if (= direction :bottom-left)
-      (layout/flip-x (not-bit (layout/flip-x expression)))
-      (let [complement (layout/flip-x (bit 1))
-            [l r] (layout/align-for-intersection expression complement)
-            [x-lo]      (-> l :alu/output :alu/position)
-            [x-ro y-ro] (-> r :alu/output :alu/position)
-            x-diff (+ (int (/ (- x-ro x-lo) 2)) 4)
-            height (+ (-> l :alu/dimensions :alu/height) 5 1)
-            steps (+ (r :alu/steps) (* 4 x-diff))]
-        (-> (layout/merge-expressions l r)
-            (assoc-in [:alu/dimensions :alu/height] height)
-            (assoc-in [:alu/output :alu/direction] :bottom-left)
-            (assoc-in [:alu/output :alu/position] (coords/add [x-ro y-ro] [(- x-diff) x-diff]))
-            (assoc :alu/steps steps))))))
+  (let [direction (-> expression :alu/output :alu/direction)
+        e (if (= direction :bottom-left) (layout/flip-x expression) expression)
+        complement (layout/flip-x (bit 1))
+        [l r] (layout/align-for-intersection e complement)
+        [x-lo] (-> l :alu/output :alu/position)
+        [x-ro y-ro] (-> r :alu/output :alu/position)
+        x-diff (+ (int (/ (- x-ro x-lo) 2)) 4)
+        height (+ (-> l :alu/dimensions :alu/height) 5 1)
+        steps (+ (r :alu/steps) (* 4 x-diff))]
+    (-> (layout/merge-expressions l r)
+        (assoc-in [:alu/dimensions :alu/height] height)
+        (assoc-in [:alu/output :alu/direction] :bottom-left)
+        (assoc-in [:alu/output :alu/position] (coords/add [x-ro y-ro] [(- x-diff) x-diff]))
+        (assoc :alu/steps steps))))
 
 (defn and-bit
   "Combine left and right expressions to form an 'and' statement."
