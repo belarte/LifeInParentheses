@@ -1,5 +1,6 @@
 (ns alu.alu-test
   (:require [clojure.test :refer [deftest testing is are]]
+            [clojure.set :as set]
             [alu.layout :as layout]
             [alu.alu :as alu]))
 
@@ -26,6 +27,17 @@
     (is (= 1 (alu/read-bit (layout/wire (layout/wire (alu/bit 1) 2) 3)))))
   (testing "A wire can extend a flipped pattern"
     (is (= 1 (alu/read-bit (layout/wire (layout/flip-x (alu/bit 1)) 4))))))
+
+(deftest negation-is-properly-formed
+  (testing "A negation is properly formed"
+    (let [output (alu/not-bit (alu/bit 1))]
+      (is (= [0 -1]       (-> output :alu/dimensions :alu/origin)))
+      (is (= 11           (-> output :alu/dimensions :alu/width)))
+      (is (= 11           (-> output :alu/dimensions :alu/height)))
+      (is (= [1 8]        (-> output :alu/output :alu/position)))
+      (is (= :bottom-left (-> output :alu/output :alu/direction)))
+      (is (= 24           (output :alu/steps)))
+      (is (set/subset? #{[3 3] [7 2]} (output :alu/pattern))))))
 
 (deftest negation
   (testing "Can negate a single bit"
