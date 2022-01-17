@@ -45,7 +45,7 @@
 (defn read-bit
   "Reads a single bit as the output of an expression."
   [expression]
-  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
+  ;{:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
   (let [output (get-in expression [:alu/output :alu/position])
         last-iteration (last (evaluate expression))]
     (if (contains? (last-iteration :alive-cells) output) 1 0)))
@@ -60,8 +60,8 @@
 (defn not-bit
   "Negates a single bit."
   [expression]
-  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
-   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
+  ;{:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
+  ; :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]]
   (let [direction (get-in expression [:alu/output :alu/direction])]
     (if (= direction :bottom-left)
       (layout/flip-x (not-bit (layout/flip-x expression)))
@@ -81,10 +81,10 @@
 (defn and-bit
   "Combine left and right expressions to form an 'and' statement."
   [left right]
-  {:pre [(s/valid? :alu/expression left) (layout/within-bounds? left)
-         (s/valid? :alu/expression right) (layout/within-bounds? right)
-         (= (get-in left [:alu/output :alu/direction]) (get-in right [:alu/output :alu/direction]))]
-   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
+  {:pre [;(s/valid? :alu/expression left) (layout/within-bounds? left)
+         ;(s/valid? :alu/expression right) (layout/within-bounds? right)
+         (= (get-in left [:alu/output :alu/direction]) (get-in right [:alu/output :alu/direction]))]}
+   ;:post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
   (let [direction (get-in left [:alu/output :alu/direction])]
     (if (= direction :bottom-left)
       (layout/flip-x (and-bit (layout/flip-x left) (layout/flip-x right)))
