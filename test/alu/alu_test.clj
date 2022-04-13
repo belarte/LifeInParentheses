@@ -79,16 +79,15 @@
     (and-bit-test-helper #(layout/wire (alu/bit %) 4) alu/bit)
     (and-bit-test-helper alu/bit #(layout/wire (alu/bit %) 4)))
   (testing "And with flipped bits"
-    (and-bit-test-helper #(layout/flip-x (alu/bit %)) #(layout/flip-x (alu/bit %))))
+    (and-bit-test-helper #(layout/flip-x (alu/bit %)) #(layout/flip-x (alu/bit %)))
+    (and-bit-test-helper #(alu/bit %) #(layout/flip-x (alu/bit %)))
+    (and-bit-test-helper #(layout/flip-x (alu/bit %)) #(alu/bit %)))
   (testing "Nested ands"
     (are [result a b c d] (= result (alu/read-bit (alu/and-bit (alu/and-bit (alu/bit a) (alu/bit b)) (alu/and-bit (alu/bit c) (alu/bit d)))))
          0 0 0 0 0, 0 0 0 0 1, 0 0 0 1 0, 0 0 0 1 1,
          0 0 1 0 0, 0 0 1 0 1, 0 0 1 1 0, 0 0 1 1 1,
          0 1 0 0 0, 0 1 0 0 1, 0 1 0 1 0, 0 1 0 1 1,
-         0 1 1 0 0, 0 1 1 0 1, 0 1 1 1 0, 1 1 1 1 1))
-  (testing "Throws when expressions are not facing same direction"
-    (is (thrown? AssertionError (alu/and-bit (alu/bit 0) (layout/flip-x (alu/bit 0)))))
-    (is (thrown? AssertionError (alu/and-bit (layout/flip-x (alu/bit 0)) (alu/bit 0))))))
+         0 1 1 0 0, 0 1 1 0 1, 0 1 1 1 0, 1 1 1 1 1)))
 
 (defn or-bit-test-helper [f-left f-right]
   (are [result l r] (= result (alu/read-bit (alu/or-bit (f-left l) (f-right r))))
@@ -104,14 +103,13 @@
     (or-bit-test-helper #(layout/wire (alu/bit %) 4) alu/bit)
     (or-bit-test-helper alu/bit #(layout/wire (alu/bit %) 4)))
   (testing "Or with flipped bits"
-    (or-bit-test-helper #(layout/flip-x (alu/bit %)) #(layout/flip-x (alu/bit %))))
+    (or-bit-test-helper #(layout/flip-x (alu/bit %)) #(layout/flip-x (alu/bit %)))
+    (or-bit-test-helper #(alu/bit %) #(layout/flip-x (alu/bit %)))
+    (or-bit-test-helper #(layout/flip-x (alu/bit %)) #(alu/bit %)))
   (testing "Nested ors"
     (are [result a b c d] (= result (alu/read-bit (alu/or-bit (alu/or-bit (alu/bit a) (alu/bit b)) (alu/or-bit (alu/bit c) (alu/bit d)))))
          0 0 0 0 0, 1 0 0 0 1, 1 0 0 1 0, 1 0 0 1 1,
          1 0 1 0 0, 1 0 1 0 1, 1 0 1 1 0, 1 0 1 1 1,
          1 1 0 0 0, 1 1 0 0 1, 1 1 0 1 0, 1 1 0 1 1,
-         1 1 1 0 0, 1 1 1 0 1, 1 1 1 1 0, 1 1 1 1 1))
-  (testing "Throws when expressions are not facing same direction"
-    (is (thrown? AssertionError (alu/and-bit (alu/bit 0) (layout/flip-x (alu/bit 0)))))
-    (is (thrown? AssertionError (alu/and-bit (layout/flip-x (alu/bit 0)) (alu/bit 0))))))
+         1 1 1 0 0, 1 1 1 0 1, 1 1 1 1 0, 1 1 1 1 1)))
 

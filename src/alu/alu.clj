@@ -80,34 +80,33 @@
 (defn and-bit
   "Combine left and right expressions to form an 'and' statement."
   [left right]
-  {:pre [;(s/valid? :alu/expression left) (layout/within-bounds? left)
-         ;(s/valid? :alu/expression right) (layout/within-bounds? right)
-         (= (get-in left [:alu/output :alu/direction]) (get-in right [:alu/output :alu/direction]))]}
-   ;:post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [direction (get-in left [:alu/output :alu/direction])]
-    (if (= direction :bottom-left)
-      (layout/flip-x (and-bit (layout/flip-x left) (layout/flip-x right)))
-      (let [not-right (not-bit right)
-            [l r] (layout/align-for-intersection left not-right)
-            [x-lo y-lo] (get-in l [:alu/output :alu/position])
-            [x-ro _] (get-in r [:alu/output :alu/position])
-            x-diff (+ (int (/ (- x-ro x-lo) 2)) 7)
-            height (+ y-lo x-diff 1)
-            steps (+ (r :alu/steps) (* 4 x-diff))
-            eater (patterns/offset (patterns/flip-x patterns/eater) [(- x-diff 3) (+ x-diff 6)])]
-        (-> (layout/merge-expressions l r)
-            (assoc-in [:alu/dimensions :alu/height] height)
-            (assoc-in [:alu/output :alu/direction] :bottom-right)
-            (assoc-in [:alu/output :alu/position] (coords/add [x-lo y-lo] [x-diff x-diff]))
-            (assoc :alu/steps steps)
-            (update :alu/pattern set/union eater))))))
+  ;{:pre [(s/valid? :alu/expression left) (layout/within-bounds? left)
+  ;       (s/valid? :alu/expression right) (layout/within-bounds? right)]
+  ; ;:post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
+  (let [left-direction (-> left :alu/output :alu/direction)
+        right-direction (-> right :alu/output :alu/direction)
+        left-e (if (= left-direction :bottom-left) (layout/flip-x left) left)
+        right-e (if (= right-direction :bottom-left) (layout/flip-x right) right)
+        not-right (not-bit right-e)
+        [l r] (layout/align-for-intersection left-e not-right)
+        [x-lo y-lo] (get-in l [:alu/output :alu/position])
+        [x-ro _] (get-in r [:alu/output :alu/position])
+        x-diff (+ (int (/ (- x-ro x-lo) 2)) 7)
+        height (+ y-lo x-diff 1)
+        steps (+ (r :alu/steps) (* 4 x-diff))
+        eater (patterns/offset (patterns/flip-x patterns/eater) [(- x-diff 3) (+ x-diff 6)])]
+      (-> (layout/merge-expressions l r)
+          (assoc-in [:alu/dimensions :alu/height] height)
+          (assoc-in [:alu/output :alu/direction] :bottom-right)
+          (assoc-in [:alu/output :alu/position] (coords/add [x-lo y-lo] [x-diff x-diff]))
+          (assoc :alu/steps steps)
+          (update :alu/pattern set/union eater))))
 
 (defn or-bit
   "Combine left and right expressions to form an 'or' statement."
   [left right]
   {:pre [(s/valid? :alu/expression left) (layout/within-bounds? left)
-         (s/valid? :alu/expression right) (layout/within-bounds? right)
-         (= (get-in left [:alu/output :alu/direction]) (get-in right [:alu/output :alu/direction]))]
+         (s/valid? :alu/expression right) (layout/within-bounds? right)]
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
   (not-bit (and-bit (not-bit left) (not-bit right))))
 
