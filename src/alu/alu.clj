@@ -73,11 +73,12 @@
         [x-ro y-ro] (-> r :alu/output :alu/position)
         x-diff      (+ (int (/ (- x-ro x-lo) 2)) 4)
         height      (+ (-> l :alu/dimensions :alu/height) 5 1)
-        steps       (+ (r :alu/steps) (* 4 x-diff))]
+        steps       (+ (r :alu/steps) (* 4 x-diff))
+        output-pos  (coords/add [x-ro y-ro] [(- x-diff) x-diff])]
     (-> (layout/merge-expressions l r)
         (assoc-in [:alu/dimensions :alu/height] height)
         (assoc-in [:alu/output :alu/direction] :bottom-left)
-        (assoc-in [:alu/output :alu/position] (coords/add [x-ro y-ro] [(- x-diff) x-diff]))
+        (assoc-in [:alu/output :alu/position] output-pos)
         (assoc :alu/steps steps))))
 
 (defn and-bit
@@ -95,11 +96,12 @@
         x-diff      (+ (int (/ (- x-ro x-lo) 2)) 7)
         height      (+ y-lo x-diff 1)
         steps       (+ (r :alu/steps) (* 4 x-diff))
-        eater       (patterns/offset (patterns/flip-x patterns/eater) [(- x-diff 3) (+ x-diff 6)])]
+        eater       (patterns/offset (patterns/flip-x patterns/eater) [(- x-diff 3) (+ x-diff 6)])
+        output-pos  (coords/add [x-lo y-lo] [x-diff x-diff])]
       (-> (layout/merge-expressions l r)
           (assoc-in [:alu/dimensions :alu/height] height)
           (assoc-in [:alu/output :alu/direction] :bottom-right)
-          (assoc-in [:alu/output :alu/position] (coords/add [x-lo y-lo] [x-diff x-diff]))
+          (assoc-in [:alu/output :alu/position] output-pos)
           (assoc :alu/steps steps)
           (update :alu/pattern set/union eater))))
 
