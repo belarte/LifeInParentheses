@@ -67,13 +67,13 @@
   ;{:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
   ; :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]]
   (let [e (make-face-right expression)
-        complement (layout/flip-x (bit 1))
-        [l r] (layout/align-for-intersection e complement)
-        [x-lo] (-> l :alu/output :alu/position)
+        complement  (layout/flip-x (bit 1))
+        [l r]       (layout/align-for-intersection e complement)
+        [x-lo]      (-> l :alu/output :alu/position)
         [x-ro y-ro] (-> r :alu/output :alu/position)
-        x-diff (+ (int (/ (- x-ro x-lo) 2)) 4)
-        height (+ (-> l :alu/dimensions :alu/height) 5 1)
-        steps (+ (r :alu/steps) (* 4 x-diff))]
+        x-diff      (+ (int (/ (- x-ro x-lo) 2)) 4)
+        height      (+ (-> l :alu/dimensions :alu/height) 5 1)
+        steps       (+ (r :alu/steps) (* 4 x-diff))]
     (-> (layout/merge-expressions l r)
         (assoc-in [:alu/dimensions :alu/height] height)
         (assoc-in [:alu/output :alu/direction] :bottom-left)
@@ -86,16 +86,16 @@
   ;{:pre [(s/valid? :alu/expression left) (layout/within-bounds? left)
   ;       (s/valid? :alu/expression right) (layout/within-bounds? right)]
   ; ;:post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [left-e (make-face-right left)
-        right-e (make-face-right right)
-        not-right (not-bit right-e)
-        [l r] (layout/align-for-intersection left-e not-right)
+  (let [left-e      (make-face-right left)
+        right-e     (make-face-right right)
+        not-right   (not-bit right-e)
+        [l r]       (layout/align-for-intersection left-e not-right)
         [x-lo y-lo] (get-in l [:alu/output :alu/position])
-        [x-ro _] (get-in r [:alu/output :alu/position])
-        x-diff (+ (int (/ (- x-ro x-lo) 2)) 7)
-        height (+ y-lo x-diff 1)
-        steps (+ (r :alu/steps) (* 4 x-diff))
-        eater (patterns/offset (patterns/flip-x patterns/eater) [(- x-diff 3) (+ x-diff 6)])]
+        [x-ro _]    (get-in r [:alu/output :alu/position])
+        x-diff      (+ (int (/ (- x-ro x-lo) 2)) 7)
+        height      (+ y-lo x-diff 1)
+        steps       (+ (r :alu/steps) (* 4 x-diff))
+        eater       (patterns/offset (patterns/flip-x patterns/eater) [(- x-diff 3) (+ x-diff 6)])]
       (-> (layout/merge-expressions l r)
           (assoc-in [:alu/dimensions :alu/height] height)
           (assoc-in [:alu/output :alu/direction] :bottom-right)
