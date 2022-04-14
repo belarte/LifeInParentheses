@@ -57,13 +57,16 @@
   (run! #(do (println %) (println (life/draw-board %)))
         (evaluate expression)))
 
+(defn- make-face-right [expression]
+  (let [direction (-> expression :alu/output :alu/direction)]
+    (if (= direction :bottom-left) (layout/flip-x expression) expression)))
+
 (defn not-bit
   "Negates a single bit. Expects the input to be facing bottom right, if not the input will be flipped."
   [expression]
   ;{:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
   ; :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]]
-  (let [direction (-> expression :alu/output :alu/direction)
-        e (if (= direction :bottom-left) (layout/flip-x expression) expression)
+  (let [e (make-face-right expression)
         complement (layout/flip-x (bit 1))
         [l r] (layout/align-for-intersection e complement)
         [x-lo] (-> l :alu/output :alu/position)
@@ -83,10 +86,8 @@
   ;{:pre [(s/valid? :alu/expression left) (layout/within-bounds? left)
   ;       (s/valid? :alu/expression right) (layout/within-bounds? right)]
   ; ;:post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [left-direction (-> left :alu/output :alu/direction)
-        right-direction (-> right :alu/output :alu/direction)
-        left-e (if (= left-direction :bottom-left) (layout/flip-x left) left)
-        right-e (if (= right-direction :bottom-left) (layout/flip-x right) right)
+  (let [left-e (make-face-right left)
+        right-e (make-face-right right)
         not-right (not-bit right-e)
         [l r] (layout/align-for-intersection left-e not-right)
         [x-lo y-lo] (get-in l [:alu/output :alu/position])
