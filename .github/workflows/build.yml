@@ -21,9 +21,17 @@ jobs:
         with:
           cli: 1.11.1.1105
 
+      - name: Install clojure linter
+        uses: DeLaGuardo/setup-clj-kondo@master
+        with:
+          version: '2020.04.05'
+
       - name: Run tests
         run: clojure -M:test
         shell: bash
+
+      - name: Lint sources
+        run: clj-kondo --lint src
 
       - name: Build app
         run: clojure -T:build uber
