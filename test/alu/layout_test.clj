@@ -95,6 +95,27 @@
     (testing "Aligned expression is still within bounds"
       (is (layout/within-bounds? aligned)))))
 
+(deftest change-direction
+  (testing "Make face direction"
+    (let [l {:alu/dimensions {:alu/origin [1 1]
+                              :alu/width 6
+                              :alu/height 3}
+             :alu/output {:alu/position [2 3]
+                          :alu/direction :bottom-left}
+             :alu/steps 16
+             :alu/pattern #{[4 1] [3 2]}}
+          r {:alu/dimensions {:alu/origin [1 1]
+                              :alu/width 6
+                              :alu/height 3}
+             :alu/output {:alu/position [5 3]
+                          :alu/direction :bottom-right}
+             :alu/steps 16
+             :alu/pattern #{[3 1] [4 2]}}]
+      (is (= r (layout/change-direction :bottom-right r)))
+      (is (= r (layout/change-direction :bottom-right l)))
+      (is (= l (layout/change-direction :bottom-left r)))
+      (is (= l (layout/change-direction :bottom-left l))))))
+
 (deftest align-for-intesection
   (let [[left-output right-output] (layout/align-for-intersection left right)]
     (testing "Result expressions do not overlap"

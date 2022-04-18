@@ -90,6 +90,10 @@
       [left (wire right diff)]
       [(wire left (- diff)) right])))
 
+(defn change-direction [direction expression]
+  (let [d (-> expression :alu/output :alu/direction)]
+    (if (= d direction) expression (flip-x expression))))
+
 (defn align-for-intersection
   "Aligns expressions by shifting one so that outputs will intersect.
   If both expression have a non zero output, they will cancel each other when intersecting.
