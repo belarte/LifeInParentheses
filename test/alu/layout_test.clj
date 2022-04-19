@@ -2,13 +2,21 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [alu.layout :as layout]))
 
-(def expression {:alu/dimensions {:alu/origin [1 1]
-                                  :alu/width 6
-                                  :alu/height 4}
-                 :alu/output {:alu/position [4 4]
-                              :alu/direction :bottom-right}
-                 :alu/steps 16
-                 :alu/pattern #{[1 1] [2 3] [6 4]}})
+(def left-facing {:alu/dimensions {:alu/origin [1 1]
+                                   :alu/width 6
+                                   :alu/height 3}
+                  :alu/output {:alu/position [2 3]
+                               :alu/direction :bottom-left}
+                  :alu/steps 16
+                  :alu/pattern #{[4 1] [3 2]}})
+
+(def right-facing {:alu/dimensions {:alu/origin [1 1]
+                                    :alu/width 6
+                                    :alu/height 3}
+                   :alu/output {:alu/position [5 3]
+                                :alu/direction :bottom-right}
+                   :alu/steps 16
+                   :alu/pattern #{[3 1] [4 2]}})
 
 (def left {:alu/dimensions {:alu/origin [2 2]
                             :alu/width 6
@@ -41,17 +49,11 @@
 
 (deftest flip-x
   (testing "Flipping twice returns copy of input"
-    (is (= expression (layout/flip-x (layout/flip-x expression)))))
+    (is (= left-facing (layout/flip-x (layout/flip-x left-facing))))
+    (is (= right-facing (layout/flip-x (layout/flip-x right-facing)))))
   (testing "Can flip an expression on the X axis"
-    (let [result (layout/flip-x expression)
-          {:keys [alu/dimensions alu/output alu/steps alu/pattern]} result]
-      (is (= [1 1] (dimensions :alu/origin)))
-      (is (= 6 (dimensions :alu/width)))
-      (is (= 4 (dimensions :alu/height)))
-      (is (= [3 4] (output :alu/position)))
-      (is (= :bottom-left (output :alu/direction)))
-      (is (= 16 steps))
-      (is (= #{[6 1] [5 3] [1 4]} pattern)))))
+    (is (= left-facing (layout/flip-x right-facing)))
+    (is (= right-facing (layout/flip-x left-facing)))))
 
 (deftest wire
   (testing "Check left facing expression"
@@ -96,25 +98,11 @@
       (is (layout/within-bounds? aligned)))))
 
 (deftest change-direction
-  (testing "Make face direction"
-    (let [l {:alu/dimensions {:alu/origin [1 1]
-                              :alu/width 6
-                              :alu/height 3}
-             :alu/output {:alu/position [2 3]
-                          :alu/direction :bottom-left}
-             :alu/steps 16
-             :alu/pattern #{[4 1] [3 2]}}
-          r {:alu/dimensions {:alu/origin [1 1]
-                              :alu/width 6
-                              :alu/height 3}
-             :alu/output {:alu/position [5 3]
-                          :alu/direction :bottom-right}
-             :alu/steps 16
-             :alu/pattern #{[3 1] [4 2]}}]
-      (is (= r (layout/change-direction :bottom-right r)))
-      (is (= r (layout/change-direction :bottom-right l)))
-      (is (= l (layout/change-direction :bottom-left r)))
-      (is (= l (layout/change-direction :bottom-left l))))))
+  (testing "Change direction"
+    (is (= right-facing (layout/change-direction :bottom-right right-facing)))
+    (is (= right-facing (layout/change-direction :bottom-right left-facing)))
+    (is (= left-facing (layout/change-direction :bottom-left right-facing)))
+    (is (= left-facing (layout/change-direction :bottom-left left-facing)))))
 
 (deftest align-for-intesection
   (let [[left-output right-output] (layout/align-for-intersection left right)]
