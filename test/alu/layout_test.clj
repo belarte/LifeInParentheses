@@ -104,31 +104,31 @@
     (is (= left-facing (layout/change-direction :bottom-left right-facing)))
     (is (= left-facing (layout/change-direction :bottom-left left-facing)))))
 
-(deftest align-for-intesection
-  (let [[left-output right-output] (layout/align-for-intersection left right)]
+(deftest make-intersect
+  (let [[left-output right-output] (layout/make-intersect left right)]
     (testing "Result expressions do not overlap"
-      (let [[xl] (get-in left-output [:alu/dimensions :alu/origin])
-            [xr] (get-in right-output [:alu/dimensions :alu/origin])
-            w (get-in left-output [:alu/dimensions :alu/width])]
+      (let [[xl] (-> left-output :alu/dimensions :alu/origin)
+            [xr] (-> right-output :alu/dimensions :alu/origin)
+            w    (-> left-output :alu/dimensions :alu/width)]
         (is (>= xr (+ xl w)))))
     (testing "X origin coordinates are separated by an odd number of cells"
-      (let [[xl] (get-in left-output [:alu/output :alu/position])
-            [xr] (get-in right-output [:alu/output :alu/position])]
+      (let [[xl] (-> left-output :alu/output :alu/position)
+            [xr] (-> right-output :alu/output :alu/position)]
         (is (odd? (- xr xl 1)))))
     (testing "Both result expressiona have same number of steps"
-      (let [left-steps (left-output :alu/steps)
+      (let [left-steps  (left-output :alu/steps)
             right-steps (right-output :alu/steps)]
         (is (= left-steps right-steps))))
     (testing "Outputs align"
-      (let [[_ yl] (get-in left-output [:alu/output :alu/position])
-            [_ yr] (get-in right-output [:alu/output :alu/position])]
+      (let [[_ yl] (-> left-output :alu/output :alu/position)
+            [_ yr] (-> right-output :alu/output :alu/position)]
         (is (= yr (- yl 1)))))
-    (testing "Throws exception if outputs have the same direction"
-      (is (thrown? AssertionError (layout/align-for-intersection left left)))
-      (is (thrown? AssertionError (layout/align-for-intersection right right))))
+    (testing "Inputs are flipped so left is facing right and right is facing left"
+      (is (= (layout/make-intersect right right-facing) (layout/make-intersect right left-facing)))
+      (is (= (layout/make-intersect right-facing left) (layout/make-intersect left-facing left))))
     (testing "Organise epressions so first is going bottom-right and second bottom-left"
-      (is (= :bottom-right (get-in left-output [:alu/output :alu/direction])))
-      (is (= :bottom-left (get-in right-output [:alu/output :alu/direction]))))))
+      (is (= :bottom-right (-> left-output :alu/output :alu/direction)))
+      (is (= :bottom-left (-> right-output :alu/output :alu/direction))))))
 
 (deftest merge-expressions
   (let [left {:alu/dimensions {:alu/origin [1 2]

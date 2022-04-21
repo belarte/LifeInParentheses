@@ -94,20 +94,19 @@
   (let [d (-> expression :alu/output :alu/direction)]
     (if (= d direction) expression (flip-x expression))))
 
-(defn align-for-intersection
+(defn make-intersect
   "Aligns expressions by shifting one so that outputs will intersect.
   If both expression have a non zero output, they will cancel each other when intersecting.
   First output will face bottom-right and second output will face bottom-left."
   [left right]
-  {:pre [(not= (get-in left [:alu/output :alu/direction]) (get-in right [:alu/output :alu/direction]))]}
-  (if (= :bottom-left (get-in left [:alu/output :alu/direction]))
-    (align-for-intersection right left)
-    (let [[l r] (delay-expression left right)
-          x-min (x-offset-at-origin l r)
-          x-diff (x-offset-at-output l r)
-          x-offset (if (odd? (+ x-min x-diff)) (inc x-min) x-min)
-          y-offset (y-offset-at-output l r)]
-      [l (shift r [x-offset y-offset])])))
+  (let [l-flipped (change-direction :bottom-right left)
+        r-flipped (change-direction :bottom-left right)
+        [l r]     (delay-expression l-flipped r-flipped)
+        x-min     (x-offset-at-origin l r)
+        x-diff    (x-offset-at-output l r)
+        x-offset  (if (odd? (+ x-min x-diff)) (inc x-min) x-min)
+        y-offset  (y-offset-at-output l r)]
+    [l (shift r [x-offset y-offset])]))
 
 (defn merge-expressions
   "Merge two expressions into one, disregarding :output and :step."

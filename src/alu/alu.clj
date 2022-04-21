@@ -64,7 +64,7 @@
   ; :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]]
   (let [e           (layout/change-direction :bottom-right expression)
         complement  (layout/flip-x (bit 1))
-        [l r]       (layout/align-for-intersection e complement)
+        [l r]       (layout/make-intersect e complement)
         [x-lo]      (-> l :alu/output :alu/position)
         [x-ro y-ro] (-> r :alu/output :alu/position)
         x-diff      (+ (int (/ (- x-ro x-lo) 2)) 4)
@@ -86,7 +86,7 @@
   (let [left-e      (layout/change-direction :bottom-right left)
         right-e     (layout/change-direction :bottom-right right)
         not-right   (not-bit right-e)
-        [l r]       (layout/align-for-intersection left-e not-right)
+        [l r]       (layout/make-intersect left-e not-right)
         [x-lo y-lo] (get-in l [:alu/output :alu/position])
         [x-ro _]    (get-in r [:alu/output :alu/position])
         x-diff      (+ (int (/ (- x-ro x-lo) 2)) 7)
