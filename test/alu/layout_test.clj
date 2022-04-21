@@ -115,7 +115,7 @@
       (let [[xl] (-> left-output :alu/output :alu/position)
             [xr] (-> right-output :alu/output :alu/position)]
         (is (odd? (- xr xl 1)))))
-    (testing "Both result expressiona have same number of steps"
+    (testing "Both expressiona have same number of steps"
       (let [left-steps  (left-output :alu/steps)
             right-steps (right-output :alu/steps)]
         (is (= left-steps right-steps))))
@@ -129,6 +129,32 @@
     (testing "Organise epressions so first is going bottom-right and second bottom-left"
       (is (= :bottom-right (-> left-output :alu/output :alu/direction)))
       (is (= :bottom-left (-> right-output :alu/output :alu/direction))))))
+
+(deftest make-parallel
+  (let [[left-output right-output] (layout/make-parallel left right)]
+    (testing "Result expressions do not overlap"
+      (let [[xl] (-> left-output :alu/dimensions :alu/origin)
+            [xr] (-> right-output :alu/dimensions :alu/origin)
+            w    (-> left-output :alu/dimensions :alu/width)]
+        (is (>= xr (+ xl w)))))
+    (testing "X origin coordinates are separated by an odd number of cells"
+      (let [[xl] (-> left-output :alu/output :alu/position)
+            [xr] (-> right-output :alu/output :alu/position)]
+        (is (odd? (- xr xl 1)))))
+    (testing "Both expressiona have same number of steps"
+      (let [left-steps  (left-output :alu/steps)
+            right-steps (right-output :alu/steps)]
+        (is (= left-steps right-steps))))
+    (testing "Outputs align"
+      (let [[_ yl] (-> left-output :alu/output :alu/position)
+            [_ yr] (-> right-output :alu/output :alu/position)]
+        (is (= yr yl))))
+    (testing "Inputs are flipped so both are facing right"
+      (is (= (layout/make-parallel right right-facing) (layout/make-parallel right left-facing)))
+      (is (= (layout/make-parallel right-facing left) (layout/make-parallel left-facing left))))
+    (testing "Organise epressions so both face bottom right"
+      (is (= :bottom-right (-> left-output :alu/output :alu/direction)))
+      (is (= :bottom-right (-> right-output :alu/output :alu/direction))))))
 
 (deftest merge-expressions
   (let [left {:alu/dimensions {:alu/origin [1 2]

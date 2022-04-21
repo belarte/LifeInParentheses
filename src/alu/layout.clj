@@ -80,7 +80,7 @@
 (defn- y-offset-at-output [left right]
   (let [[_ y1] (get-in left [:alu/output :alu/position])
         [_ y2] (get-in right [:alu/output :alu/position])]
-    (dec (- y1 y2))))
+    (- y1 y2)))
 
 (defn- delay-expression [left right]
   (let [s1 (left :alu/steps)
@@ -101,6 +101,18 @@
   [left right]
   (let [l-flipped (change-direction :bottom-right left)
         r-flipped (change-direction :bottom-left right)
+        [l r]     (delay-expression l-flipped r-flipped)
+        x-min     (x-offset-at-origin l r)
+        x-diff    (x-offset-at-output l r)
+        x-offset  (if (odd? (+ x-min x-diff)) (inc x-min) x-min)
+        y-offset  (dec (y-offset-at-output l r))]
+    [l (shift r [x-offset y-offset])]))
+
+(defn make-parallel
+  "Align expressions so they both face bottom right and outputs are synchronised."
+  [left right]
+  (let [l-flipped (change-direction :bottom-right left)
+        r-flipped (change-direction :bottom-right right)
         [l r]     (delay-expression l-flipped r-flipped)
         x-min     (x-offset-at-origin l r)
         x-diff    (x-offset-at-output l r)
