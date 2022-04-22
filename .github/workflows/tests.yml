@@ -7,7 +7,7 @@ on:
       - completed
 
 jobs:
-  notify:
+  clojure:
     runs-on: ubuntu-latest
 
     steps:
