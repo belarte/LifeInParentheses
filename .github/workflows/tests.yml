@@ -1,0 +1,21 @@
+name: System tests
+
+on:
+  workflow_run:
+    workflows: ["Build app"]
+    types:
+      - completed
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Test
+        run: |
+          echo "Local path"
+          pwd
+          echo "list files"
+          ls -al
+          echo "list files in workspace"
+          ls -al ${{ github.workspace }}
