@@ -90,6 +90,13 @@
       [left (wire right diff)]
       [(wire left (- diff)) right])))
 
+(defn- calculate-offset [l r y-modifier-fn]
+  (let [x-min     (x-offset-at-origin l r)
+        x-diff    (x-offset-at-output l r)
+        x-offset  (if (odd? (+ x-min x-diff)) (inc x-min) x-min)
+        y-offset  (y-modifier-fn (y-offset-at-output l r))]
+    [x-offset y-offset]))
+
 (defn change-direction [direction expression]
   (let [d (-> expression :alu/output :alu/direction)]
     (if (= d direction) expression (flip-x expression))))
@@ -102,11 +109,8 @@
   (let [l-flipped (change-direction :bottom-right left)
         r-flipped (change-direction :bottom-left right)
         [l r]     (delay-expression l-flipped r-flipped)
-        x-min     (x-offset-at-origin l r)
-        x-diff    (x-offset-at-output l r)
-        x-offset  (if (odd? (+ x-min x-diff)) (inc x-min) x-min)
-        y-offset  (dec (y-offset-at-output l r))]
-    [l (shift r [x-offset y-offset])]))
+        offset    (calculate-offset l r dec)]
+    [l (shift r offset)]))
 
 (defn make-parallel
   "Align expressions so they both face bottom right and outputs are synchronised."
@@ -114,11 +118,8 @@
   (let [l-flipped (change-direction :bottom-right left)
         r-flipped (change-direction :bottom-right right)
         [l r]     (delay-expression l-flipped r-flipped)
-        x-min     (x-offset-at-origin l r)
-        x-diff    (x-offset-at-output l r)
-        x-offset  (if (odd? (+ x-min x-diff)) (inc x-min) x-min)
-        y-offset  (y-offset-at-output l r)]
-    [l (shift r [x-offset y-offset])]))
+        offset    (calculate-offset l r identity)]
+    [l (shift r offset)]))
 
 (defn merge-expressions
   "Merge two expressions into one, disregarding :output and :step."
