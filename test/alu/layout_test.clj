@@ -128,7 +128,34 @@
       (is (= (layout/make-intersect right-facing left) (layout/make-intersect left-facing left))))
     (testing "Organise epressions so first is going bottom-right and second bottom-left"
       (is (= :bottom-right (-> left-output :alu/output :alu/direction)))
-      (is (= :bottom-left (-> right-output :alu/output :alu/direction))))))
+      (is (= :bottom-left (-> right-output :alu/output :alu/direction)))))
+  (let [left {:alu/dimensions {:alu/origin [18 -1]
+                               :alu/width 17
+                               :alu/height 17}
+              :alu/output {:alu/position [32 14]
+                           :alu/direction :bottom-right}
+              :alu/steps 44}
+        right {:alu/dimensions {:alu/origin [0 0]
+                                :alu/width 5
+                                :alu/height 5}
+               :alu/output {:alu/position [3 3]
+                            :alu/direction :bottom-right}
+               :alu/steps 0}
+        [l r] (layout/make-intersect left right)]
+    (testing "Left output is correct"
+      (is (= [18 -1]       (-> l :alu/dimensions :alu/origin)))
+      (is (= 17            (-> l :alu/dimensions :alu/width)))
+      (is (= 17            (-> l :alu/dimensions :alu/height)))
+      (is (= [32 14]       (-> l :alu/output :alu/position)))
+      (is (= :bottom-right (-> l :alu/output :alu/direction)))
+      (is (= 44            (l :alu/steps))))
+    (testing "Right output is correct"
+      (is (= [37 -1]      (-> r :alu/dimensions :alu/origin)))
+      (is (= 16           (-> r :alu/dimensions :alu/width)))
+      (is (= 16           (-> r :alu/dimensions :alu/height)))
+      (is (= [38 13]      (-> r :alu/output :alu/position)))
+      (is (= :bottom-left (-> r :alu/output :alu/direction)))
+      (is (= 44           (r :alu/steps))))))
 
 (deftest make-parallel
   (let [[left-output right-output] (layout/make-parallel left right)]
@@ -154,7 +181,34 @@
       (is (= (layout/make-parallel right-facing left) (layout/make-parallel left-facing left))))
     (testing "Organise epressions so both face bottom right"
       (is (= :bottom-right (-> left-output :alu/output :alu/direction)))
-      (is (= :bottom-right (-> right-output :alu/output :alu/direction))))))
+      (is (= :bottom-right (-> right-output :alu/output :alu/direction)))))
+  (let [left {:alu/dimensions {:alu/origin [0 0]
+                               :alu/width 5
+                               :alu/height 5}
+              :alu/output {:alu/position [3 3]
+                           :alu/direction :bottom-right}
+              :alu/steps 0}
+        right {:alu/dimensions {:alu/origin [0 -1]
+                                :alu/width 17
+                                :alu/height 17}
+               :alu/output {:alu/position [14 14]
+                            :alu/direction :bottom-right}
+               :alu/steps 44}
+        [l r] (layout/make-parallel left right)]
+    (testing "Left output is correct"
+      (is (= [0 0]         (-> l :alu/dimensions :alu/origin)))
+      (is (= 16            (-> l :alu/dimensions :alu/width)))
+      (is (= 16            (-> l :alu/dimensions :alu/height)))
+      (is (= [14 14]       (-> l :alu/output :alu/position)))
+      (is (= :bottom-right (-> l :alu/output :alu/direction)))
+      (is (= 44            (l :alu/steps))))
+    (testing "Right output is correct"
+      (is (= [18 -1]       (-> r :alu/dimensions :alu/origin)))
+      (is (= 17            (-> r :alu/dimensions :alu/width)))
+      (is (= 17            (-> r :alu/dimensions :alu/height)))
+      (is (= [32 14]       (-> r :alu/output :alu/position)))
+      (is (= :bottom-right (-> r :alu/output :alu/direction)))
+      (is (= 44            (r :alu/steps))))))
 
 (deftest merge-expressions
   (let [left {:alu/dimensions {:alu/origin [1 2]

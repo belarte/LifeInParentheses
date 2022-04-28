@@ -70,7 +70,7 @@
   (let [x1 (get-in left [:alu/dimensions :alu/origin 0])
         x2 (get-in right [:alu/dimensions :alu/origin 0])
         width (get-in left [:alu/dimensions :alu/width])]
-    (- (+ x1 width) x2)))
+    (- (+ x1 width 1) x2)))
 
 (defn- x-offset-at-output [left right]
   (let [[x1] (get-in left [:alu/output :alu/position])
@@ -82,6 +82,12 @@
         [_ y2] (get-in right [:alu/output :alu/position])]
     (- y1 y2)))
 
+(defn- x-offset-to-right-border [expression]
+  (let [[x0] (-> expression :alu/dimensions :alu/origin)
+        w    (-> expression :alu/dimensions :alu/width)
+        [x1] (-> expression :alu/output :alu/position)]
+    (- (+ x0 w) 2 x1)))
+
 (defn- delay-expression [left right]
   (let [s1 (left :alu/steps)
         s2 (right :alu/steps)
@@ -90,10 +96,11 @@
       [left (wire right diff)]
       [(wire left (- diff)) right])))
 
-(defn- calculate-offset [l r y-modifier-fn]
+(defn- calculate-offset [l r x-modifier-fn y-modifier-fn]
   (let [x-min     (x-offset-at-origin l r)
         x-diff    (x-offset-at-output l r)
-        x-offset  (if (odd? (+ x-min x-diff)) (inc x-min) x-min)
+        x         (x-modifier-fn x-min (x-offset-to-right-border l))
+        x-offset  (if (odd? (+ x-min x-diff)) (inc x) x)
         y-offset  (y-modifier-fn (y-offset-at-output l r))]
     [x-offset y-offset]))
 
@@ -109,7 +116,7 @@
   (let [l-flipped (change-direction :bottom-right left)
         r-flipped (change-direction :bottom-left right)
         [l r]     (delay-expression l-flipped r-flipped)
-        offset    (calculate-offset l r dec)]
+        offset    (calculate-offset l r (fn [x _] x) dec)]
     [l (shift r offset)]))
 
 (defn make-parallel
@@ -118,7 +125,7 @@
   (let [l-flipped (change-direction :bottom-right left)
         r-flipped (change-direction :bottom-right right)
         [l r]     (delay-expression l-flipped r-flipped)
-        offset    (calculate-offset l r identity)]
+        offset    (calculate-offset l r (fn [x d] (+ x (* 2 d))) identity)]
     [l (shift r offset)]))
 
 (defn merge-expressions
