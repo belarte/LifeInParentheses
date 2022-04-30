@@ -45,7 +45,7 @@
 (defn read-bit
   "Reads a single bit as the output of an expression."
   [expression]
-  ;{:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
+  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
   (let [output (get-in expression [:alu/output :alu/position])
         last-iteration (last (evaluate expression))]
     (if (contains? (last-iteration :alive-cells) output) 1 0)))
@@ -60,8 +60,8 @@
 (defn not-bit
   "Negates a single bit. Expects the input to be facing bottom right, if not the input will be flipped."
   [expression]
-  ;{:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
-  ; :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]]
+  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
+   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
   (let [e           (layout/change-direction :bottom-right expression)
         complement  (layout/flip-x (bit 1))
         [l r]       (layout/make-intersect e complement)
