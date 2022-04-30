@@ -54,7 +54,7 @@
   "Prints all steps generated."
   [expression]
   {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
-  (run! #(do (println %) (println (life/draw-board %)))
+  (run! #(do (println %) (println (life/draw-board %) (Thread/sleep 100)))
         (evaluate expression)))
 
 (defn not-bit
