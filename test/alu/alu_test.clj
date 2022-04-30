@@ -65,6 +65,28 @@
     (is (= 0 (alu/read-bit (alu/not-bit (alu/not-bit (alu/bit 0))))))
     (is (= 1 (alu/read-bit (alu/not-bit (alu/not-bit (alu/bit 1))))))))
 
+(deftest and-is-properly-formed
+  (testing "And is properly formed"
+    (let [output (alu/and-bit (alu/bit 1) (alu/bit 1))]
+      (is (= [0 -1]        (-> output :alu/dimensions :alu/origin)))
+      (is (= 17            (-> output :alu/dimensions :alu/width)))
+      (is (= 17            (-> output :alu/dimensions :alu/height)))
+      (is (= [14 14]       (-> output :alu/output :alu/position)))
+      (is (= :bottom-right (-> output :alu/output :alu/direction)))
+      (is (= 44            (output :alu/steps)))
+      (is (set/subset? #{[3 3] [9 3] [13 2] [5 11]} (output :alu/pattern)))))
+  (testing "Nested ands are properly formed"
+    (let [output (alu/and-bit (alu/bit 1) (alu/and-bit (alu/bit 1) (alu/bit 1)))]
+      (is (= [0 -1]        (-> output :alu/dimensions :alu/origin)))
+      (is (= 53            (-> output :alu/dimensions :alu/width)))
+      (is (= 35            (-> output :alu/dimensions :alu/height)))
+      (is (= [32 32]       (-> output :alu/output :alu/position)))
+      (is (= :bottom-right (-> output :alu/output :alu/direction)))
+      (is (= 116           (output :alu/steps)))
+      (is (set/subset?
+            #{[3 3] [21 3] [27 3] [31 2] [49 2] [23 11] [23 29]}
+            (output :alu/pattern))))))
+
 (defn and-bit-test-helper [f-left f-right]
   (are [result l r] (= result (alu/read-bit (alu/and-bit (f-left l) (f-right r))))
        0 0 0

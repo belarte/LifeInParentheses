@@ -77,24 +77,31 @@
         (assoc-in [:alu/output :alu/position] output-pos)
         (assoc :alu/steps steps))))
 
+(defn- get-intersection [left right]
+  (let [[x0 y0] (-> left :alu/output :alu/position)
+        [x1 __] (-> right :alu/output :alu/position)
+        diff    (int (/ (- x1 x0) 2))]
+      [(+ x0 diff) (+ y0 diff) diff]))
+
 (defn and-bit
   "Combine left and right expressions to form an 'and' statement."
   [left right]
-  ;{:pre [(s/valid? :alu/expression left) (layout/within-bounds? left)
-  ;       (s/valid? :alu/expression right) (layout/within-bounds? right)]
-  ; ;:post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
+  {:pre  [(s/valid? :alu/expression left) (layout/within-bounds? left)
+          (s/valid? :alu/expression right) (layout/within-bounds? right)]
+   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
   (let [left-e      (layout/change-direction :bottom-right left)
         right-e     (layout/change-direction :bottom-right right)
-        not-right   (not-bit right-e)
-        [l r]       (layout/make-intersect left-e not-right)
-        [x-lo y-lo] (get-in l [:alu/output :alu/position])
-        [x-ro _]    (get-in r [:alu/output :alu/position])
-        x-diff      (+ (int (/ (- x-ro x-lo) 2)) 7)
-        height      (+ y-lo x-diff 1)
-        steps       (+ (r :alu/steps) (* 4 x-diff))
-        eater       (patterns/offset (patterns/flip-x patterns/eater) [(- x-diff 3) (+ x-diff 6)])
-        output-pos  (coords/add [x-lo y-lo] [x-diff x-diff])]
-      (-> (layout/merge-expressions l r)
+        [l-a r-a]   (layout/make-parallel left-e right-e)
+        [_ n]       (layout/make-intersect r-a (bit 1))
+        [x y diff]  (get-intersection l-a n)
+        height-diff (+ diff 6 1)
+        height      (+ (-> l-a :alu/dimensions :alu/height) height-diff)
+        steps-diff  (* 4 (+ diff 6))
+        steps       (+ (n :alu/steps) steps-diff)
+        output-pos  (coords/add [x y] [6 6])
+        eater-pos   (coords/add [x y] [-6 3])
+        eater       (patterns/offset (patterns/flip-x patterns/eater) eater-pos)]
+      (-> (layout/merge-expressions l-a (layout/merge-expressions r-a n))
           (assoc-in [:alu/dimensions :alu/height] height)
           (assoc-in [:alu/output :alu/direction] :bottom-right)
           (assoc-in [:alu/output :alu/position] output-pos)
@@ -112,10 +119,11 @@
 (comment
   (s/explain :alu/expression (bit 1))
   (print-e (not-bit (layout/wire (bit 1) 3)))
-  (print-e (and-bit (bit 0) (bit 0)))
-  (let [exp (and-bit (bit 1) (bit 1))
+  (print-e (layout/align-with-origin (and-bit (bit 1) (bit 1))))
+  (let [exp (layout/align-with-origin (and-bit (bit 1) (and-bit (bit 1) (bit 1))))
         board (life/create-board ((exp :alu/dimensions) :alu/width) ((exp :alu/dimensions) :alu/height) [(exp :alu/pattern)])]
     (println exp)
-    (println (life/draw-board board)))
+    (println (life/draw-board board))
+    (print-e exp))
   (read-bit (bit 1))
   (layout/within-bounds? (bit 1)))
