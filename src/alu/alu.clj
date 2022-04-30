@@ -57,31 +57,29 @@
   (run! #(do (println %) (println (life/draw-board %) (Thread/sleep 100)))
         (evaluate expression)))
 
-(defn not-bit
-  "Negates a single bit. Expects the input to be facing bottom right, if not the input will be flipped."
-  [expression]
-  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
-   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [e           (layout/change-direction :bottom-right expression)
-        complement  (layout/flip-x (bit 1))
-        [l r]       (layout/make-intersect e complement)
-        [x-lo]      (-> l :alu/output :alu/position)
-        [x-ro y-ro] (-> r :alu/output :alu/position)
-        x-diff      (+ (int (/ (- x-ro x-lo) 2)) 4)
-        height      (+ (-> l :alu/dimensions :alu/height) 5 1)
-        steps       (+ (r :alu/steps) (* 4 x-diff))
-        output-pos  (coords/add [x-ro y-ro] [(- x-diff) x-diff])]
-    (-> (layout/merge-expressions l r)
-        (assoc-in [:alu/dimensions :alu/height] height)
-        (assoc-in [:alu/output :alu/direction] :bottom-left)
-        (assoc-in [:alu/output :alu/position] output-pos)
-        (assoc :alu/steps steps))))
-
 (defn- get-intersection [left right]
   (let [[x0 y0] (-> left :alu/output :alu/position)
         [x1 __] (-> right :alu/output :alu/position)
         diff    (int (/ (- x1 x0) 2))]
       [(+ x0 diff) (+ y0 diff) diff]))
+
+(defn not-bit
+  "Negates a single bit. Expects the input to be facing bottom right, if not the input will be flipped."
+  [expression]
+  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
+   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
+  (let [[l r]       (layout/make-intersect expression (bit 1))
+        [x y diff]  (get-intersection l r)
+        height-diff (+ diff 3 1)
+        height      (+ (-> l :alu/dimensions :alu/height) height-diff)
+        steps-diff  (* 4 (+ diff 4))
+        steps       (+ (r :alu/steps) steps-diff)
+        output-pos  (coords/add [x y] [(- 4) 3])]
+    (-> (layout/merge-expressions l r)
+        (assoc-in [:alu/dimensions :alu/height] height)
+        (assoc-in [:alu/output :alu/direction] :bottom-left)
+        (assoc-in [:alu/output :alu/position] output-pos)
+        (assoc :alu/steps steps))))
 
 (defn and-bit
   "Combine left and right expressions to form an 'and' statement."
@@ -89,9 +87,7 @@
   {:pre  [(s/valid? :alu/expression left) (layout/within-bounds? left)
           (s/valid? :alu/expression right) (layout/within-bounds? right)]
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [left-e      (layout/change-direction :bottom-right left)
-        right-e     (layout/change-direction :bottom-right right)
-        [l-a r-a]   (layout/make-parallel left-e right-e)
+  (let [[l-a r-a]   (layout/make-parallel left right)
         [_ n]       (layout/make-intersect r-a (bit 1))
         [x y diff]  (get-intersection l-a n)
         height-diff (+ diff 6 1)
