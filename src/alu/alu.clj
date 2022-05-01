@@ -50,7 +50,7 @@
         last-iteration (last (evaluate expression))]
     (if (contains? (last-iteration :alive-cells) output) 1 0)))
 
-(defn print-e
+(defn- print-e
   "Prints all steps generated."
   [expression]
   {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
