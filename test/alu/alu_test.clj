@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [clojure.set :as set]
             [alu.layout :as layout]
-            [alu.alu :as alu]))
+            [alu.alu :as alu :refer [one zero]]))
 
 (deftest bit-is-properly-formed
   (testing "A bit is properly formed"
@@ -13,24 +13,24 @@
                                  :alu/direction :bottom-right}
                     :alu/steps 0
                     :alu/pattern #{[2 1] [3 2] [1 3] [2 3] [3 3]}}]
-      (is (= expected (alu/bit 1))))))
+      (is (= expected one)))))
 
 (deftest write-and-read-bit
   (testing "A bit in input can be read as output"
-    (is (= 0 (alu/read-bit (alu/bit 0))))
-    (is (= 1 (alu/read-bit (alu/bit 1))))))
+    (is (= 0 (alu/read-bit zero)))
+    (is (= 1 (alu/read-bit one)))))
 
 (deftest wire-traversal
   (testing "A bit can be read after traversing a wire"
-    (is (= 0 (alu/read-bit (layout/wire (alu/bit 0) 3))))
-    (is (= 1 (alu/read-bit (layout/wire (alu/bit 1) 3))))
-    (is (= 1 (alu/read-bit (layout/wire (layout/wire (alu/bit 1) 2) 3)))))
+    (is (= 0 (alu/read-bit (layout/wire zero 3))))
+    (is (= 1 (alu/read-bit (layout/wire one 3))))
+    (is (= 1 (alu/read-bit (layout/wire (layout/wire one 2) 3)))))
   (testing "A wire can extend a flipped pattern"
-    (is (= 1 (alu/read-bit (layout/wire (layout/flip-x (alu/bit 1)) 4))))))
+    (is (= 1 (alu/read-bit (layout/wire (layout/flip-x one) 4))))))
 
 (deftest negation-is-properly-formed
   (testing "A negation is properly formed"
-    (let [output (alu/not-bit (alu/bit 1))]
+    (let [output (alu/not-bit one)]
       (is (= [0 -1]       (-> output :alu/dimensions :alu/origin)))
       (is (= 11           (-> output :alu/dimensions :alu/width)))
       (is (= 11           (-> output :alu/dimensions :alu/height)))
@@ -39,7 +39,7 @@
       (is (= 24           (output :alu/steps)))
       (is (set/subset? #{[3 3] [7 2]} (output :alu/pattern)))))
   (testing "A double negation is properly formed"
-    (let [output (alu/not-bit (alu/not-bit (alu/bit 1)))]
+    (let [output (alu/not-bit (alu/not-bit one))]
       (is (= [0 -2]       (-> output :alu/dimensions :alu/origin)))
       (is (= 23           (-> output :alu/dimensions :alu/width)))
       (is (= 17           (-> output :alu/dimensions :alu/height)))
@@ -50,24 +50,24 @@
 
 (deftest negation
   (testing "Can negate a single bit"
-    (is (= 1 (alu/read-bit (alu/not-bit (alu/bit 0)))))
-    (is (= 0 (alu/read-bit (alu/not-bit (alu/bit 1))))))
+    (is (= 1 (alu/read-bit (alu/not-bit zero))))
+    (is (= 0 (alu/read-bit (alu/not-bit one)))))
   (testing "Can negate a flipped bit"
-    (is (= 1 (alu/read-bit (alu/not-bit (layout/flip-x (alu/bit 0))))))
-    (is (= 0 (alu/read-bit (alu/not-bit (layout/flip-x (alu/bit 1)))))))
+    (is (= 1 (alu/read-bit (alu/not-bit (layout/flip-x zero)))))
+    (is (= 0 (alu/read-bit (alu/not-bit (layout/flip-x one))))))
   (testing "Can negate a wired bit"
-    (is (= 1 (alu/read-bit (alu/not-bit (layout/wire (alu/bit 0) 5)))))
-    (is (= 0 (alu/read-bit (alu/not-bit (layout/wire (alu/bit 1) 5))))))
+    (is (= 1 (alu/read-bit (alu/not-bit (layout/wire zero 5)))))
+    (is (= 0 (alu/read-bit (alu/not-bit (layout/wire one 5))))))
   (testing "Some combination"
-    (is (= 1 (alu/read-bit (alu/not-bit (layout/flip-x (layout/wire (alu/bit 0) 5))))))
-    (is (= 0 (alu/read-bit (alu/not-bit (layout/flip-x (layout/wire (alu/bit 1) 5)))))))
+    (is (= 1 (alu/read-bit (alu/not-bit (layout/flip-x (layout/wire zero 5))))))
+    (is (= 0 (alu/read-bit (alu/not-bit (layout/flip-x (layout/wire one 5)))))))
   (testing "Double negation returns original value"
-    (is (= 0 (alu/read-bit (alu/not-bit (alu/not-bit (alu/bit 0))))))
-    (is (= 1 (alu/read-bit (alu/not-bit (alu/not-bit (alu/bit 1))))))))
+    (is (= 0 (alu/read-bit (alu/not-bit (alu/not-bit zero)))))
+    (is (= 1 (alu/read-bit (alu/not-bit (alu/not-bit one)))))))
 
 (deftest and-is-properly-formed
   (testing "And is properly formed"
-    (let [output (alu/and-bit (alu/bit 1) (alu/bit 1))]
+    (let [output (alu/and-bit one one)]
       (is (= [0 -1]        (-> output :alu/dimensions :alu/origin)))
       (is (= 17            (-> output :alu/dimensions :alu/width)))
       (is (= 17            (-> output :alu/dimensions :alu/height)))
@@ -76,7 +76,7 @@
       (is (= 44            (output :alu/steps)))
       (is (set/subset? #{[3 3] [9 3] [13 2] [5 11]} (output :alu/pattern)))))
   (testing "Nested ands are properly formed"
-    (let [output (alu/and-bit (alu/bit 1) (alu/and-bit (alu/bit 1) (alu/bit 1)))]
+    (let [output (alu/and-bit one (alu/and-bit one one))]
       (is (= [0 -1]        (-> output :alu/dimensions :alu/origin)))
       (is (= 53            (-> output :alu/dimensions :alu/width)))
       (is (= 35            (-> output :alu/dimensions :alu/height)))
@@ -145,5 +145,5 @@
   (testing "Inputs are validated"
     (is (thrown? AssertionError (alu/write-byte -1)))
     (is (thrown? AssertionError (alu/write-byte 256)))
-    (is (thrown? AssertionError (alu/read-byte [(alu/bit 1) (alu/bit 1) (alu/bit 1) (alu/bit 1) (alu/bit 1) (alu/bit 1) (alu/bit 1)])))
-    (is (thrown? AssertionError (alu/read-byte [(alu/bit 1) (alu/bit 1) (alu/bit 1) (alu/bit 1) (alu/bit 1) (alu/bit 1) (alu/bit 1) (alu/bit 1) (alu/bit 1)])))))
+    (is (thrown? AssertionError (alu/read-byte [one one one one one one one])))
+    (is (thrown? AssertionError (alu/read-byte [one one one one one one one one one])))))

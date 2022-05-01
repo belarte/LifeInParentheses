@@ -37,6 +37,10 @@
      :alu/steps 0
      :alu/pattern pattern}))
 
+(def one (bit 1))
+
+(def zero (bit 0))
+
 (defn- evaluate [expression]
   (let [{:keys [alu/dimensions alu/steps alu/pattern]} expression
         board (life/create-board (dimensions :alu/width) (dimensions :alu/height) [pattern])]
@@ -68,7 +72,7 @@
   [expression]
   {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [[l r]       (layout/make-intersect expression (bit 1))
+  (let [[l r]       (layout/make-intersect expression one)
         [x y diff]  (get-intersection l r)
         height-diff (+ diff 3 1)
         height      (+ (-> l :alu/dimensions :alu/height) height-diff)
@@ -88,7 +92,7 @@
           (s/valid? :alu/expression right) (layout/within-bounds? right)]
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
   (let [[l r]       (layout/make-parallel left right)
-        [_ n]       (layout/make-intersect r (bit 1))
+        [_ n]       (layout/make-intersect r one)
         [x y diff]  (get-intersection l n)
         height-diff (+ diff 6 1)
         height      (+ (-> l :alu/dimensions :alu/height) height-diff)
@@ -143,13 +147,13 @@
 
 (comment
   (read-byte (write-byte 12))
-  (s/explain :alu/expression (bit 1))
-  (print-e (not-bit (layout/wire (bit 1) 3)))
-  (print-e (layout/align-with-origin (and-bit (bit 1) (bit 1))))
-  (let [exp (layout/align-with-origin (and-bit (bit 1) (and-bit (bit 1) (bit 1))))
+  (s/explain :alu/expression one)
+  (print-e (not-bit (layout/wire one 3)))
+  (print-e (layout/align-with-origin (and-bit one one)))
+  (let [exp (layout/align-with-origin (and-bit one (and-bit one one)))
         board (life/create-board ((exp :alu/dimensions) :alu/width) ((exp :alu/dimensions) :alu/height) [(exp :alu/pattern)])]
     (println exp)
     (println (life/draw-board board))
     (print-e exp))
-  (read-bit (bit 1))
-  (layout/within-bounds? (bit 1)))
+  (read-bit one)
+  (layout/within-bounds? one))
