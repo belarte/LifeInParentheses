@@ -87,17 +87,17 @@
   {:pre  [(s/valid? :alu/expression left) (layout/within-bounds? left)
           (s/valid? :alu/expression right) (layout/within-bounds? right)]
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [[l-a r-a]   (layout/make-parallel left right)
-        [_ n]       (layout/make-intersect r-a (bit 1))
-        [x y diff]  (get-intersection l-a n)
+  (let [[l r]       (layout/make-parallel left right)
+        [_ n]       (layout/make-intersect r (bit 1))
+        [x y diff]  (get-intersection l n)
         height-diff (+ diff 6 1)
-        height      (+ (-> l-a :alu/dimensions :alu/height) height-diff)
+        height      (+ (-> l :alu/dimensions :alu/height) height-diff)
         steps-diff  (* 4 (+ diff 6))
         steps       (+ (n :alu/steps) steps-diff)
         output-pos  (coords/add [x y] [6 6])
         eater-pos   (coords/add [x y] [-6 3])
         eater       (patterns/offset (patterns/flip-x patterns/eater) eater-pos)]
-      (-> (layout/merge-expressions l-a (layout/merge-expressions r-a n))
+      (-> (layout/merge-expressions l r n)
           (assoc-in [:alu/dimensions :alu/height] height)
           (assoc-in [:alu/output :alu/direction] :bottom-right)
           (assoc-in [:alu/output :alu/position] output-pos)

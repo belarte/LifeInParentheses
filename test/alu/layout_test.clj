@@ -218,22 +218,32 @@
       (is (= 44            (r :alu/steps))))))
 
 (deftest merge-expressions
-  (let [left {:alu/dimensions {:alu/origin [1 2]
-                               :alu/width 5
-                               :alu/height 4}
-              :alu/pattern #{[1 5] [5 2]}}
-        right {:alu/dimensions {:alu/origin [7 1]
-                                :alu/width 4
-                                :alu/height 3}
-               :alu/pattern #{[7 1] [10 3]}}
-        output (layout/merge-expressions left right)]
-    (testing "Merging expressions"
-      (is (= [1 1] (get-in output [:alu/dimensions :alu/origin])))
-      (is (= 10 (get-in output [:alu/dimensions :alu/width])))
-      (is (= 5 (get-in output [:alu/dimensions :alu/height])))
-      (is (= #{[1 5] [5 2] [7 1] [10 3]} (output :alu/pattern))))
+  (let [e1 {:alu/dimensions {:alu/origin [1 2]
+                             :alu/width 5
+                             :alu/height 4}
+            :alu/pattern #{[1 5] [5 2]}}
+        e2 {:alu/dimensions {:alu/origin [7 1]
+                             :alu/width 4
+                             :alu/height 3}
+            :alu/pattern #{[7 1] [10 3]}}
+        e3 {:alu/dimensions {:alu/origin [3 3]
+                             :alu/width 5
+                             :alu/height 4}
+            :alu/pattern #{[3 3] [7 6]}}
+        o1 (layout/merge-expressions e1 e2)
+        o2 (layout/merge-expressions e1 e2 e3)]
+    (testing "Merging two expressions"
+      (is (= [1 1] (-> o1 :alu/dimensions :alu/origin)))
+      (is (= 10    (-> o1 :alu/dimensions :alu/width)))
+      (is (= 5     (-> o1 :alu/dimensions :alu/height)))
+      (is (= #{[1 5] [5 2] [7 1] [10 3]} (o1 :alu/pattern))))
+    (testing "Merging more than two expressions"
+      (is (= [1 1] (-> o2 :alu/dimensions :alu/origin)))
+      (is (= 10    (-> o2 :alu/dimensions :alu/width)))
+      (is (= 6     (-> o2 :alu/dimensions :alu/height)))
+      (is (= #{[1 5] [5 2] [7 1] [10 3] [3 3] [7 6]} (o2 :alu/pattern))))
     (testing "Order does not matter"
-      (is (= (layout/merge-expressions left right) (layout/merge-expressions right left))))))
+      (is (= (layout/merge-expressions e1 e2) (layout/merge-expressions e2 e1))))))
 
 (deftest spread-on-x-axis
   (let [e1 {:alu/dimensions {:alu/origin [-1 0]

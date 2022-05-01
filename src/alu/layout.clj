@@ -131,21 +131,27 @@
 
 (defn merge-expressions
   "Merge two expressions into one, disregarding :output and :step."
-  [left right]
-  (let [[x0 y0] (get-in left [:alu/dimensions :alu/origin])
-        [x1 y1] (get-in right [:alu/dimensions :alu/origin])
-        w0 (get-in left [:alu/dimensions :alu/width])
-        h0 (get-in left [:alu/dimensions :alu/height])
-        w1 (get-in right [:alu/dimensions :alu/width])
-        h1 (get-in right [:alu/dimensions :alu/height])
-        x-min (min x0 x1)
-        y-min (min y0 y1)
-        x-max (max (+ x0 w0) (+ x1 w1))
-        y-max (max (+ y0 h0) (+ y1 h1))]
-    {:alu/dimensions {:alu/origin [x-min y-min]
-                      :alu/width (- x-max x-min)
-                      :alu/height (- y-max y-min)}
-     :alu/pattern (set/union (left :alu/pattern) (right :alu/pattern))}))
+  [& expressions]
+  (let [xs     (map #(get-in % [:alu/dimensions :alu/origin 0]) expressions)
+        ys     (map #(get-in % [:alu/dimensions :alu/origin 1]) expressions)
+        x0     (apply min xs)
+        y0     (apply min ys)
+        width  (->> (map #(-> % :alu/dimensions :alu/width) expressions)
+                    (map vector xs)
+                    (map #(apply + %))
+                    (map #(- % x0))
+                    (apply max))
+        height (->> (map #(-> % :alu/dimensions :alu/height) expressions)
+                    (map vector ys)
+                    (map #(apply + %))
+                    (map #(- % y0))
+                    (apply max))
+        pattern (->> (map #(% :alu/pattern) expressions)
+                     (reduce set/union))]
+    {:alu/dimensions {:alu/origin [x0 y0]
+                      :alu/width width
+                      :alu/height height}
+     :alu/pattern pattern}))
 
 (defn spread-x
   "Spreads expressions on the X axis so they are adjacent and do not overlap."
