@@ -18,20 +18,27 @@
      (and (check output)
           (every? identity (map check pattern))))))
 
+(defn flip-x>
+  "Generator for flipping expression on the X axis."
+  [[e f]]
+  (let [[x0 _]     (-> e :alu/dimensions :alu/origin)
+        width      (-> e :alu/dimensions :alu/width)
+        dir        (-> e :alu/output :alu/direction)
+        position   (-> e :alu/output :alu/position)
+        direction  (if (= dir :bottom-right) :bottom-left :bottom-right)
+        output     (coords/flip-x position x0 width)
+        expression (-> e
+                       (assoc-in [:alu/output :alu/direction] direction)
+                       (assoc-in [:alu/output :alu/position] output))
+        function   (fn [args]
+                     (patterns/flip-x (f args) x0 width))]
+    [expression function]))
+
 (defn flip-x
-  "Flip exprssion on the X axis."
+  "Flip expression on the X axis."
   [expression]
-  (let [{:keys [alu/pattern]
-         {:keys [alu/origin alu/width]} :alu/dimensions
-         {:keys [alu/position alu/direction]} :alu/output} expression
-        [x0] origin
-        new-direction (if (= direction :bottom-right) :bottom-left :bottom-right)
-        new-position (coords/flip-x position x0 width)
-        new-pattern (patterns/flip-x pattern x0 width)]
-    (-> expression
-        (assoc-in [:alu/output :alu/direction] new-direction)
-        (assoc-in [:alu/output :alu/position] new-position)
-        (assoc :alu/pattern new-pattern))))
+  (let [[e f] (flip-x> [expression identity])]
+    (assoc e :alu/pattern (f (e :alu/pattern)))))
 
 (defn wire
   "Allow transmission of one bit over a distance."
