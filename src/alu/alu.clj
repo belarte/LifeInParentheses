@@ -23,19 +23,25 @@
                                      :alu/steps
                                      :alu/pattern]))
 
+(def bit>
+  "Generator for a single bit."
+  (let [expression {:alu/dimensions {:alu/origin [0 0]
+                                     :alu/width 5
+                                     :alu/height 5}
+                    :alu/output {:alu/position [3 3]
+                                 :alu/direction :bottom-right}
+                    :alu/steps 0}
+        function (fn [n]
+                   {:pre [(or (= 1 n) (= 0 n))]}
+                   (if (zero? n) #{} (patterns/offset patterns/glider [1 1])))]
+    [expression function]))
+
 (defn bit
   "Represents a single bit as an input to an expression."
-  [value]
-  {:pre [(or (= 1 value) (= 0 value))]
-   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [pattern (if (zero? value) #{} (patterns/offset patterns/glider [1 1]))]
-    {:alu/dimensions {:alu/origin [0 0]
-                      :alu/width 5
-                      :alu/height 5}
-     :alu/output {:alu/position [3 3]
-                  :alu/direction :bottom-right}
-     :alu/steps 0
-     :alu/pattern pattern}))
+  [n]
+  {:post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
+  (let [[e f] bit>]
+    (assoc e :alu/pattern (f n))))
 
 (def one (bit 1))
 
