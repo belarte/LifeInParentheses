@@ -1,7 +1,7 @@
 (ns alu.alu
   (:require [clojure.spec.alpha :as s]
             [clojure.set :as set]
-            [alu.layout :as layout]
+            [alu.layout :as layout :refer [=>]]
             [life.coords :as coords]
             [life.life :as life]
             [life.patterns :as patterns]))
@@ -152,6 +152,7 @@
        from-base-2))
 
 (comment
+  (=> (layout/shift> (layout/flip-x> bit>) [1 2]) 1)
   (read-byte (write-byte 12))
   (s/explain :alu/expression one)
   (print-e (not-bit (layout/wire one 3)))

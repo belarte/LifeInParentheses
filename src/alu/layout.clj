@@ -3,6 +3,9 @@
             [life.patterns :as patterns]
             [life.coords :as coords]))
 
+(defn => [[e f] args]
+  (assoc e :alu/pattern (f args)))
+
 (defn within-bounds?
   ([expression]
    (let [origin  (-> expression :alu/dimensions :alu/origin)
