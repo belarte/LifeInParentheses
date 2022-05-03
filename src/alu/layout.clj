@@ -56,16 +56,24 @@
           (assoc-in [:alu/output :alu/position] [x y])
           (assoc :alu/steps (+ steps (* 4 distance)))))))
 
+(defn shift>
+  "Generator for shift."
+  [[e f] offset]
+  (let [origin     (-> e :alu/dimensions :alu/origin)
+        position   (-> e :alu/output :alu/position)
+        expression (-> e
+                       (assoc-in [:alu/dimensions :alu/origin] (coords/add origin offset))
+                       (assoc-in [:alu/output :alu/position] (coords/add position offset)))
+        function   (fn [args]
+                       (patterns/offset (f args) offset))]
+    [expression function]))
+
 (defn shift
   "Shifts an expression with the given offset."
   [expression offset]
-  (let [origin (get-in expression [:alu/dimensions :alu/origin])
-        position (get-in expression [:alu/output :alu/position])
-        pattern (get expression :alu/pattern)]
-    (-> expression
-        (assoc-in [:alu/dimensions :alu/origin] (coords/add origin offset))
-        (assoc-in [:alu/output :alu/position] (coords/add position offset))
-        (assoc :alu/pattern (patterns/offset pattern offset)))))
+  (let [[e f] (shift> [expression identity] offset)]
+    (assoc e :alu/pattern (f (e :alu/pattern)))))
+
 
 (defn align-with-origin
   "Aligns the given expression so its origin is [0 0]."
