@@ -130,27 +130,30 @@
     [l (shift r offset)]))
 
 (defn merge-expressions
-  "Merge two expressions into one, disregarding :output and :step."
+  "Merge two expressions into one, disregarding :output."
   [& expressions]
-  (let [xs     (map #(get-in % [:alu/dimensions :alu/origin 0]) expressions)
-        ys     (map #(get-in % [:alu/dimensions :alu/origin 1]) expressions)
-        x0     (apply min xs)
-        y0     (apply min ys)
-        width  (->> (map #(-> % :alu/dimensions :alu/width) expressions)
-                    (map vector xs)
-                    (map #(apply + %))
-                    (map #(- % x0))
-                    (apply max))
-        height (->> (map #(-> % :alu/dimensions :alu/height) expressions)
-                    (map vector ys)
-                    (map #(apply + %))
-                    (map #(- % y0))
-                    (apply max))
+  {:pre [(apply = (map #(% :alu/steps) expressions))]}
+  (let [xs      (map #(get-in % [:alu/dimensions :alu/origin 0]) expressions)
+        ys      (map #(get-in % [:alu/dimensions :alu/origin 1]) expressions)
+        x0      (apply min xs)
+        y0      (apply min ys)
+        width   (->> (map #(-> % :alu/dimensions :alu/width) expressions)
+                     (map vector xs)
+                     (map #(apply + %))
+                     (map #(- % x0))
+                     (apply max))
+        height  (->> (map #(-> % :alu/dimensions :alu/height) expressions)
+                     (map vector ys)
+                     (map #(apply + %))
+                     (map #(- % y0))
+                     (apply max))
+        steps   ((first expressions) :alu/steps)
         pattern (->> (map #(% :alu/pattern) expressions)
                      (reduce set/union))]
     {:alu/dimensions {:alu/origin [x0 y0]
                       :alu/width width
                       :alu/height height}
+     :alu/steps steps
      :alu/pattern pattern}))
 
 (defn spread-x
