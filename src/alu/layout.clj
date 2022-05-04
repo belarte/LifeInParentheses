@@ -118,13 +118,17 @@
         [x1] (-> expression :alu/output :alu/position)]
     (- (+ x0 w) 2 x1)))
 
-(defn- delay-expression [left right]
-  (let [s1 (left :alu/steps)
-        s2 (right :alu/steps)
+(defn- delay-expression> [[e1 f1] [e2 f2]]
+  (let [s1   (e1 :alu/steps)
+        s2   (e2 :alu/steps)
         diff (int (/ (- s1 s2) 4))]
     (if (pos? diff)
-      [left (wire right diff)]
-      [(wire left (- diff)) right])))
+      [[e1 f1] (wire> [e2 f2] diff)]
+      [(wire> [e1 f1] (- diff)) [e2 f2]])))
+
+(defn- delay-expression [left right]
+  (let [[[e1 f1] [e2 f2]] (delay-expression> [left identity] [right identity])]
+    [(assoc e1 :alu/pattern (f1 (e1 :alu/pattern))) (assoc e2 :alu/pattern (f2 (e2 :alu/pattern)))]))
 
 (defn- calculate-offset [l r x-modifier-fn y-modifier-fn]
   (let [x-min     (x-offset-at-origin l r)
