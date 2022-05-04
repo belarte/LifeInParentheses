@@ -138,9 +138,17 @@
         y-offset  (y-modifier-fn (y-offset-at-output l r))]
     [x-offset y-offset]))
 
-(defn change-direction [direction expression]
-  (let [d (-> expression :alu/output :alu/direction)]
-    (if (= d direction) expression (flip-x expression))))
+(defn change-direction>
+  "Generator for change-direction"
+  [direction [e f]]
+  (let [d (-> e :alu/output :alu/direction)]
+    (if (= d direction) [e f] (flip-x> [e f]))))
+
+(defn change-direction
+  "Change direction of expression."
+  [direction expression]
+  (let [[e f] (change-direction> direction[expression identity])]
+    (assoc e :alu/pattern (f (e :alu/pattern)))))
 
 (defn make-intersect
   "Aligns expressions by shifting one so that outputs will intersect.
