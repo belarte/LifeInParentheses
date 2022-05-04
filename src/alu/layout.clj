@@ -43,21 +43,32 @@
   (let [[e f] (flip-x> [expression identity])]
     (assoc e :alu/pattern (f (e :alu/pattern)))))
 
+(defn wire>
+  "Generator for wire."
+  [[e f] distance]
+  (if (= (-> e :alu/output :alu/direction) :bottom-left)
+    (flip-x> (wire> (flip-x> [e f]) distance))
+    (let [[x0 y0]    (-> e :alu/dimensions :alu/origin)
+          w          (-> e :alu/dimensions :alu/width)
+          h          (-> e :alu/dimensions :alu/height)
+          p          (-> e :alu/output :alu/position)
+          s          (e :alu/steps)
+          [x y]      (coords/add p [distance distance])
+          width      (max w (+ 2 (- x x0)))
+          height     (max h (+ 2 (- y y0)))
+          steps      (+ s (* 4 distance))
+          expression (-> e
+                         (assoc-in [:alu/dimensions :alu/width] width)
+                         (assoc-in [:alu/dimensions :alu/height] height)
+                         (assoc-in [:alu/output :alu/position] [x y])
+                         (assoc :alu/steps steps))]
+      [expression f])))
+
 (defn wire
   "Allow transmission of one bit over a distance."
   [expression distance]
-  (let [{:keys [alu/steps]
-         {:keys [alu/origin alu/width alu/height]} :alu/dimensions
-         {:keys [alu/position alu/direction]} :alu/output} expression
-        [x0 y0] origin
-        [x y] (coords/add position [distance distance])]
-    (if (= direction :bottom-left)
-      (flip-x (wire (flip-x expression) distance))
-      (-> expression
-          (assoc-in [:alu/dimensions :alu/width] (max width (+ 2 (- x x0))))
-          (assoc-in [:alu/dimensions :alu/height] (max height (+ 2 (- y y0))))
-          (assoc-in [:alu/output :alu/position] [x y])
-          (assoc :alu/steps (+ steps (* 4 distance)))))))
+  (let [[e f] (wire> [expression identity] distance)]
+    (assoc e :alu/pattern (f (e :alu/pattern)))))
 
 (defn shift>
   "Generator for shift."
