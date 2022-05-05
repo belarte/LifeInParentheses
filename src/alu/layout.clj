@@ -150,16 +150,22 @@
   (let [[e f] (change-direction> direction[expression identity])]
     (assoc e :alu/pattern (f (e :alu/pattern)))))
 
+(defn make-intersect>
+  "Generator for make-intersect."
+  [[e1 f1] [e2 f2]]
+  (let [left            (change-direction> :bottom-right [e1 f1])
+        right           (change-direction> :bottom-left [e2 f2])
+        [[l fl] [r fr]] (delay-expression> left right)
+        offset          (calculate-offset l r (fn [x _] x) dec)]
+    [[l fl] (shift> [r fr] offset)]))
+
 (defn make-intersect
   "Aligns expressions by shifting one so that outputs will intersect.
   If both expression have a non zero output, they will cancel each other when intersecting.
   First output will face bottom-right and second output will face bottom-left."
   [left right]
-  (let [l-flipped (change-direction :bottom-right left)
-        r-flipped (change-direction :bottom-left right)
-        [l r]     (delay-expression l-flipped r-flipped)
-        offset    (calculate-offset l r (fn [x _] x) dec)]
-    [l (shift r offset)]))
+  (let [[[e1 f1] [e2 f2]] (make-intersect> [left identity] [right identity])]
+    [(assoc e1 :alu/pattern (f1 (e1 :alu/pattern))) (assoc e2 :alu/pattern (f2 (e2 :alu/pattern)))]))
 
 (defn make-parallel
   "Align expressions so they both face bottom right and outputs are synchronised."
