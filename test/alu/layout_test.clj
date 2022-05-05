@@ -1,6 +1,6 @@
 (ns alu.layout-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [alu.layout :as layout]))
+            [alu.layout :as layout :refer [=>]]))
 
 (def left-facing {:alu/dimensions {:alu/origin [1 1]
                                    :alu/width 6
@@ -218,23 +218,23 @@
       (is (= 44            (r :alu/steps))))))
 
 (deftest merge-expressions
-  (let [e1 {:alu/dimensions {:alu/origin [1 2]
-                             :alu/width 5
-                             :alu/height 4}
-            :alu/steps 16
-            :alu/pattern #{[1 5] [5 2]}}
-        e2 {:alu/dimensions {:alu/origin [7 1]
-                             :alu/width 4
-                             :alu/height 3}
-            :alu/steps 16
-            :alu/pattern #{[7 1] [10 3]}}
-        e3 {:alu/dimensions {:alu/origin [3 3]
-                             :alu/width 5
-                             :alu/height 4}
-            :alu/steps 16
-            :alu/pattern #{[3 3] [7 6]}}
-        o1 (layout/merge-expressions e1 e2)
-        o2 (layout/merge-expressions e1 e2 e3)]
+  (let [e1 [{:alu/dimensions {:alu/origin [1 2]
+                              :alu/width 5
+                              :alu/height 4}
+             :alu/steps 16}
+            (fn [_] #{[1 5] [5 2]})]
+        e2 [ {:alu/dimensions {:alu/origin [7 1]
+                               :alu/width 4
+                               :alu/height 3}
+              :alu/steps 16}
+             (fn [_] #{[7 1] [10 3]})]
+        e3 [ {:alu/dimensions {:alu/origin [3 3]
+                               :alu/width 5
+                               :alu/height 4}
+              :alu/steps 16}
+             (fn [_] #{[3 3] [7 6]})]
+        o1 (=> (layout/merge-expressions> e1 e2) [1 1])
+        o2 (=> (layout/merge-expressions> e1 e2 e3) [1 1 1])]
     (testing "Merging two expressions"
       (is (= [1 1] (-> o1 :alu/dimensions :alu/origin)))
       (is (= 10    (-> o1 :alu/dimensions :alu/width)))
@@ -248,7 +248,7 @@
       (is (= 16    (o1 :alu/steps)))
       (is (= #{[1 5] [5 2] [7 1] [10 3] [3 3] [7 6]} (o2 :alu/pattern))))
     (testing "Order does not matter"
-      (is (= (layout/merge-expressions e1 e2) (layout/merge-expressions e2 e1))))))
+      (is (= (=> (layout/merge-expressions> e1 e2) [1 1]) (=> (layout/merge-expressions> e2 e1) [1 1]))))))
 
 (deftest spread-on-x-axis
   (let [e1 {:alu/dimensions {:alu/origin [-1 0]

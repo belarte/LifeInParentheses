@@ -182,6 +182,36 @@
   (let [[[e1 f1] [e2 f2]] (make-parallel> [left identity] [right identity])]
     [(assoc e1 :alu/pattern (f1 (e1 :alu/pattern))) (assoc e2 :alu/pattern (f2 (e2 :alu/pattern)))]))
 
+(defn merge-expressions>
+  "Generator for merge-expression."
+  [& args]
+  {:pre [(apply = (map #(get-in % [0 :alu/steps]) args))]}
+  (let [expressions (map #(first %) args)
+        functions   (map #(last %) args)
+        xs      (map #(get-in % [:alu/dimensions :alu/origin 0]) expressions)
+        ys      (map #(get-in % [:alu/dimensions :alu/origin 1]) expressions)
+        x0      (apply min xs)
+        y0      (apply min ys)
+        width   (->> (map #(-> % :alu/dimensions :alu/width) expressions)
+                     (map vector xs)
+                     (map #(apply + %))
+                     (map #(- % x0))
+                     (apply max))
+        height  (->> (map #(-> % :alu/dimensions :alu/height) expressions)
+                     (map vector ys)
+                     (map #(apply + %))
+                     (map #(- % y0))
+                     (apply max))
+        steps   ((first expressions) :alu/steps)
+        expression {:alu/dimensions {:alu/origin [x0 y0]
+                                     :alu/width width
+                                     :alu/height height}
+                    :alu/steps steps}
+        function (fn [args] (->> (map vector functions args)
+                                 (map #((first %) (last %)))
+                                 (reduce set/union)))]
+    [expression function]))
+
 (defn merge-expressions
   "Merge two expressions into one, disregarding :output."
   [& expressions]

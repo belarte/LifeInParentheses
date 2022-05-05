@@ -153,6 +153,7 @@
 
 (comment
   (=> (layout/shift> (layout/flip-x> bit>) [1 2]) 1)
+  (=> (layout/merge-expressions> (layout/flip-x> bit>) (layout/shift> bit> [3 3]) bit>) [1 1 1])
   (read-byte (write-byte 12))
   (s/explain :alu/expression one)
   (print-e (not-bit (layout/wire one 3)))
