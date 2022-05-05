@@ -167,14 +167,20 @@
   (let [[[e1 f1] [e2 f2]] (make-intersect> [left identity] [right identity])]
     [(assoc e1 :alu/pattern (f1 (e1 :alu/pattern))) (assoc e2 :alu/pattern (f2 (e2 :alu/pattern)))]))
 
+(defn make-parallel>
+  "Generator for make-parallel"
+  [[e1 f1] [e2 f2]]
+  (let [left            (change-direction> :bottom-right [e1 f1])
+        right           (change-direction> :bottom-right [e2 f2])
+        [[l fl] [r fr]] (delay-expression> left right)
+        offset          (calculate-offset l r (fn [x d] (+ x (* 2 d))) identity)]
+    [[l fl] (shift> [r fr] offset)]))
+
 (defn make-parallel
   "Align expressions so they both face bottom right and outputs are synchronised."
   [left right]
-  (let [l-flipped (change-direction :bottom-right left)
-        r-flipped (change-direction :bottom-right right)
-        [l r]     (delay-expression l-flipped r-flipped)
-        offset    (calculate-offset l r (fn [x d] (+ x (* 2 d))) identity)]
-    [l (shift r offset)]))
+  (let [[[e1 f1] [e2 f2]] (make-parallel> [left identity] [right identity])]
+    [(assoc e1 :alu/pattern (f1 (e1 :alu/pattern))) (assoc e2 :alu/pattern (f2 (e2 :alu/pattern)))]))
 
 (defn merge-expressions
   "Merge two expressions into one, disregarding :output."
