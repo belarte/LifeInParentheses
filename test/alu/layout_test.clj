@@ -2,34 +2,39 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [alu.layout :as layout :refer [=>]]))
 
-(def left-facing {:alu/dimensions {:alu/origin [1 1]
-                                   :alu/width 6
-                                   :alu/height 3}
-                  :alu/output {:alu/position [2 3]
-                               :alu/direction :bottom-left}
-                  :alu/steps 16
-                  :alu/pattern #{[4 1] [3 2]}})
-
-(def right-facing {:alu/dimensions {:alu/origin [1 1]
+(def left-facing [{:alu/dimensions {:alu/origin [1 1]
                                     :alu/width 6
                                     :alu/height 3}
-                   :alu/output {:alu/position [5 3]
-                                :alu/direction :bottom-right}
-                   :alu/steps 16
-                   :alu/pattern #{[3 1] [4 2]}})
+                   :alu/output {:alu/position [2 3]
+                                :alu/direction :bottom-left}
+                   :alu/steps 16}
+                  (fn [_] #{[4 1] [3 2]})])
 
-(def left {:alu/dimensions {:alu/origin [2 2]
-                            :alu/width 6
-                            :alu/height 5}
-           :alu/output {:alu/position [4 5]
-                        :alu/direction :bottom-left}
-           :alu/steps 24})
-(def right {:alu/dimensions {:alu/origin [4 1]
-                             :alu/width 4
-                             :alu/height 4}
-            :alu/output {:alu/position [6 3]
-                         :alu/direction :bottom-right}
-            :alu/steps 16})
+(def right-facing [{:alu/dimensions {:alu/origin [1 1]
+                                     :alu/width 6
+                                     :alu/height 3}
+                    :alu/output {:alu/position [5 3]
+                                 :alu/direction :bottom-right}
+                    :alu/steps 16}
+                   (fn [_] #{[3 1] [4 2]})])
+
+(def left [{:alu/dimensions {:alu/origin [2 2]
+                             :alu/width 6
+                             :alu/height 5}
+            :alu/output {:alu/position [4 5]
+                         :alu/direction :bottom-left}
+            :alu/steps 24}
+           (fn [_] #{})])
+(def right [{:alu/dimensions {:alu/origin [4 1]
+                              :alu/width 4
+                              :alu/height 4}
+             :alu/output {:alu/position [6 3]
+                          :alu/direction :bottom-right}
+             :alu/steps 16}
+            (fn [_] #{})])
+
+; As expressions are pre-generated above, inputs are irrelevant in these tests
+(def input [1])
 
 (defn within-bounds-test-helper [pattern output]
   {:alu/dimensions {:alu/origin [2 2]
@@ -56,29 +61,29 @@
 
 (deftest flip-x
   (testing "Flipping twice returns copy of input"
-    (is (= left-facing (layout/flip-x (layout/flip-x left-facing))))
-    (is (= right-facing (layout/flip-x (layout/flip-x right-facing)))))
+    (is (= (=> left-facing input) (=> (layout/flip-x> (layout/flip-x> left-facing)) input)))
+    (is (= (=> right-facing input) (=> (layout/flip-x> (layout/flip-x> right-facing)) input))))
   (testing "Can flip an expression on the X axis"
-    (is (= left-facing (layout/flip-x right-facing)))
-    (is (= right-facing (layout/flip-x left-facing)))))
+    (is (= (=> left-facing input) (=> (layout/flip-x> right-facing) input)))
+    (is (= (=> right-facing input) (=> (layout/flip-x> left-facing) input)))))
 
 (deftest wire
   (testing "Check left facing expression"
-    (let [output (layout/wire left 3)]
-      (is (= [2 2] (get-in output [:alu/dimensions :alu/origin])))
-      (is (= 8 (get-in output [:alu/dimensions :alu/width])))
-      (is (= 8 (get-in output [:alu/dimensions :alu/height])))
-      (is (= [3 8] (get-in output [:alu/output :alu/position])))
-      (is (= :bottom-left (get-in output [:alu/output :alu/direction])))
-      (is (= 36 (output :alu/steps)))))
+    (let [output (=> (layout/wire> left 3) input)]
+      (is (= [2 2]        (-> output :alu/dimensions :alu/origin)))
+      (is (= 8            (-> output :alu/dimensions :alu/width)))
+      (is (= 8            (-> output :alu/dimensions :alu/height)))
+      (is (= [3 8]        (-> output :alu/output :alu/position)))
+      (is (= :bottom-left (-> output :alu/output :alu/direction)))
+      (is (= 36           (output :alu/steps)))))
   (testing "Check right facing expression"
-    (let [output (layout/wire right 3)]
-      (is (= [4 1] (get-in output [:alu/dimensions :alu/origin])))
-      (is (= 7 (get-in output [:alu/dimensions :alu/width])))
-      (is (= 7 (get-in output [:alu/dimensions :alu/height])))
-      (is (= [9 6] (get-in output [:alu/output :alu/position])))
-      (is (= :bottom-right (get-in output [:alu/output :alu/direction])))
-      (is (= 28 (output :alu/steps))))))
+    (let [output (=> (layout/wire> right 3) input)]
+      (is (= [4 1]         (-> output :alu/dimensions :alu/origin)))
+      (is (= 7             (-> output :alu/dimensions :alu/width)))
+      (is (= 7             (-> output :alu/dimensions :alu/height)))
+      (is (= [9 6]         (-> output :alu/output :alu/position)))
+      (is (= :bottom-right (-> output :alu/output :alu/direction)))
+      (is (= 28            (output :alu/steps))))))
 
 (deftest shift
   (let [input [{:alu/dimensions {:alu/origin [1 2]}
@@ -106,13 +111,15 @@
 
 (deftest change-direction
   (testing "Change direction"
-    (is (= right-facing (layout/change-direction :bottom-right right-facing)))
-    (is (= right-facing (layout/change-direction :bottom-right left-facing)))
-    (is (= left-facing (layout/change-direction :bottom-left right-facing)))
-    (is (= left-facing (layout/change-direction :bottom-left left-facing)))))
+    (is (= (=> right-facing input) (=> (layout/change-direction> :bottom-right right-facing) input)))
+    (is (= (=> right-facing input) (=> (layout/change-direction> :bottom-right left-facing) input)))
+    (is (= (=> left-facing input) (=> (layout/change-direction> :bottom-left right-facing) input)))
+    (is (= (=> left-facing input) (=> (layout/change-direction> :bottom-left left-facing) input)))))
 
 (deftest make-intersect
-  (let [[left-output right-output] (layout/make-intersect left right)]
+  (let [[l r] (layout/make-intersect> left right)
+        left-output (=> l input)
+        right-output (=> r input)]
     (testing "Result expressions do not overlap"
       (let [[xl] (-> left-output :alu/dimensions :alu/origin)
             [xr] (-> right-output :alu/dimensions :alu/origin)
@@ -131,24 +138,34 @@
             [_ yr] (-> right-output :alu/output :alu/position)]
         (is (= yr (- yl 1)))))
     (testing "Inputs are flipped so left is facing right and right is facing left"
-      (is (= (layout/make-intersect right right-facing) (layout/make-intersect right left-facing)))
-      (is (= (layout/make-intersect right-facing left) (layout/make-intersect left-facing left))))
+      (let [[l1 r1] (layout/make-intersect> right right-facing)
+            [l2 r2] (layout/make-intersect> right left-facing)]
+        (is (= (=> l1 input) (=> l2 input)))
+        (is (= (=> r1 input) (=> r2 input))))
+      (let [[l1 r1] (layout/make-intersect> right-facing left)
+            [l2 r2] (layout/make-intersect> left-facing left)]
+        (is (= (=> l1 input) (=> l2 input)))
+        (is (= (=> r1 input) (=> r2 input)))))
     (testing "Organise epressions so first is going bottom-right and second bottom-left"
       (is (= :bottom-right (-> left-output :alu/output :alu/direction)))
       (is (= :bottom-left (-> right-output :alu/output :alu/direction)))))
-  (let [left {:alu/dimensions {:alu/origin [18 -1]
-                               :alu/width 17
-                               :alu/height 17}
-              :alu/output {:alu/position [32 14]
-                           :alu/direction :bottom-right}
-              :alu/steps 44}
-        right {:alu/dimensions {:alu/origin [0 0]
-                                :alu/width 5
-                                :alu/height 5}
-               :alu/output {:alu/position [3 3]
+  (let [left [{:alu/dimensions {:alu/origin [18 -1]
+                                :alu/width 17
+                                :alu/height 17}
+               :alu/output {:alu/position [32 14]
                             :alu/direction :bottom-right}
-               :alu/steps 0}
-        [l r] (layout/make-intersect left right)]
+               :alu/steps 44}
+              (fn [_] #{})]
+        right [{:alu/dimensions {:alu/origin [0 0]
+                                 :alu/width 5
+                                 :alu/height 5}
+                :alu/output {:alu/position [3 3]
+                             :alu/direction :bottom-right}
+                :alu/steps 0}
+               (fn [_] #{})]
+        [l-output r-output] (layout/make-intersect> left right)
+        l (=> l-output input)
+        r (=> r-output input)]
     (testing "Left output is correct"
       (is (= [18 -1]       (-> l :alu/dimensions :alu/origin)))
       (is (= 17            (-> l :alu/dimensions :alu/width)))
@@ -165,7 +182,9 @@
       (is (= 44           (r :alu/steps))))))
 
 (deftest make-parallel
-  (let [[left-output right-output] (layout/make-parallel left right)]
+  (let [[l r] (layout/make-parallel> left right)
+        left-output (=> l input)
+        right-output (=> r input)]
     (testing "Result expressions do not overlap"
       (let [[xl] (-> left-output :alu/dimensions :alu/origin)
             [xr] (-> right-output :alu/dimensions :alu/origin)
@@ -183,25 +202,35 @@
       (let [[_ yl] (-> left-output :alu/output :alu/position)
             [_ yr] (-> right-output :alu/output :alu/position)]
         (is (= yr yl))))
-    (testing "Inputs are flipped so both are facing right"
-      (is (= (layout/make-parallel right right-facing) (layout/make-parallel right left-facing)))
-      (is (= (layout/make-parallel right-facing left) (layout/make-parallel left-facing left))))
+    (testing "Inputs are flipped so left is facing right and right is facing left"
+      (let [[l1 r1] (layout/make-parallel> right right-facing)
+            [l2 r2] (layout/make-parallel> right left-facing)]
+        (is (= (=> l1 input) (=> l2 input)))
+        (is (= (=> r1 input) (=> r2 input))))
+      (let [[l1 r1] (layout/make-parallel> right-facing left)
+            [l2 r2] (layout/make-parallel> left-facing left)]
+        (is (= (=> l1 input) (=> l2 input)))
+        (is (= (=> r1 input) (=> r2 input)))))
     (testing "Organise epressions so both face bottom right"
       (is (= :bottom-right (-> left-output :alu/output :alu/direction)))
       (is (= :bottom-right (-> right-output :alu/output :alu/direction)))))
-  (let [left {:alu/dimensions {:alu/origin [0 0]
-                               :alu/width 5
-                               :alu/height 5}
-              :alu/output {:alu/position [3 3]
-                           :alu/direction :bottom-right}
-              :alu/steps 0}
-        right {:alu/dimensions {:alu/origin [0 -1]
-                                :alu/width 17
-                                :alu/height 17}
-               :alu/output {:alu/position [14 14]
+  (let [left [{:alu/dimensions {:alu/origin [0 0]
+                                :alu/width 5
+                                :alu/height 5}
+               :alu/output {:alu/position [3 3]
                             :alu/direction :bottom-right}
-               :alu/steps 44}
-        [l r] (layout/make-parallel left right)]
+               :alu/steps 0}
+              (fn [_] #{})]
+        right [{:alu/dimensions {:alu/origin [0 -1]
+                                 :alu/width 17
+                                 :alu/height 17}
+                :alu/output {:alu/position [14 14]
+                             :alu/direction :bottom-right}
+                :alu/steps 44}
+               (fn [_] #{})]
+        [l-output r-output] (layout/make-parallel> left right)
+        l (=> l-output input)
+        r (=> r-output input)]
     (testing "Left output is correct"
       (is (= [0 0]         (-> l :alu/dimensions :alu/origin)))
       (is (= 16            (-> l :alu/dimensions :alu/width)))
