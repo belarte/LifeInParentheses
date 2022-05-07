@@ -126,10 +126,6 @@
       [[e1 f1] (wire> [e2 f2] diff)]
       [(wire> [e1 f1] (- diff)) [e2 f2]])))
 
-(defn- delay-expression [left right]
-  (let [[[e1 f1] [e2 f2]] (delay-expression> [left identity] [right identity])]
-    [(assoc e1 :alu/pattern (f1 (e1 :alu/pattern))) (assoc e2 :alu/pattern (f2 (e2 :alu/pattern)))]))
-
 (defn- calculate-offset [l r x-modifier-fn y-modifier-fn]
   (let [x-min     (x-offset-at-origin l r)
         x-diff    (x-offset-at-output l r)
@@ -143,12 +139,6 @@
   [direction [e f]]
   (let [d (-> e :alu/output :alu/direction)]
     (if (= d direction) [e f] (flip-x> [e f]))))
-
-(defn change-direction
-  "Change direction of expression."
-  [direction expression]
-  (let [[e f] (change-direction> direction [expression identity])]
-    (assoc e :alu/pattern (f (e :alu/pattern)))))
 
 (defn make-intersect>
   "Generator for make-intersect."
