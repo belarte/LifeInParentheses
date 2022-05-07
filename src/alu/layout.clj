@@ -147,7 +147,7 @@
 (defn change-direction
   "Change direction of expression."
   [direction expression]
-  (let [[e f] (change-direction> direction[expression identity])]
+  (let [[e f] (change-direction> direction [expression identity])]
     (assoc e :alu/pattern (f (e :alu/pattern)))))
 
 (defn make-intersect>
