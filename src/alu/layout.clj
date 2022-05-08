@@ -88,13 +88,18 @@
   (let [[e f] (shift> [expression identity] offset)]
     (assoc e :alu/pattern (f (e :alu/pattern)))))
 
+(defn align-with-origin>
+  "Generator for align-wih-origin"
+  [[e f]]
+  (let [[x y] (-> e :alu/dimensions :alu/origin)
+        offset [(- x) (- y)]]
+    (shift> [e f] offset)))
 
 (defn align-with-origin
   "Aligns the given expression so its origin is [0 0]."
   [expression]
-  (let [[x y] (get-in expression [:alu/dimensions :alu/origin])
-        offset [(- x) (- y)]]
-    (shift expression offset)))
+  (let [[e f] (align-with-origin> [expression identity])]
+    (assoc e :alu/pattern (f (e :alu/pattern)))))
 
 (defn- x-offset-at-origin [left right]
   (let [x1 (get-in left [:alu/dimensions :alu/origin 0])

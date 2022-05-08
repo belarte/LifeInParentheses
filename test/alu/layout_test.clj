@@ -96,18 +96,18 @@
       (is (= #{[2 4] [3 5] [4 6] [5 7]} (f 1))))))
 
 (deftest align-with-origin
-  (let [e {:alu/dimensions {:alu/origin [1 2]
-                            :alu/width 5
-                            :alu/height 5}
-           :alu/output {:alu/position [5 6]}
-           :alu/pattern #{[1 2] [2 3] [3 4] [4 5]}}
-        aligned (layout/align-with-origin e)]
+  (let [expression [{:alu/dimensions {:alu/origin [1 2]
+                                      :alu/width 5
+                                      :alu/height 5}
+                     :alu/output {:alu/position [5 6]}}
+                    (fn [_] #{[1 2] [2 3] [3 4] [4 5]})]
+        e (=> (layout/align-with-origin> expression) input)]
     (testing "Check new origin is [0 0]"
-      (is (= [0 0] (get-in aligned [:alu/dimensions :alu/origin]))))
+      (is (= [0 0] (get-in e [:alu/dimensions :alu/origin]))))
     (testing "New output is correct"
-      (is (= [4 4] (get-in aligned [:alu/output :alu/position]))))
+      (is (= [4 4] (get-in e [:alu/output :alu/position]))))
     (testing "Aligned expression is still within bounds"
-      (is (layout/within-bounds? aligned)))))
+      (is (layout/within-bounds? e)))))
 
 (deftest change-direction
   (testing "Change direction"
