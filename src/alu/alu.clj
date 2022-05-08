@@ -25,23 +25,25 @@
 
 (def bit>
   "Generator for a single bit."
-  (let [expression {:alu/dimensions {:alu/origin [0 0]
-                                     :alu/width 5
-                                     :alu/height 5}
-                    :alu/output {:alu/position [3 3]
-                                 :alu/direction :bottom-right}
-                    :alu/steps 0}
-        function (fn [n]
-                   {:pre [(or (= 1 n) (= 0 n))]}
-                   (if (zero? n) #{} (patterns/offset patterns/glider [1 1])))]
-    [expression function]))
+  {:alu/dimensions {:alu/origin [0 0]
+                    :alu/width 5
+                    :alu/height 5}
+   :alu/output {:alu/position [3 3]
+                :alu/direction :bottom-right}
+   :alu/steps 0
+   :alu/generator (fn [n]
+                    {:pre [(or (= 1 n) (= 0 n))]}
+                    (if (zero? n) #{} (patterns/offset patterns/glider [1 1])))})
 
 (defn bit
   "Represents a single bit as an input to an expression."
   [n]
   {:post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [[e f] bit>]
-    (assoc e :alu/pattern (f n))))
+  (let [e bit>
+        f (e :alu/generator)]
+    (-> e
+        (assoc :alu/pattern (f n))
+        (dissoc :alu/generator))))
 
 (def one (bit 1))
 
@@ -156,6 +158,7 @@
   (=> (layout/merge-expressions> (layout/flip-x> bit>) (layout/shift> bit> [3 3]) bit>) [1 1 1])
   (read-byte (write-byte 12))
   (s/explain :alu/expression one)
+  (not-bit one)
   (print-e (not-bit (layout/wire one 3)))
   (print-e (layout/align-with-origin (and-bit one one)))
   (let [exp (layout/align-with-origin (and-bit one (and-bit one one)))

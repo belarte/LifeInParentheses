@@ -2,36 +2,37 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [alu.layout :as layout :refer [=>]]))
 
-(def left-facing [{:alu/dimensions {:alu/origin [1 1]
+(def left-facing {:alu/dimensions {:alu/origin [1 1]
+                                   :alu/width 6
+                                   :alu/height 3}
+                  :alu/output {:alu/position [2 3]
+                               :alu/direction :bottom-left}
+                  :alu/steps 16
+                  :alu/generator (fn [_] #{[4 1] [3 2]})})
+
+(def right-facing {:alu/dimensions {:alu/origin [1 1]
                                     :alu/width 6
                                     :alu/height 3}
-                   :alu/output {:alu/position [2 3]
-                                :alu/direction :bottom-left}
-                   :alu/steps 16}
-                  (fn [_] #{[4 1] [3 2]})])
+                   :alu/output {:alu/position [5 3]
+                                :alu/direction :bottom-right}
+                   :alu/steps 16
+                   :alu/generator (fn [_] #{[3 1] [4 2]})})
 
-(def right-facing [{:alu/dimensions {:alu/origin [1 1]
-                                     :alu/width 6
-                                     :alu/height 3}
-                    :alu/output {:alu/position [5 3]
-                                 :alu/direction :bottom-right}
-                    :alu/steps 16}
-                   (fn [_] #{[3 1] [4 2]})])
+(def left {:alu/dimensions {:alu/origin [2 2]
+                            :alu/width 6
+                            :alu/height 5}
+           :alu/output {:alu/position [4 5]
+                        :alu/direction :bottom-left}
+           :alu/steps 24
+           :alu/generator (fn [_] #{})})
 
-(def left [{:alu/dimensions {:alu/origin [2 2]
-                             :alu/width 6
-                             :alu/height 5}
-            :alu/output {:alu/position [4 5]
-                         :alu/direction :bottom-left}
-            :alu/steps 24}
-           (fn [_] #{})])
-(def right [{:alu/dimensions {:alu/origin [4 1]
-                              :alu/width 4
-                              :alu/height 4}
-             :alu/output {:alu/position [6 3]
-                          :alu/direction :bottom-right}
-             :alu/steps 16}
-            (fn [_] #{})])
+(def right {:alu/dimensions {:alu/origin [4 1]
+                             :alu/width 4
+                             :alu/height 4}
+            :alu/output {:alu/position [6 3]
+                         :alu/direction :bottom-right}
+            :alu/steps 16
+            :alu/generator (fn [_] #{})})
 
 ; As expressions are pre-generated above, inputs are irrelevant in these tests
 (def input [1])
@@ -86,21 +87,22 @@
       (is (= 28            (output :alu/steps))))))
 
 (deftest shift
-  (let [input [{:alu/dimensions {:alu/origin [1 2]}
-                :alu/output {:alu/position [5 6]}}
-               (fn [_] #{[1 2] [2 3] [3 4] [4 5]})]
-        [e f] (layout/shift> input [1 2])]
+  (let [input {:alu/dimensions {:alu/origin [1 2]}
+               :alu/output {:alu/position [5 6]}
+               :alu/generator (fn [_] #{[1 2] [2 3] [3 4] [4 5]})}
+        e (layout/shift> input [1 2])
+        f (e :alu/generator)]
     (testing "Check shifting expression"
       (is (= [2 4] (-> e :alu/dimensions :alu/origin)))
       (is (= [6 8] (-> e :alu/output :alu/position)))
       (is (= #{[2 4] [3 5] [4 6] [5 7]} (f 1))))))
 
 (deftest align-with-origin
-  (let [expression [{:alu/dimensions {:alu/origin [1 2]
-                                      :alu/width 5
-                                      :alu/height 5}
-                     :alu/output {:alu/position [5 6]}}
-                    (fn [_] #{[1 2] [2 3] [3 4] [4 5]})]
+  (let [expression {:alu/dimensions {:alu/origin [1 2]
+                                     :alu/width 5
+                                     :alu/height 5}
+                    :alu/output {:alu/position [5 6]}
+                    :alu/generator (fn [_] #{[1 2] [2 3] [3 4] [4 5]})}
         e (=> (layout/align-with-origin> expression) input)]
     (testing "Check new origin is [0 0]"
       (is (= [0 0] (get-in e [:alu/dimensions :alu/origin]))))
@@ -149,20 +151,20 @@
     (testing "Organise epressions so first is going bottom-right and second bottom-left"
       (is (= :bottom-right (-> left-output :alu/output :alu/direction)))
       (is (= :bottom-left (-> right-output :alu/output :alu/direction)))))
-  (let [left [{:alu/dimensions {:alu/origin [18 -1]
-                                :alu/width 17
-                                :alu/height 17}
-               :alu/output {:alu/position [32 14]
+  (let [left {:alu/dimensions {:alu/origin [18 -1]
+                               :alu/width 17
+                               :alu/height 17}
+              :alu/output {:alu/position [32 14]
+                           :alu/direction :bottom-right}
+              :alu/steps 44
+              :alu/generator (fn [_] #{})}
+        right {:alu/dimensions {:alu/origin [0 0]
+                                :alu/width 5
+                                :alu/height 5}
+               :alu/output {:alu/position [3 3]
                             :alu/direction :bottom-right}
-               :alu/steps 44}
-              (fn [_] #{})]
-        right [{:alu/dimensions {:alu/origin [0 0]
-                                 :alu/width 5
-                                 :alu/height 5}
-                :alu/output {:alu/position [3 3]
-                             :alu/direction :bottom-right}
-                :alu/steps 0}
-               (fn [_] #{})]
+               :alu/steps 0
+               :alu/generator (fn [_] #{})}
         [l-output r-output] (layout/make-intersect> left right)
         l (=> l-output input)
         r (=> r-output input)]
@@ -214,20 +216,20 @@
     (testing "Organise epressions so both face bottom right"
       (is (= :bottom-right (-> left-output :alu/output :alu/direction)))
       (is (= :bottom-right (-> right-output :alu/output :alu/direction)))))
-  (let [left [{:alu/dimensions {:alu/origin [0 0]
-                                :alu/width 5
-                                :alu/height 5}
-               :alu/output {:alu/position [3 3]
+  (let [left {:alu/dimensions {:alu/origin [0 0]
+                               :alu/width 5
+                               :alu/height 5}
+              :alu/output {:alu/position [3 3]
+                           :alu/direction :bottom-right}
+              :alu/steps 0
+              :alu/generator (fn [_] #{})}
+        right {:alu/dimensions {:alu/origin [0 -1]
+                                :alu/width 17
+                                :alu/height 17}
+               :alu/output {:alu/position [14 14]
                             :alu/direction :bottom-right}
-               :alu/steps 0}
-              (fn [_] #{})]
-        right [{:alu/dimensions {:alu/origin [0 -1]
-                                 :alu/width 17
-                                 :alu/height 17}
-                :alu/output {:alu/position [14 14]
-                             :alu/direction :bottom-right}
-                :alu/steps 44}
-               (fn [_] #{})]
+               :alu/steps 44
+               :alu/generator (fn [_] #{})}
         [l-output r-output] (layout/make-parallel> left right)
         l (=> l-output input)
         r (=> r-output input)]
@@ -247,21 +249,21 @@
       (is (= 44            (r :alu/steps))))))
 
 (deftest merge-expressions
-  (let [e1 [{:alu/dimensions {:alu/origin [1 2]
-                              :alu/width 5
-                              :alu/height 4}
-             :alu/steps 16}
-            (fn [_] #{[1 5] [5 2]})]
-        e2 [ {:alu/dimensions {:alu/origin [7 1]
-                               :alu/width 4
-                               :alu/height 3}
-              :alu/steps 16}
-             (fn [_] #{[7 1] [10 3]})]
-        e3 [ {:alu/dimensions {:alu/origin [3 3]
-                               :alu/width 5
-                               :alu/height 4}
-              :alu/steps 16}
-             (fn [_] #{[3 3] [7 6]})]
+  (let [e1 {:alu/dimensions {:alu/origin [1 2]
+                             :alu/width 5
+                             :alu/height 4}
+            :alu/steps 16
+            :alu/generator (fn [_] #{[1 5] [5 2]})}
+        e2 {:alu/dimensions {:alu/origin [7 1]
+                             :alu/width 4
+                             :alu/height 3}
+            :alu/steps 16
+            :alu/generator (fn [_] #{[7 1] [10 3]})}
+        e3 {:alu/dimensions {:alu/origin [3 3]
+                             :alu/width 5
+                             :alu/height 4}
+            :alu/steps 16
+             :alu/generator (fn [_] #{[3 3] [7 6]})}
         o1 (=> (layout/merge-expressions> e1 e2) [1 1])
         o2 (=> (layout/merge-expressions> e1 e2 e3) [1 1 1])]
     (testing "Merging two expressions"
@@ -280,26 +282,26 @@
       (is (= (=> (layout/merge-expressions> e1 e2) [1 1]) (=> (layout/merge-expressions> e2 e1) [1 1]))))))
 
 (deftest spread-on-x-axis
-  (let [e1 [{:alu/dimensions {:alu/origin [-1 0]
-                              :alu/width 4
-                              :alu/height 4}
-             :alu/output {:alu/position [2 3]}}
-            (fn [_] #{[-1 0] [2 3]})]
-        e2 [{:alu/dimensions {:alu/origin [2 0]
-                              :alu/width 5
-                              :alu/height 4}
-             :alu/output {:alu/position [6 3]}}
-            (fn [_] #{[2 0] [6 3]})]
-        e3 [{:alu/dimensions {:alu/origin [12 0]
-                              :alu/width 2
-                              :alu/height 4}
-             :alu/output {:alu/position [13 3]}}
-            (fn [_] #{[12 0] [13 3]})]
-        e4 [{:alu/dimensions {:alu/origin [11 0]
-                              :alu/width 2
-                              :alu/height 4}
-             :alu/output {:alu/position [12 3]}}
-            (fn [_] #{[11 0] [12 3]})]
+  (let [e1 {:alu/dimensions {:alu/origin [-1 0]
+                             :alu/width 4
+                             :alu/height 4}
+            :alu/output {:alu/position [2 3]}
+            :alu/generator (fn [_] #{[-1 0] [2 3]})}
+        e2 {:alu/dimensions {:alu/origin [2 0]
+                             :alu/width 5
+                             :alu/height 4}
+            :alu/output {:alu/position [6 3]}
+            :alu/generator (fn [_] #{[2 0] [6 3]})}
+        e3 {:alu/dimensions {:alu/origin [12 0]
+                             :alu/width 2
+                             :alu/height 4}
+            :alu/output {:alu/position [13 3]}
+            :alu/generator (fn [_] #{[12 0] [13 3]})}
+        e4 {:alu/dimensions {:alu/origin [11 0]
+                             :alu/width 2
+                             :alu/height 4}
+            :alu/output {:alu/position [12 3]}
+            :alu/generator (fn [_] #{[11 0] [12 3]})}
         [o1 o2 o3 o4] (map #(=> % input) (layout/spread-x> e1 e2 e3 e4))]
     (testing "Spreaded expressions do no overlap"
       (is (= -1 (get-in o1 [:alu/dimensions :alu/origin 0])))
