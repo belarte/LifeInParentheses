@@ -45,14 +45,22 @@
         (assoc :alu/pattern (f n))
         (dissoc :alu/generator))))
 
-(def one (bit 1))
+(def one (=> bit> 1))
 
-(def zero (bit 0))
+(def zero (=> bit> 0))
 
 (defn- evaluate [expression]
   (let [{:keys [alu/dimensions alu/steps alu/pattern]} expression
         board (life/create-board (dimensions :alu/width) (dimensions :alu/height) [pattern])]
     (life/simulate board steps)))
+
+(defn read>
+  "Reads a single bit as the output of an expression."
+  [expression args]
+  (let [exp       (=> expression args)
+        output    (-> exp :alu/output :alu/position)
+        last-iter (last (evaluate exp))]
+    (if (contains? (last-iter :alive-cells) output) 1 0)))
 
 (defn read-bit
   "Reads a single bit as the output of an expression."

@@ -1,7 +1,7 @@
 (ns alu.alu-test
   (:require [clojure.test :refer [deftest testing is are]]
             [clojure.set :as set]
-            [alu.layout :as layout]
+            [alu.layout :as layout :refer [=>]]
             [alu.alu :as alu :refer [one zero]]))
 
 (deftest bit-is-properly-formed
@@ -12,21 +12,22 @@
                     :alu/output {:alu/position [3 3]
                                  :alu/direction :bottom-right}
                     :alu/steps 0
-                    :alu/pattern #{[2 1] [3 2] [1 3] [2 3] [3 3]}}]
-      (is (= expected one)))))
+                    :alu/pattern #{[2 1] [3 2] [1 3] [2 3] [3 3]}}
+          output (=> alu/bit> 1)]
+      (is (= expected output)))))
 
 (deftest write-and-read-bit
   (testing "A bit in input can be read as output"
-    (is (= 0 (alu/read-bit zero)))
-    (is (= 1 (alu/read-bit one)))))
+    (is (= 0 (alu/read> alu/bit> 0)))
+    (is (= 1 (alu/read> alu/bit> 1)))))
 
 (deftest wire-traversal
   (testing "A bit can be read after traversing a wire"
-    (is (= 0 (alu/read-bit (layout/wire zero 3))))
-    (is (= 1 (alu/read-bit (layout/wire one 3))))
-    (is (= 1 (alu/read-bit (layout/wire (layout/wire one 2) 3)))))
+    (is (= 0 (alu/read> (layout/wire> alu/bit> 3) 0)))
+    (is (= 1 (alu/read> (layout/wire> alu/bit> 3) 1)))
+    (is (= 1 (alu/read> (layout/wire> (layout/wire> alu/bit> 2) 3) 1))))
   (testing "A wire can extend a flipped pattern"
-    (is (= 1 (alu/read-bit (layout/wire (layout/flip-x one) 4))))))
+    (is (= 1 (alu/read> (layout/wire> (layout/flip-x> alu/bit>) 4) 1)))))
 
 (deftest negation-is-properly-formed
   (testing "A negation is properly formed"
