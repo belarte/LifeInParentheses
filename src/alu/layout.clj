@@ -234,6 +234,20 @@
      :alu/steps steps
      :alu/pattern pattern}))
 
+(defn spread-x>
+  "Generator for spread-x."
+  [& args]
+  (let [expressions (map #(first %) args)
+        x0 (get-in (first expressions) [:alu/dimensions :alu/origin 0])
+        old-origins (map #(get-in % [:alu/dimensions :alu/origin 0]) expressions)
+        new-origins (->> (map #(get-in % [:alu/dimensions :alu/width]) expressions)
+                         (reductions +)
+                         drop-last
+                         (cons 0)
+                         (map (partial + x0)))
+        x-offsets (map #(apply - %) (map vector new-origins old-origins))]
+    (map (fn [[e x]] (shift> e [x 0])) (map vector args x-offsets))))
+
 (defn spread-x
   "Spreads expressions on the X axis so they are adjacent and do not overlap."
   [expressions]
