@@ -20,8 +20,8 @@
 
 (s/def :alu/expression (s/keys :req [:alu/dimensions
                                      :alu/output
-                                     :alu/steps
-                                     :alu/pattern]))
+                                     :alu/steps]
+                               :opt [:alu/pattern]))
 
 (def bit>
   "Generator for a single bit."
@@ -82,6 +82,29 @@
         [x1 __] (-> right :alu/output :alu/position)
         diff    (int (/ (- x1 x0) 2))]
       [(+ x0 diff) (+ y0 diff) diff]))
+
+(defn not>
+  "Negates a single bit. Expects the input to be facing bottom right, if not the input will be flipped."
+  [expression]
+  {:pre  [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
+   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
+  (let [[l r]       (layout/make-intersect> expression bit>)
+        [x y diff]  (get-intersection l r)
+        height-diff (+ diff 3 1)
+        height      (+ (-> l :alu/dimensions :alu/height) height-diff)
+        steps-diff  (* 4 (+ diff 4))
+        steps       (+ (r :alu/steps) steps-diff)
+        output-pos  (coords/add [x y] [(- 4) 3])
+        generator   (fn [args]
+                      (let [fl (l :alu/generator)
+                            fr (r :alu/generator)]
+                        (set/union (fl args) (fr 1))))]
+    (-> (layout/merge-expressions> l r)
+        (assoc-in [:alu/dimensions :alu/height] height)
+        (assoc-in [:alu/output :alu/direction] :bottom-left)
+        (assoc-in [:alu/output :alu/position] output-pos)
+        (assoc :alu/steps steps)
+        (assoc :alu/generator generator))))
 
 (defn not-bit
   "Negates a single bit. Expects the input to be facing bottom right, if not the input will be flipped."

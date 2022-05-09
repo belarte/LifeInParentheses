@@ -31,7 +31,7 @@
 
 (deftest negation-is-properly-formed
   (testing "A negation is properly formed"
-    (let [output (alu/not-bit one)]
+    (let [output (=> (alu/not> alu/bit>) 1)]
       (is (= [0 -1]       (-> output :alu/dimensions :alu/origin)))
       (is (= 11           (-> output :alu/dimensions :alu/width)))
       (is (= 11           (-> output :alu/dimensions :alu/height)))
@@ -40,7 +40,7 @@
       (is (= 24           (output :alu/steps)))
       (is (set/subset? #{[3 3] [7 2]} (output :alu/pattern)))))
   (testing "A double negation is properly formed"
-    (let [output (alu/not-bit (alu/not-bit one))]
+    (let [output (=> (alu/not> (alu/not> alu/bit>)) 1)]
       (is (= [0 -2]       (-> output :alu/dimensions :alu/origin)))
       (is (= 23           (-> output :alu/dimensions :alu/width)))
       (is (= 17           (-> output :alu/dimensions :alu/height)))
@@ -51,20 +51,25 @@
 
 (deftest negation
   (testing "Can negate a single bit"
-    (is (= 1 (alu/read-bit (alu/not-bit zero))))
-    (is (= 0 (alu/read-bit (alu/not-bit one)))))
+    (let [fun (alu/not> alu/bit>)]
+      (is (= 1 (alu/read> fun 0)))
+      (is (= 0 (alu/read> fun 1)))))
   (testing "Can negate a flipped bit"
-    (is (= 1 (alu/read-bit (alu/not-bit (layout/flip-x zero)))))
-    (is (= 0 (alu/read-bit (alu/not-bit (layout/flip-x one))))))
+    (let [fun (alu/not> (layout/flip-x> alu/bit>))]
+      (is (= 1 (alu/read> fun 0)))
+      (is (= 0 (alu/read> fun 1)))))
   (testing "Can negate a wired bit"
-    (is (= 1 (alu/read-bit (alu/not-bit (layout/wire zero 5)))))
-    (is (= 0 (alu/read-bit (alu/not-bit (layout/wire one 5))))))
+    (let [fun (alu/not> (layout/wire> alu/bit> 5))]
+      (is (= 1 (alu/read> fun 0)))
+      (is (= 0 (alu/read> fun 1)))))
   (testing "Some combination"
-    (is (= 1 (alu/read-bit (alu/not-bit (layout/flip-x (layout/wire zero 5))))))
-    (is (= 0 (alu/read-bit (alu/not-bit (layout/flip-x (layout/wire one 5)))))))
+    (let [fun (alu/not> (layout/flip-x>  (layout/wire> alu/bit> 5)))]
+      (is (= 1 (alu/read> fun 0)))
+      (is (= 0 (alu/read> fun 1)))))
   (testing "Double negation returns original value"
-    (is (= 0 (alu/read-bit (alu/not-bit (alu/not-bit zero)))))
-    (is (= 1 (alu/read-bit (alu/not-bit (alu/not-bit one)))))))
+    (let [fun (alu/not> (alu/not> alu/bit>))]
+      (is (= 0 (alu/read> fun 0)))
+      (is (= 1 (alu/read> fun 1))))))
 
 (deftest and-is-properly-formed
   (testing "And is properly formed"
