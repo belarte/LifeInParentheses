@@ -41,15 +41,8 @@
         (assoc-in [:alu/output :alu/position] output)
         (assoc :alu/generator generator))))
 
-(defn flip-x
-  "Flip expression on the X axis."
-  [expression]
-  (let [e (flip-x> (assoc expression :alu/generator identity))
-        f (e :alu/generator)]
-    (assoc e :alu/pattern (f (e :alu/pattern)))))
-
 (defn wire>
-  "Generator for wire."
+  "Generator for wire. Allow transmission of one bit over a distance."
   [expression distance]
   (if (= (-> expression :alu/output :alu/direction) :bottom-left)
     (flip-x> (wire> (flip-x> expression) distance))
@@ -68,15 +61,8 @@
           (assoc-in [:alu/output :alu/position] [x y])
           (assoc :alu/steps steps)))))
 
-(defn wire
-  "Allow transmission of one bit over a distance."
-  [expression distance]
-  (let [e (wire> (assoc expression :alu/generator identity) distance)
-        f (e :alu/generator)]
-    (assoc e :alu/pattern (f (e :alu/pattern)))))
-
 (defn shift>
-  "Generator for shift."
+  "Generator for shift. Shifts an expression with the given offset."
   [expression offset]
   (let [origin     (-> expression :alu/dimensions :alu/origin)
         position   (-> expression :alu/output :alu/position)
@@ -96,17 +82,11 @@
     (assoc e :alu/pattern (f (e :alu/pattern)))))
 
 (defn align-with-origin>
-  "Generator for align-wih-origin"
+  "Generator for aligning the given expression so its origin is [0 0]."
   [expression]
   (let [[x y]  (-> expression :alu/dimensions :alu/origin)
         offset [(- x) (- y)]]
     (shift> expression offset)))
-
-(defn align-with-origin
-  "Aligns the given expression so its origin is [0 0]."
-  [expression]
-  (let [[e f] (align-with-origin> (assoc expression :alu/generator identity))]
-    (assoc e :alu/pattern (f (e :alu/pattern)))))
 
 (defn- x-offset-at-origin [left right]
   (let [x1 (get-in left [:alu/dimensions :alu/origin 0])
@@ -153,7 +133,9 @@
     (if (= d direction) expression (flip-x> expression))))
 
 (defn make-intersect>
-  "Generator for make-intersect."
+  "Generator for intersection. Aligns expressions by shifting one so that outputs will intersect.
+  If both expression have a non zero output, they will cancel each other when intersecting.
+  First output will face bottom-right and second output will face bottom-left."
   [left right]
   (let [e1     (change-direction> :bottom-right left)
         e2     (change-direction> :bottom-left right)
@@ -161,18 +143,8 @@
         offset (calculate-offset l r (fn [x _] x) dec)]
     [l (shift> r offset)]))
 
-(defn make-intersect
-  "Aligns expressions by shifting one so that outputs will intersect.
-  If both expression have a non zero output, they will cancel each other when intersecting.
-  First output will face bottom-right and second output will face bottom-left."
-  [left right]
-  (let [[l r] (make-intersect> (assoc left :alu/generator identity) (assoc right :alu/generator identity))
-        fl    (l :alu/generator)
-        fr    (r :alu/generator)]
-    [(assoc l :alu/pattern (fl (l :alu/pattern))) (assoc r :alu/pattern (fr (r :alu/pattern)))]))
-
 (defn make-parallel>
-  "Generator for make-parallel"
+  "Generator for parallelism. Align expressions so they both face bottom right and outputs are synchronised."
   [left right]
   (let [e1     (change-direction> :bottom-right left)
         e2     (change-direction> :bottom-right right)
@@ -180,16 +152,8 @@
         offset (calculate-offset l r (fn [x d] (+ x (* 2 d))) identity)]
     [l (shift> r offset)]))
 
-(defn make-parallel
-  "Align expressions so they both face bottom right and outputs are synchronised."
-  [left right]
-  (let [[l r] (make-parallel> (assoc left :alu/generator identity) (assoc right :alu/generator identity))
-        fl    (l :alu/generator)
-        fr    (r :alu/generator)]
-    [(assoc l :alu/pattern (fl (l :alu/pattern))) (assoc r :alu/pattern (fr (r :alu/pattern)))]))
-
 (defn merge-expressions>
-  "Generator for merge-expression."
+  "Generator for merging. Merge two expressions into one, disregarding :output."
   [& expressions]
   {:pre [(apply = (map #(get-in % [0 :alu/steps]) expressions))]}
   (let [xs      (map #(get-in % [:alu/dimensions :alu/origin 0]) expressions)
@@ -215,33 +179,6 @@
      :alu/generator (fn [args] (->> (map vector generators args)
                                     (map #((first %) (last %)))
                                     (reduce set/union)))}))
-
-(defn merge-expressions
-  "Merge two expressions into one, disregarding :output."
-  [& expressions]
-  {:pre [(apply = (map #(% :alu/steps) expressions))]}
-  (let [xs      (map #(get-in % [:alu/dimensions :alu/origin 0]) expressions)
-        ys      (map #(get-in % [:alu/dimensions :alu/origin 1]) expressions)
-        x0      (apply min xs)
-        y0      (apply min ys)
-        width   (->> (map #(-> % :alu/dimensions :alu/width) expressions)
-                     (map vector xs)
-                     (map #(apply + %))
-                     (map #(- % x0))
-                     (apply max))
-        height  (->> (map #(-> % :alu/dimensions :alu/height) expressions)
-                     (map vector ys)
-                     (map #(apply + %))
-                     (map #(- % y0))
-                     (apply max))
-        steps   ((first expressions) :alu/steps)
-        pattern (->> (map #(% :alu/pattern) expressions)
-                     (reduce set/union))]
-    {:alu/dimensions {:alu/origin [x0 y0]
-                      :alu/width width
-                      :alu/height height}
-     :alu/steps steps
-     :alu/pattern pattern}))
 
 (defn spread-x>
   "Generator for spread-x."

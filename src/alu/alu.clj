@@ -106,24 +106,6 @@
         (assoc :alu/steps steps)
         (assoc :alu/generator generator))))
 
-(defn not-bit
-  "Negates a single bit. Expects the input to be facing bottom right, if not the input will be flipped."
-  [expression]
-  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]
-   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [[l r]       (layout/make-intersect expression one)
-        [x y diff]  (get-intersection l r)
-        height-diff (+ diff 3 1)
-        height      (+ (-> l :alu/dimensions :alu/height) height-diff)
-        steps-diff  (* 4 (+ diff 4))
-        steps       (+ (r :alu/steps) steps-diff)
-        output-pos  (coords/add [x y] [(- 4) 3])]
-    (-> (layout/merge-expressions l r)
-        (assoc-in [:alu/dimensions :alu/height] height)
-        (assoc-in [:alu/output :alu/direction] :bottom-left)
-        (assoc-in [:alu/output :alu/position] output-pos)
-        (assoc :alu/steps steps))))
-
 (defn and>
   "Combine left and right expressions to form an 'and' statement."
   [left right]
@@ -151,29 +133,6 @@
         (assoc-in [:alu/output :alu/position] output-pos)
         (assoc :alu/steps steps)
         (assoc :alu/generator generator))))
-
-(defn and-bit
-  "Combine left and right expressions to form an 'and' statement."
-  [left right]
-  {:pre  [(s/valid? :alu/expression left) (layout/within-bounds? left)
-          (s/valid? :alu/expression right) (layout/within-bounds? right)]
-   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [[l r]       (layout/make-parallel left right)
-        [_ n]       (layout/make-intersect r one)
-        [x y diff]  (get-intersection l n)
-        height-diff (+ diff 6 1)
-        height      (+ (-> l :alu/dimensions :alu/height) height-diff)
-        steps-diff  (* 4 (+ diff 6))
-        steps       (+ (n :alu/steps) steps-diff)
-        output-pos  (coords/add [x y] [6 6])
-        eater-pos   (coords/add [x y] [-6 3])
-        eater       (patterns/offset (patterns/flip-x patterns/eater) eater-pos)]
-      (-> (layout/merge-expressions l r n)
-          (assoc-in [:alu/dimensions :alu/height] height)
-          (assoc-in [:alu/output :alu/direction] :bottom-right)
-          (assoc-in [:alu/output :alu/position] output-pos)
-          (assoc :alu/steps steps)
-          (update :alu/pattern set/union eater))))
 
 (defn or>
   "Combine left and right expressions to form an 'or' statement."
@@ -216,14 +175,10 @@
   (=> (layout/shift> (layout/flip-x> bit>) [1 2]) 1)
   (=> (layout/merge-expressions> (layout/flip-x> bit>) (layout/shift> bit> [3 3]) bit>) [1 1 1])
   (read-byte (write-byte 12))
-  (s/explain :alu/expression one)
-  (not-bit one)
-  (print-e (not-bit (layout/wire one 3)))
-  (print-e (layout/align-with-origin (and-bit one one)))
-  (let [exp (layout/align-with-origin (and-bit one (and-bit one one)))
+  (print-e (=> (not> (layout/wire> bit> 3)) 1))
+  (print-e (=> (layout/align-with-origin> (and> bit> bit>)) [1 1]))
+  (let [exp   (=> (layout/align-with-origin> (and> bit> (and> bit> bit>))) [1 [1 1]])
         board (life/create-board ((exp :alu/dimensions) :alu/width) ((exp :alu/dimensions) :alu/height) [(exp :alu/pattern)])]
     (println exp)
     (println (life/draw-board board))
-    (print-e exp))
-  (read-bit one)
-  (layout/within-bounds? one))
+    (print-e exp)))
