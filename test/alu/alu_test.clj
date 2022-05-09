@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [clojure.set :as set]
             [alu.layout :as layout :refer [=>]]
-            [alu.alu :as alu :refer [one zero]]))
+            [alu.alu :as alu]))
 
 (deftest bit-is-properly-formed
   (testing "A bit is properly formed"
@@ -143,13 +143,11 @@
 
 (deftest write-and-read-byte
   (testing "A byte can be write then read again"
-    (is (= 0   (alu/read-byte (alu/write-byte 0))))
-    (is (= 1   (alu/read-byte (alu/write-byte 1))))
-    (is (= 42  (alu/read-byte (alu/write-byte 42))))
-    (is (= 86  (alu/read-byte (alu/write-byte 86))))
-    (is (= 255 (alu/read-byte (alu/write-byte 255)))))
+    (is (= 0   (alu/read-byte> alu/write-byte> 0)))
+    (is (= 1   (alu/read-byte> alu/write-byte> 1)))
+    (is (= 42  (alu/read-byte> alu/write-byte> 42)))
+    (is (= 86  (alu/read-byte> alu/write-byte> 86)))
+    (is (= 255 (alu/read-byte> alu/write-byte> 255))))
   (testing "Inputs are validated"
-    (is (thrown? AssertionError (alu/write-byte -1)))
-    (is (thrown? AssertionError (alu/write-byte 256)))
-    (is (thrown? AssertionError (alu/read-byte [one one one one one one one])))
-    (is (thrown? AssertionError (alu/read-byte [one one one one one one one one one])))))
+    (is (thrown? AssertionError (alu/read-byte> alu/write-byte> -1)))
+    (is (thrown? AssertionError (alu/read-byte> alu/write-byte> 256)))))

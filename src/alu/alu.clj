@@ -35,20 +35,6 @@
                     {:pre [(or (= 1 n) (= 0 n))]}
                     (if (zero? n) #{} (patterns/offset patterns/glider [1 1])))})
 
-(defn bit
-  "Represents a single bit as an input to an expression."
-  [n]
-  {:post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (let [e bit>
-        f (e :alu/generator)]
-    (-> e
-        (assoc :alu/pattern (f n))
-        (dissoc :alu/generator))))
-
-(def one (=> bit> 1))
-
-(def zero (=> bit> 0))
-
 (defn- evaluate [expression]
   (let [{:keys [alu/dimensions alu/steps alu/pattern]} expression
         board (life/create-board (dimensions :alu/width) (dimensions :alu/height) [pattern])]
@@ -61,14 +47,6 @@
         output    (-> exp :alu/output :alu/position)
         last-iter (last (evaluate exp))]
     (if (contains? (last-iter :alive-cells) output) 1 0)))
-
-(defn read-bit
-  "Reads a single bit as the output of an expression."
-  [expression]
-  {:pre [(s/valid? :alu/expression expression) (layout/within-bounds? expression)]}
-  (let [output (get-in expression [:alu/output :alu/position])
-        last-iteration (last (evaluate expression))]
-    (if (contains? (last-iteration :alive-cells) output) 1 0)))
 
 (defn- print-e
   "Prints all steps generated."
@@ -155,26 +133,24 @@
        (map #(apply * %))
        (reduce +)))
 
-(defn write-byte
+(def write-byte>
   "Represents byte as a sequence of expressions. Little-endian representation."
-  [n]
-  {:pre [(>= n 0) (< n 256)]}
-  (->> (to-base-2 n)
-       (map bit)
-       layout/spread-x))
+  (->> (repeat bit>)
+       (take 8)
+       (apply layout/spread-x>)))
 
-(defn read-byte
+(defn read-byte>
   "Reads a bit as the output of a  sequence of expressions."
-  [expressions]
-  {:pre [(= 8 (count expressions))]}
-  (->> expressions
-       (map read-bit)
+  [expressions arg]
+  {:pre [(= 8 (count expressions)) (int? arg) (< arg 256) (>= arg 0)]}
+  (->> (map vector expressions (to-base-2 arg))
+       (map #(apply read> %))
        from-base-2))
 
 (comment
   (=> (layout/shift> (layout/flip-x> bit>) [1 2]) 1)
   (=> (layout/merge-expressions> (layout/flip-x> bit>) (layout/shift> bit> [3 3]) bit>) [1 1 1])
-  (read-byte (write-byte 12))
+  (read-byte> write-byte> 42)
   (print-e (=> (not> (layout/wire> bit> 3)) 1))
   (print-e (=> (layout/align-with-origin> (and> bit> bit>)) [1 1]))
   (let [exp   (=> (layout/align-with-origin> (and> bit> (and> bit> bit>))) [1 [1 1]])
