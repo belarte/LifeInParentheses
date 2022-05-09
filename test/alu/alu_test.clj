@@ -73,7 +73,7 @@
 
 (deftest and-is-properly-formed
   (testing "And is properly formed"
-    (let [output (alu/and-bit one one)]
+    (let [output (=> (alu/and> alu/bit> alu/bit>) [1 1])]
       (is (= [0 -1]        (-> output :alu/dimensions :alu/origin)))
       (is (= 17            (-> output :alu/dimensions :alu/width)))
       (is (= 17            (-> output :alu/dimensions :alu/height)))
@@ -82,7 +82,7 @@
       (is (= 44            (output :alu/steps)))
       (is (set/subset? #{[3 3] [9 3] [13 2] [5 11]} (output :alu/pattern)))))
   (testing "Nested ands are properly formed"
-    (let [output (alu/and-bit one (alu/and-bit one one))]
+    (let [output (=> (alu/and> alu/bit> (alu/and> alu/bit> alu/bit>)) [1 [1 1]])]
       (is (= [0 -1]        (-> output :alu/dimensions :alu/origin)))
       (is (= 53            (-> output :alu/dimensions :alu/width)))
       (is (= 35            (-> output :alu/dimensions :alu/height)))
@@ -94,28 +94,28 @@
             (output :alu/pattern))))))
 
 (defn and-bit-test-helper [f-left f-right]
-  (are [result l r] (= result (alu/read-bit (alu/and-bit (f-left l) (f-right r))))
-       0 0 0
-       0 1 0
-       0 0 1
-       1 1 1))
+  (are [result args] (= result (alu/read> (alu/and> f-left f-right) args))
+       0 [0 0]
+       0 [1 0]
+       0 [0 1]
+       1 [1 1]))
 
 (deftest and-bit
   (testing "And with single bits"
-    (and-bit-test-helper alu/bit alu/bit))
+    (and-bit-test-helper alu/bit> alu/bit>))
   (testing "And with wired bits"
-    (and-bit-test-helper #(layout/wire (alu/bit %) 4) alu/bit)
-    (and-bit-test-helper alu/bit #(layout/wire (alu/bit %) 4)))
+    (and-bit-test-helper (layout/wire> alu/bit> 4) alu/bit>)
+    (and-bit-test-helper alu/bit> (layout/wire> alu/bit>  4)))
   (testing "And with flipped bits"
-    (and-bit-test-helper #(layout/flip-x (alu/bit %)) #(layout/flip-x (alu/bit %)))
-    (and-bit-test-helper #(alu/bit %) #(layout/flip-x (alu/bit %)))
-    (and-bit-test-helper #(layout/flip-x (alu/bit %)) #(alu/bit %)))
+    (and-bit-test-helper (layout/flip-x> alu/bit>) (layout/flip-x> alu/bit>))
+    (and-bit-test-helper alu/bit> (layout/flip-x> alu/bit>))
+    (and-bit-test-helper (layout/flip-x> alu/bit>) alu/bit>))
   (testing "Nested ands"
-    (are [result a b c d] (= result (alu/read-bit (alu/and-bit (alu/and-bit (alu/bit a) (alu/bit b)) (alu/and-bit (alu/bit c) (alu/bit d)))))
-         0 0 0 0 0, 0 0 0 0 1, 0 0 0 1 0, 0 0 0 1 1,
-         0 0 1 0 0, 0 0 1 0 1, 0 0 1 1 0, 0 0 1 1 1,
-         0 1 0 0 0, 0 1 0 0 1, 0 1 0 1 0, 0 1 0 1 1,
-         0 1 1 0 0, 0 1 1 0 1, 0 1 1 1 0, 1 1 1 1 1)))
+    (are [result args] (= result (alu/read> (alu/and> (alu/and> alu/bit> alu/bit>) (alu/and> alu/bit> alu/bit>)) args))
+         0 [[0 0] [0 0]], 0 [[0 0] [0 1]], 0 [[0 0] [1 0]], 0 [[0 0] [1 1]],
+         0 [[0 1] [0 0]], 0 [[0 1] [0 1]], 0 [[0 1] [1 0]], 0 [[0 1] [1 1]],
+         0 [[1 0] [0 0]], 0 [[1 0] [0 1]], 0 [[1 0] [1 0]], 0 [[1 0] [1 1]],
+         0 [[1 1] [0 0]], 0 [[1 1] [0 1]], 0 [[1 1] [1 0]], 1 [[1 1] [1 1]])))
 
 (defn or-bit-test-helper [f-left f-right]
   (are [result l r] (= result (alu/read-bit (alu/or-bit (f-left l) (f-right r))))

@@ -124,6 +124,34 @@
         (assoc-in [:alu/output :alu/position] output-pos)
         (assoc :alu/steps steps))))
 
+(defn and>
+  "Combine left and right expressions to form an 'and' statement."
+  [left right]
+  {:pre  [(s/valid? :alu/expression left) (layout/within-bounds? left)
+          (s/valid? :alu/expression right) (layout/within-bounds? right)]
+   :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
+  (let [[l r]       (layout/make-parallel> left right)
+        [_ n]       (layout/make-intersect> r bit>)
+        [x y diff]  (get-intersection l n)
+        height-diff (+ diff 6 1)
+        height      (+ (-> l :alu/dimensions :alu/height) height-diff)
+        steps-diff  (* 4 (+ diff 6))
+        steps       (+ (n :alu/steps) steps-diff)
+        output-pos  (coords/add [x y] [6 6])
+        eater-pos   (coords/add [x y] [-6 3])
+        eater       (patterns/offset (patterns/flip-x patterns/eater) eater-pos)
+        generator   (fn [[left-args right-args]]
+                      (let [lf (l :alu/generator)
+                            rf (r :alu/generator)
+                            nf (n :alu/generator)]
+                        (set/union (lf left-args) (rf right-args) (nf 1) eater)))]
+    (-> (layout/merge-expressions> l r n)
+        (assoc-in [:alu/dimensions :alu/height] height)
+        (assoc-in [:alu/output :alu/direction] :bottom-right)
+        (assoc-in [:alu/output :alu/position] output-pos)
+        (assoc :alu/steps steps)
+        (assoc :alu/generator generator))))
+
 (defn and-bit
   "Combine left and right expressions to form an 'and' statement."
   [left right]
