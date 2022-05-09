@@ -74,13 +74,6 @@
         (assoc-in [:alu/output :alu/position] (coords/add position offset))
         (assoc :alu/generator generator))))
 
-(defn shift
-  "Shifts an expression with the given offset."
-  [expression offset]
-  (let [e (shift> (assoc expression :alu/generator identity) offset)
-        f (e :alu/generator)]
-    (assoc e :alu/pattern (f (e :alu/pattern)))))
-
 (defn align-with-origin>
   "Generator for aligning the given expression so its origin is [0 0]."
   [expression]
@@ -193,31 +186,5 @@
         x-offsets (map #(apply - %) (map vector new-origins old-origins))]
     (map (fn [[e x]] (shift> e [x 0])) (map vector expressions x-offsets))))
 
-(defn spread-x
-  "Spreads expressions on the X axis so they are adjacent and do not overlap."
-  [expressions]
-  (let [x0 (get-in (first expressions) [:alu/dimensions :alu/origin 0])
-        old-origins (map #(get-in % [:alu/dimensions :alu/origin 0]) expressions)
-        new-origins (->> (map #(get-in % [:alu/dimensions :alu/width]) expressions)
-                         (reductions +)
-                         drop-last
-                         (cons 0)
-                         (map (partial + x0)))
-        x-offsets (map #(apply - %) (map vector new-origins old-origins))]
-    (map (fn [[e x]] (shift e [x 0])) (map vector expressions x-offsets))))
-
 (comment
-  (within-bounds? #{[1 1] [1 2] [2 3] [3 4] [4 4]} [1 2] [1 2] 5 5)
-  (let [init {:alu/dimensions {:alu/origin [0 0]
-                               :alu/width 5
-                               :alu/height 5}
-              :alu/output {:alu/position [3 3]
-                           :alu/direction :bottom-right}
-              :alu/steps 0
-              :alu/pattern (patterns/offset patterns/glider [1 1])}
-        shifted (shift init [2 1])]
-    (println init)
-    (println (shift init [2 1]))
-    (println (x-offset-at-origin shifted init))
-    (println (x-offset-at-output init shifted))
-    (println (y-offset-at-output init shifted))))
+  (within-bounds? #{[1 1] [1 2] [2 3] [3 4] [4 4]} [1 2] [1 2] 5 5))
