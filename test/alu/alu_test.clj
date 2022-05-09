@@ -118,28 +118,28 @@
          0 [[1 1] [0 0]], 0 [[1 1] [0 1]], 0 [[1 1] [1 0]], 1 [[1 1] [1 1]])))
 
 (defn or-bit-test-helper [f-left f-right]
-  (are [result l r] (= result (alu/read-bit (alu/or-bit (f-left l) (f-right r))))
-       0 0 0
-       1 1 0
-       1 0 1
-       1 1 1))
+  (are [result args] (= result (alu/read> (alu/or> f-left f-right) args))
+       0 [0 0]
+       1 [0 1]
+       1 [1 0]
+       1 [1 1]))
 
 (deftest or-bit
   (testing "Or with single bits"
-    (or-bit-test-helper alu/bit alu/bit))
+    (or-bit-test-helper alu/bit> alu/bit>))
   (testing "Or with wired bits"
-    (or-bit-test-helper #(layout/wire (alu/bit %) 4) alu/bit)
-    (or-bit-test-helper alu/bit #(layout/wire (alu/bit %) 4)))
+    (or-bit-test-helper (layout/wire> alu/bit> 4) alu/bit>)
+    (or-bit-test-helper alu/bit> (layout/wire> alu/bit> 4)))
   (testing "Or with flipped bits"
-    (or-bit-test-helper #(layout/flip-x (alu/bit %)) #(layout/flip-x (alu/bit %)))
-    (or-bit-test-helper #(alu/bit %) #(layout/flip-x (alu/bit %)))
-    (or-bit-test-helper #(layout/flip-x (alu/bit %)) #(alu/bit %)))
+    (or-bit-test-helper (layout/flip-x> alu/bit>) (layout/flip-x> alu/bit>))
+    (or-bit-test-helper alu/bit> (layout/flip-x> alu/bit>))
+    (or-bit-test-helper (layout/flip-x> alu/bit>) alu/bit>))
   (testing "Nested ors"
-    (are [result a b c d] (= result (alu/read-bit (alu/or-bit (alu/or-bit (alu/bit a) (alu/bit b)) (alu/or-bit (alu/bit c) (alu/bit d)))))
-         0 0 0 0 0, 1 0 0 0 1, 1 0 0 1 0, 1 0 0 1 1,
-         1 0 1 0 0, 1 0 1 0 1, 1 0 1 1 0, 1 0 1 1 1,
-         1 1 0 0 0, 1 1 0 0 1, 1 1 0 1 0, 1 1 0 1 1,
-         1 1 1 0 0, 1 1 1 0 1, 1 1 1 1 0, 1 1 1 1 1)))
+    (are [result args] (= result (alu/read> (alu/or> (alu/or> alu/bit> alu/bit>) (alu/or> alu/bit> alu/bit>)) args))
+         0 [[0 0] [0 0]], 1 [[0 0] [0 1]], 1 [[0 0] [1 0]], 1 [[0 0] [1 1]],
+         1 [[0 1] [0 0]], 1 [[0 1] [0 1]], 1 [[0 1] [1 0]], 1 [[0 1] [1 1]],
+         1 [[1 0] [0 0]], 1 [[1 0] [0 1]], 1 [[1 0] [1 0]], 1 [[1 0] [1 1]],
+         1 [[1 1] [0 0]], 1 [[1 1] [0 1]], 1 [[1 1] [1 0]], 1 [[1 1] [1 1]])))
 
 (deftest write-and-read-byte
   (testing "A byte can be write then read again"

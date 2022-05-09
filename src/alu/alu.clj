@@ -175,13 +175,13 @@
           (assoc :alu/steps steps)
           (update :alu/pattern set/union eater))))
 
-(defn or-bit
+(defn or>
   "Combine left and right expressions to form an 'or' statement."
   [left right]
   {:pre [(s/valid? :alu/expression left) (layout/within-bounds? left)
          (s/valid? :alu/expression right) (layout/within-bounds? right)]
    :post [(s/valid? :alu/expression %) (layout/within-bounds? %)]}
-  (not-bit (and-bit (not-bit left) (not-bit right))))
+  (not> (and> (not> left) (not> right))))
 
 (defn- to-base-2 [n]
   (loop [n n
