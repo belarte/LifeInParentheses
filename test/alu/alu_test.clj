@@ -151,3 +151,18 @@
   (testing "Inputs are validated"
     (is (thrown? AssertionError (alu/read-byte> alu/byte> -1)))
     (is (thrown? AssertionError (alu/read-byte> alu/byte> 256)))))
+
+(deftest not-byte
+  (testing "Byte negation"
+    (let [op (alu/not> alu/byte>)]
+      (is (= 255        (alu/read-byte> op 0)))
+      (is (= 0          (alu/read-byte> op 255)))
+      (is (= 2r10101010 (alu/read-byte> op 2r01010101)))
+      (is (= 2r00001111 (alu/read-byte> op 2r11110000)))))
+  (testing "Double negation"
+    (let [op (alu/not> (alu/not> alu/byte>))]
+      (is (= 0          (alu/read-byte> op 0)))
+      (is (= 1          (alu/read-byte> op 1)))
+      (is (= 42         (alu/read-byte> op 42)))
+      (is (= 86         (alu/read-byte> op 86)))
+      (is (= 255        (alu/read-byte> op 255))))))
