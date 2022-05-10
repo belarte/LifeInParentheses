@@ -143,11 +143,11 @@
 
 (deftest write-and-read-byte
   (testing "A byte can be write then read again"
-    (is (= 0   (alu/read-byte> alu/write-byte> 0)))
-    (is (= 1   (alu/read-byte> alu/write-byte> 1)))
-    (is (= 42  (alu/read-byte> alu/write-byte> 42)))
-    (is (= 86  (alu/read-byte> alu/write-byte> 86)))
-    (is (= 255 (alu/read-byte> alu/write-byte> 255))))
+    (is (= 0   (alu/read-byte> alu/byte> 0)))
+    (is (= 1   (alu/read-byte> alu/byte> 1)))
+    (is (= 42  (alu/read-byte> alu/byte> 42)))
+    (is (= 86  (alu/read-byte> alu/byte> 86)))
+    (is (= 255 (alu/read-byte> alu/byte> 255))))
   (testing "Inputs are validated"
-    (is (thrown? AssertionError (alu/read-byte> alu/write-byte> -1)))
-    (is (thrown? AssertionError (alu/read-byte> alu/write-byte> 256)))))
+    (is (thrown? AssertionError (alu/read-byte> alu/byte> -1)))
+    (is (thrown? AssertionError (alu/read-byte> alu/byte> 256)))))

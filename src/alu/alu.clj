@@ -133,19 +133,20 @@
        (map #(apply * %))
        (reduce +)))
 
-(def write-byte>
+(def byte>
   "Represents byte as a sequence of expressions. Little-endian representation."
-  (->> (repeat bit>)
-       (take 8)
-       (apply layout/spread-x>)))
+  bit>)
 
 (defn read-byte>
   "Reads a bit as the output of a  sequence of expressions."
-  [expressions arg]
-  {:pre [(= 8 (count expressions)) (int? arg) (< arg 256) (>= arg 0)]}
-  (->> (map vector expressions (to-base-2 arg))
-       (map #(apply read> %))
-       from-base-2))
+  [expression arg]
+  {:pre [(int? arg) (< arg 256) (>= arg 0)]}
+  (let [expressions (->> (repeat expression)
+                         (take 8)
+                         (apply layout/spread-x>))]
+    (->> (map vector expressions (to-base-2 arg))
+         (map #(apply read> %))
+         from-base-2)))
 
 (comment
   (=> (layout/shift> (layout/flip-x> bit>) [1 2]) 1)
