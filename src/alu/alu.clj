@@ -133,22 +133,38 @@
        (map #(apply * %))
        (reduce +)))
 
+(defmulti convert class)
+
+(defmethod convert java.lang.Number [arg]
+  (to-base-2 arg))
+
+(defmethod convert clojure.lang.PersistentVector [args]
+  (->> (map convert args)
+       (apply map vector)))
+
+(s/def :byte/value (s/and int? #(>= % 0) #(< % 256)))
+
+(s/def :byte/argument (s/or :unary-argument   :byte/value
+                            :binary-arguments (s/coll-of :byte/argument :kind vector? :count 2)))
+
 (def byte>
   "Represents byte as a sequence of expressions. Little-endian representation."
   bit>)
 
 (defn read-byte>
   "Reads a bit as the output of a  sequence of expressions."
-  [expression arg]
-  {:pre [(int? arg) (< arg 256) (>= arg 0)]}
+  [expression args]
+  {:pre [(s/valid? :byte/argument args)]}
   (let [expressions (->> (repeat expression)
                          (take 8)
                          (apply layout/spread-x>))]
-    (->> (map vector expressions (to-base-2 arg))
+    (->> (map vector expressions (convert args))
          (map #(apply read> %))
          from-base-2)))
 
 (comment
+  (s/explain :byte/argument [[0 [255 8]] [4 5]])
+  (convert [5 [7 63]])
   (=> (layout/shift> (layout/flip-x> bit>) [1 2]) 1)
   (=> (layout/merge-expressions> (layout/flip-x> bit>) (layout/shift> bit> [3 3]) bit>) [1 1 1])
   (read-byte> byte> 42)
