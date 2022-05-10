@@ -151,7 +151,7 @@
 (comment
   (=> (layout/shift> (layout/flip-x> bit>) [1 2]) 1)
   (=> (layout/merge-expressions> (layout/flip-x> bit>) (layout/shift> bit> [3 3]) bit>) [1 1 1])
-  (read-byte> write-byte> 42)
+  (read-byte> byte> 42)
   (print-e (=> (not> (layout/wire> bit> 3)) 1))
   (print-e (=> (layout/align-with-origin> (and> bit> bit>)) [1 1]))
   (let [exp   (=> (layout/align-with-origin> (and> bit> (and> bit> bit>))) [1 [1 1]])
