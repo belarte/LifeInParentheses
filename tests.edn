@@ -1,4 +1,6 @@
 #kaocha/v1
  {:color?     true
-  :reporter   [kaocha.report/dots]
-  :fail-fast? false}
+  :reporter   #profile {:ci      kaocha.report/documentation
+                        :default kaocha.report/dots}
+  :fail-fast? #profile {:ci      false
+                        :default true}}
