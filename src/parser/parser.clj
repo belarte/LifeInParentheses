@@ -8,31 +8,31 @@
      unary = '~' terminal | terminal
      terminal = #'\\d+' | '(' expr ')'"))
 
-(def dic {"~" :not, "|" :or, "&" :and})
-
 (declare read-expr)
 
-(defn- read-terminal [[header & expression]]
+(defn- read-terminal [dictionary [header & expression]]
   {:pre [(= :terminal header)]}
   (case (count expression)
     1 [:byte (Integer/parseInt (first expression))]
-    3 (read-expr (nth expression 1))))
+    3 (read-expr dictionary (nth expression 1))))
 
-(defn- read-unary [[header & expression]]
+(defn- read-unary [dictionary [header & expression]]
   {:pre [(= :unary header)]}
   (case (count expression)
-    1 (read-terminal (first expression))
-    2 [(dic (nth expression 0)) (read-terminal (nth expression 1))]))
+    1 (read-terminal dictionary (first expression))
+    2 [(dictionary (nth expression 0)) (read-terminal dictionary (nth expression 1))]))
 
-(defn- read-binary [[header & expression]]
+(defn- read-binary [dictionary [header & expression]]
   {:pre [(= :binary header)]}
   (case (count expression)
-    1 (read-unary (first expression))
-    3 [(dic (nth expression 1)) (read-binary (nth expression 0)) (read-unary (nth expression 2))]))
+    1 (read-unary dictionary (first expression))
+    3 [(dictionary (nth expression 1))
+       (read-binary dictionary (nth expression 0))
+       (read-unary dictionary (nth expression 2))]))
 
-(defn read-expr [[header & expression]]
+(defn read-expr [dictionary [header & expression]]
   {:pre [(= :expr header)]}
-  (read-binary (first expression)))
+  (read-binary dictionary (first expression)))
 
 (comment
   (parser "234"))
