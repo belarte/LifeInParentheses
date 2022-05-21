@@ -22,3 +22,8 @@
            (parser "123|456&789")))
     (is (= [:and [:or [:byte 12] [:byte 34]] [:not [:byte 127]]]
            (parser "(12|34)&~127")))))
+
+(deftest parser-generates-an-evaluable-sequence
+  (testing "Parser generates evaluable sequence"
+    (let [bitwise-parser (p/parser> p/grammar {"value" identity, "&" bit-and})]
+      (is (= 130 (eval (bitwise-parser "195&170")))))))

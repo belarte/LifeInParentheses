@@ -19,15 +19,15 @@
   {:pre [(= :unary header)]}
   (case (count expression)
     1 (read-terminal dictionary (first expression))
-    2 [(dictionary (nth expression 0)) (read-terminal dictionary (nth expression 1))]))
+    2 (seq [(dictionary (nth expression 0)) (read-terminal dictionary (nth expression 1))])))
 
 (defn- read-binary [dictionary [header & expression]]
   {:pre [(= :binary header)]}
   (case (count expression)
     1 (read-unary dictionary (first expression))
-    3 [(dictionary (nth expression 1))
-       (read-binary dictionary (nth expression 0))
-       (read-unary dictionary (nth expression 2))]))
+    3 (seq [(dictionary (nth expression 1))
+            (read-binary dictionary (nth expression 0))
+            (read-unary dictionary (nth expression 2))])))
 
 (defn read-expr [dictionary [header & expression]]
   {:pre [(= :expr header)]}
