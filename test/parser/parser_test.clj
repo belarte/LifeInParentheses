@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest testing is]]
             [parser.parser :as p]))
 
-(def dictionary {"~" :not, "|" :or, "&" :and})
+(def dictionary {"value" :byte, "~" :not, "|" :or, "&" :and})
 
 (def parser (p/parser> p/grammar dictionary))
 

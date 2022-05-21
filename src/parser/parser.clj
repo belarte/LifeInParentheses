@@ -12,7 +12,7 @@
 (defn- read-terminal [dictionary [header & expression]]
   {:pre [(= :terminal header)]}
   (case (count expression)
-    1 [:byte (Integer/parseInt (first expression))]
+    1 (seq [(dictionary "value") (Integer/parseInt (first expression))])
     3 (read-expr dictionary (nth expression 1))))
 
 (defn- read-unary [dictionary [header & expression]]
