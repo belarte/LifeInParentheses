@@ -29,7 +29,7 @@
             (read-binary dictionary (nth expression 0))
             (read-unary dictionary (nth expression 2))])))
 
-(defn read-expr [dictionary [header & expression]]
+(defn- read-expr [dictionary [header & expression]]
   {:pre [(= :expr header)]}
   (read-binary dictionary (first expression)))
 
