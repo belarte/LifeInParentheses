@@ -7,7 +7,8 @@
         metosin/reitit-malli        {:mvn/version "0.5.15"}
         metosin/reitit-sieppari     {:mvn/version "0.5.15"}
         metosin/muuntaja            {:mvn/version "0.6.8"}
-        ring/ring-jetty-adapter     {:mvn/version "1.9.4"}}
+        ring/ring-jetty-adapter     {:mvn/version "1.9.4"}
+        instaparse/instaparse       {:mvn/version "1.4.12"}}
  :aliases {:run   {:exec-fn app.main/-main}
            :build {:deps       {io.github.clojure/tools.build {:git/tag "v0.7.2" :git/sha "0361dde"}}
                    :ns-default build}

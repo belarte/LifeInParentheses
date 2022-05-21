@@ -1,19 +1,38 @@
 (ns parser.parser
-  (:require [clojure.string :as str]))
+  (:require [instaparse.core :as p]))
 
-(defn symbols-replacer [symbols dictionary]
-  (fn [s] (str/replace s symbols dictionary)))
+(def parser
+  (p/parser
+    "expr = binary
+     binary = binary #'\\&|\\|' unary | unary
+     unary = '~' terminal | terminal
+     terminal = #'\\d+' | '(' expr ')'"))
 
-(def standard-replacer
-  (symbols-replacer
-    #"and|or"
-    {"and" "bit-and", "or" "bit-or"}))
+(def dic {"~" :not, "|" :or, "&" :and})
 
-(defn evaluate [s]
-  (eval (read-string s)))
+(declare read-expr)
+
+(defn- read-terminal [[header & expression]]
+  {:pre [(= :terminal header)]}
+  (case (count expression)
+    1 [:byte (Integer/parseInt (first expression))]
+    3 (read-expr (nth expression 1))))
+
+(defn- read-unary [[header & expression]]
+  {:pre [(= :unary header)]}
+  (case (count expression)
+    1 (read-terminal (first expression))
+    2 [(dic (nth expression 0)) (read-terminal (nth expression 1))]))
+
+(defn- read-binary [[header & expression]]
+  {:pre [(= :binary header)]}
+  (case (count expression)
+    1 (read-unary (first expression))
+    3 [(dic (nth expression 1)) (read-binary (nth expression 0)) (read-unary (nth expression 2))]))
+
+(defn read-expr [[header & expression]]
+  {:pre [(= :expr header)]}
+  (read-binary (first expression)))
 
 (comment
-  (let [s "(and 3 (or 4 2))"]
-    (-> s
-        standard-replacer
-        evaluate)))
+  (parser "234"))
