@@ -1,12 +1,11 @@
 (ns parser.parser
   (:require [instaparse.core :as p]))
 
-(def parser
-  (p/parser
+(def grammar
     "expr = binary
      binary = binary #'\\&|\\|' unary | unary
      unary = '~' terminal | terminal
-     terminal = #'\\d+' | '(' expr ')'"))
+     terminal = #'\\d+' | '(' expr ')'")
 
 (declare read-expr)
 
@@ -34,5 +33,6 @@
   {:pre [(= :expr header)]}
   (read-binary dictionary (first expression)))
 
-(comment
-  (parser "234"))
+(defn parser> [grammar dictionary]
+  (fn [expression]
+    (read-expr dictionary ((p/parser grammar) expression))))
