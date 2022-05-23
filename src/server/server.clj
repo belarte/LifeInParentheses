@@ -9,7 +9,9 @@
             [reitit.http.interceptors.muuntaja :as muuntaja]
             [reitit.interceptor.sieppari :as sieppari]
             [muuntaja.core :as m]
-            [ring.adapter.jetty :as jetty]))
+            [ring.adapter.jetty :as jetty]
+            [parser.parser :as p]
+            [alu.alu :as alu]))
 
 (defn respond
   ([data]
@@ -24,7 +26,11 @@
 
 (defn calculate
   [{{{:keys [expression]} :query} :parameters}]
-  (respond (str "calculate " expression)))
+  (let [dictionary    {"value" alu/byte>, "~" alu/not>, "&" alu/and>, "|" alu/or>}
+        parser        (p/parser> p/grammar dictionary)
+        [expr values] (parser expression)
+        output        (alu/read-byte> (eval expr) values)]
+    (respond (str expression "=" output))))
 
 (def routes
   [["/health"    {:get {:handler health-check}}]
