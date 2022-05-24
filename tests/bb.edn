@@ -1,0 +1,7 @@
+{:min-bb-version "0.8.2"
+ :paths          ["src"]
+ :tasks          {clean {:doc      "Removes target folder"
+                         :requires ([babashka.fs :as fs])
+                         :task     (fs/delete-tree "target")}
+                  run-tests {:doc "Run integrations tests"
+                             :task tests/-main}}}
