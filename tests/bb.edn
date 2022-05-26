@@ -4,4 +4,4 @@
                          :requires ([babashka.fs :as fs])
                          :task     (fs/delete-tree "target")}
                   run-tests {:doc "Run integrations tests"
-                             :task tests/-main}}}
+                             :task main/-main}}}

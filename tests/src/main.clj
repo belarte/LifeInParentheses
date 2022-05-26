@@ -1,6 +1,6 @@
 #!/usr/bin/env bb
 
-(ns tests
+(ns main
   (:require [clojure.string :as string]
             [clojure.tools.cli :refer [parse-opts]]))
 
