@@ -2,7 +2,8 @@
 
 (ns main
   (:require [clojure.string :as string]
-            [clojure.tools.cli :refer [parse-opts]]))
+            [clojure.tools.cli :refer [parse-opts]]
+            [babashka.fs :as fs]))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
@@ -26,6 +27,11 @@
   (str "The following errors occurred while parsing your command:\n\n"
        (string/join \newline errors)))
 
+(defn- validate [arguments]
+  (and
+    (= 1 (count arguments))
+    (fs/exists? (first arguments))))
+
 (defn- validate-args
   "Validate command line arguments. Either return a map indicating the program
   should exit (with an error message, and optional ok status), or a map
@@ -33,10 +39,10 @@
   [args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     (cond
-      (:help options)         {:exit-message (usage summary) :ok? true}
-      errors                  {:exit-message (error-msg errors)}
-      (= 1 (count arguments)) {:file (first arguments) :options options}
-      :else                   {:exit-message (usage summary)})))
+      (:help options)      {:exit-message (usage summary) :ok? true}
+      errors               {:exit-message (error-msg errors)}
+      (validate arguments) {:file (first arguments) :options options}
+      :else                {:exit-message (error-msg [(str "File `" (first arguments) "` does not exist...")])})))
 
 (defn- exit [status msg]
   (println msg)
