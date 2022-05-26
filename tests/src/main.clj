@@ -3,7 +3,8 @@
 (ns main
   (:require [clojure.string :as string]
             [clojure.tools.cli :refer [parse-opts]]
-            [babashka.fs :as fs]))
+            [babashka.fs :as fs]
+            [tests :as t]))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
@@ -52,4 +53,4 @@
   (let [{:keys [file options exit-message ok?]} (validate-args args)]
     (if exit-message
       (exit (if ok? 0 1) exit-message)
-      (exit 0 (str "Processing file " file " with options " options)))))
+      (apply exit (t/run file options)))))
