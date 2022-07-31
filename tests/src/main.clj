@@ -13,6 +13,8 @@
     :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
    [nil "--host HOST" "Host"
     :default "localhost"]
+   [nil "--no-startup" "Do not start the calculator app"
+    :default false]
    ["-h" "--help" "Print this help"]])
 
 (defn- usage [options-summary]
