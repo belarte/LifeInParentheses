@@ -14,11 +14,12 @@
 (defn run [file options]
   (println (str "Processing file " file " with options " options))
   (let [port (:port options)
-        addr (str "localhost:" port "/health")]
+        host (:host options)
+        addr (str host ":" port "/health")]
     (when-not (:no-startup options)
       (start-calculator file port))
     (let [health (curl/get addr {:throw false})
           status (:status health)]
       (if (= 200 status)
         [0 "Success!"]
-        [1 (str "Cannot check health, status=" status)]))))
+        [1 (str "Cannot check health, error=" (:err health))]))))
