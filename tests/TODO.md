@@ -1,3 +1,3 @@
-- [ ] Add `--no-start` option
-- [ ] Read options when starting app
+- [x] Add `--no-start` option
+- [x] Read options when starting app
 - [ ] Create test runner and test functions
