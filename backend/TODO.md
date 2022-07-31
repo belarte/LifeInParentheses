@@ -1,6 +1,5 @@
-- [ ] Paremetrize server
-    - [ ] Add `port` as parameter to (server/start)
-    - [ ] Read `port` from command line
+- [x] Paremetrize server
+- [ ] Improve command line parsing
 - [ ] Paremetrize endpoint
     - [ ] Add parameter to ask for steps
     - [ ] Endpoint to return steps
