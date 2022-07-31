@@ -60,9 +60,9 @@
 ;; http server state
 (defonce http-server (atom nil))
 
-(defn start []
-  (log/info "Starting server")
-  (reset! http-server (jetty/run-jetty #'server {:port 3000 :join? false :async? true})))
+(defn start [port]
+  (log/info (str "Starting server on port " port))
+  (reset! http-server (jetty/run-jetty #'server {:port port :join? false :async? true})))
 
 (defn stop []
   (when-not (nil? @http-server)
@@ -70,5 +70,5 @@
     (.stop @http-server)))
 
 (comment
-  (start)
+  (start 3000)
   (stop))
