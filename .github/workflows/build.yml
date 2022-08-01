@@ -44,5 +44,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: calculator.jar
-          path: target/calculator.jar
+          path: backend/target/calculator.jar
           if-no-files-found: error
