@@ -11,19 +11,22 @@
     (Thread/sleep 3000)
     proc))
 
-(defn- call-endpoint [host port]
-  (let [addr   (str host ":" port "/health")
-        health (curl/get addr {:throw false})
-        status (:status health)]
-    (if (= 200 status)
-      [0 "Success!"]
-      [1 (str "Cannot check health, error=" (:err health))])))
+(defn- create-endpoint [host port]
+  (fn [enpoint]
+    (let [url    (str host ":" port enpoint)
+          health (curl/get url {:throw false})
+          status (:status health)]
+      (println (str "Calling " url))
+      (if (= 200 status)
+        [0 "Success!"]
+        [1 (str "Cannot check health, error=" (:err health))]))))
 
 (defn run [file options]
   (println (str "Processing file " file " with options " options))
   (let [port  (:port options)
         host  (:host options)
-        start (not (:no-startup options))]
+        start (not (:no-startup options))
+        call-endpoint (create-endpoint host port)]
     (when start
       (start-calculator file port))
-    (call-endpoint host port)))
+    (call-endpoint "/health")))
