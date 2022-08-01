@@ -13,6 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - uses: actions/cache@v3
+        with:
+          path: backend/target/calculator.jar
+          key: calculator.jar
+
       - name: Prepare java
         uses: actions/setup-java@v2
         with:
@@ -39,10 +44,3 @@ jobs:
       - name: Build app
         run: clojure -T:build uber
         shell: bash
-
-      - name: Publish artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: calculator.jar
-          path: backend/target/calculator.jar
-          if-no-files-found: error

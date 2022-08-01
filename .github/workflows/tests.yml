@@ -11,9 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/cache@v3
         with:
-          name: calculator.jar
+          path: calculator.jar
+          key: calculator.jar
 
       - name: Test
         run: |
