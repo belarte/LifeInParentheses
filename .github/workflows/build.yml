@@ -39,3 +39,10 @@ jobs:
       - name: Build app
         run: clojure -T:build uber
         shell: bash
+
+      - name: Publish artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: calculator.jar
+          path: target/calculator.jar
+          if-no-files-found: error
