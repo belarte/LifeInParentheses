@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - uses: actions/cache@v3
         with:
@@ -27,13 +27,6 @@ jobs:
         with:
           bb: 0.8.2
 
-      - name: Test
-        run: |
-          echo "Local path"
-          pwd
-          echo "list files"
-          ls -al
-          echo "list files in workspace"
-          ls -al ${{ github.workspace }}
-          echo "Is Babashka working?"
+      - name: Run tests
+        run:
           bb run-tests ../backend/target/calculator.jar
