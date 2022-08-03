@@ -1,6 +1,7 @@
 (ns tests
   (:require [babashka.process :refer [process destroy-tree]]
             [babashka.curl :as curl]
+            [babashka.wait :refer [wait-for-port]]
             [clojure.string :as s]))
 
 (defn- start-calculator [file port]
@@ -8,7 +9,7 @@
         proc (process cmd {:out :inherit
                            :shutdown destroy-tree})]
     (println (str "Starting calculator: `" (s/join " " cmd) "'"))
-    (Thread/sleep 9000)
+    (wait-for-port "localhost" port {:timeout 30000 :pause 500})
     proc))
 
 (defn- create-endpoint [host port]
