@@ -20,7 +20,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: backend/target/calculator.jar
-          key: calculator.jar
+          key: calculator-${{github.sha}}.jar
 
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@9.3

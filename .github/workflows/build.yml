@@ -16,7 +16,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: backend/target/calculator.jar
-          key: calculator.jar
+          key: calculator-${{ github.sha }}.jar
 
       - name: Prepare java
         uses: actions/setup-java@v2
