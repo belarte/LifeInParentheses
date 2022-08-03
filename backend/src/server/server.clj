@@ -30,7 +30,7 @@
         parser        (p/parser> p/grammar dictionary)
         [expr values] (parser expression)
         output        (alu/read-byte> (eval expr) values)]
-    (respond (str expression "=" output))))
+    (respond {:result output})))
 
 (def routes
   [["/health"    {:get {:handler health-check}}]
