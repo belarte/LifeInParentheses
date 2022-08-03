@@ -15,10 +15,10 @@
 
 (defn- create-endpoint [host port]
   (fn create
-    ([enpoint]
-     (create enpoint {}))
-    ([enpoint params]
-     (let [url    (str host ":" port enpoint)
+    ([endpoint]
+     (create endpoint {}))
+    ([endpoint params]
+     (let [url    (str host ":" port endpoint)
            health (curl/get url {:query-params params :throw false})
            status (:status health)]
        (println (str "Calling " url) (if (empty? params) "" params))
