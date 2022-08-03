@@ -1,3 +1,2 @@
-- [x] Add `--no-start` option
-- [x] Read options when starting app
-- [ ] Create test runner and test functions
+- [x] Create test runner and test functions
+- [ ] Handle malformed expression
