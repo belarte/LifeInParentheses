@@ -6,6 +6,10 @@
     :endpoint "/health"
     :test-fn  #(= 200 (:status %))}
 
+   {:name     "Unknown endpoint returns 404"
+    :endpoint "/does-not-exit"
+    :test-fn  #(= 404 (:status %))}
+
    {:name     "Calculate is responsive"
     :endpoint "/calculate"
     :params   {"expression" "0"}
