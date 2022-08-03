@@ -1,22 +1,27 @@
 (ns tests
-  (:require [framework :refer [humanized pretty-error create-endpoint start-calculator]]))
+  (:require [framework :refer [to-json pretty-error create-endpoint start-calculator]]))
 
 (def test-cases
   [{:name     "Health check"
     :endpoint "/health"
     :test-fn  #(= 200 (:status %))}
 
-   {:name     "Calculate endpoint is responsive"
+   {:name     "Calculate is responsive"
     :endpoint "/calculate"
     :params   {"expression" "0"}
     :test-fn  #(= 200 (:status %))}
 
-   {:name     "Calculate endpoint requires an expression"
+   {:name     "Calculate returns the correct answer"
+    :endpoint "/calculate"
+    :params   {"expression" "(63|64)&191"}
+    :test-fn  #(= 63 (-> (to-json %) :message :result))}
+
+   {:name     "Calculate requires an expression"
     :endpoint "/calculate"
     :test-fn  #(and
                  (= 400 (:status %))
                  (= ["missing required key"]
-                    ((humanized %) :expression)))}])
+                    (-> (to-json %) :humanized :expression)))}])
 
 (defn- run-tests [call-endpoint]
   (let [res  (->> test-cases

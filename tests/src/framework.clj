@@ -5,14 +5,14 @@
             [clojure.string :as s]
             [cheshire.core :as json]))
 
-(defn humanized [error]
-  (-> error :body (json/parse-string true) :humanized))
+(defn to-json [error]
+  (-> error :body (json/parse-string true)))
 
 (defn pretty-error [{:keys [name endpoint params result]}]
   {:name     name
    :endpoint endpoint
    :params   params
-   :error    (humanized result)})
+   :error    (to-json result)})
 
 (defn start-calculator [file port]
   (let [cmd  ["java" "-jar" file "--port" port]
@@ -34,7 +34,6 @@
                     :params {"expression" "3&7"}
                     :test-fn #(= 200 (:status %))}))
   (->
-    (curl/get "localhost:3000/calculate" {:query-params {} :throw false})
+    (curl/get "localhost:3000/calculate" {:query-params {"expression" "(64|63)&191"} :throw false})
     :body
-    (json/parse-string true)
-    :humanized))
+    (json/parse-string true)))
