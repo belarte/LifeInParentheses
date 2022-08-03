@@ -4,12 +4,12 @@
             [babashka.wait :refer [wait-for-port]]
             [clojure.string :as s]))
 
-(defn- start-calculator [file port]
+(defn- start-calculator [file port wait]
   (let [cmd  ["java" "-jar" file "--port" port]
         proc (process cmd {:out :inherit
                            :shutdown destroy-tree})]
     (println (str "Starting calculator: `" (s/join " " cmd) "'"))
-    (wait-for-port "localhost" port {:timeout 30000 :pause 500})
+    (wait)
     proc))
 
 (defn- create-endpoint [host port]
@@ -27,7 +27,7 @@
   (let [port  (:port options)
         host  (:host options)
         start (not (:no-startup options))
+        wait  #(wait-for-port host port {:timeout 30000 :pause 500})
         call-endpoint (create-endpoint host port)]
-    (when start
-      (start-calculator file port))
+    (when start (start-calculator file port wait))
     (call-endpoint "/health")))
