@@ -8,7 +8,7 @@
         proc (process cmd {:out :inherit
                            :shutdown destroy-tree})]
     (println (str "Starting calculator: `" (s/join " " cmd) "'"))
-    (Thread/sleep 5000)
+    (Thread/sleep 9000)
     proc))
 
 (defn- create-endpoint [host port]
