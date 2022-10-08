@@ -20,7 +20,9 @@
 (defn- usage [options-summary]
   (->> ["Integration tests for LifeInParentheses."
         ""
-        "Usage: bb run-tests [options] calculator.jar"
+        "Usage: bb run-tests [options] [path/to/calculator.jar]"
+        ""
+        "If --no-startup is specified, the command needs to be called without a file name."
         ""
         "Options:"
         options-summary]
@@ -30,10 +32,15 @@
   (str "The following errors occurred while parsing your command:\n\n"
        (string/join \newline errors)))
 
-(defn- validate [arguments]
-  (and
-    (= 1 (count arguments))
-    (fs/exists? (first arguments))))
+(defn- validate [arguments options]
+  (or
+    (and
+      (= 1 (count arguments))
+      (fs/exists? (first arguments))
+      (not (:no-startup options)))
+    (and
+      (= 0 (count arguments))
+      (:no-startup options))))
 
 (defn- validate-args
   "Validate command line arguments. Either return a map indicating the program
@@ -44,8 +51,8 @@
     (cond
       (:help options)      {:exit-message (usage summary) :ok? true}
       errors               {:exit-message (error-msg errors)}
-      (validate arguments) {:file (first arguments) :options options}
-      :else                {:exit-message (error-msg [(str "File `" (first arguments) "` does not exist...")])})))
+      (validate arguments options) {:file (first arguments) :options options}
+      :else                {:exit-message (str "Incompatible arguments\nargs:" arguments "\nopts:" options)})))
 
 (defn- exit [status msg]
   (println msg)
