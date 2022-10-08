@@ -1,5 +1,6 @@
 (ns tests
-  (:require [framework :refer [to-json pretty-error create-endpoint start-calculator]]))
+  (:require [framework :refer [to-json pretty-error create-endpoint start-calculator]]
+            [clojure.string :as str]))
 
 (def test-cases
   [{:name     "Health check"
@@ -32,7 +33,7 @@
                   (map #(assoc % :result (call-endpoint %)))
                   (filter #(seq (:result %)))
                   (map pretty-error))]
-    [(count res) (if (empty? res) "Success!" res)]))
+    [(count res) (if (empty? res) "Success!" (str/join "\n" res))]))
 
 (defn run [file options]
   (println (str "Processing file " file " with options " options))
