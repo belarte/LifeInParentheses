@@ -55,4 +55,6 @@
   (let [{:keys [file options exit-message ok?]} (validate-args args)]
     (if exit-message
       (exit (if ok? 0 1) exit-message)
-      (apply exit (t/run file options)))))
+      (do
+        (println (str "Processing file " file " with options " options))
+        (apply exit (t/run file options))))))

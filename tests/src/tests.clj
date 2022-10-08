@@ -36,7 +36,6 @@
     [(count res) (if (empty? res) "Success!" (str/join "\n" res))]))
 
 (defn run [file options]
-  (println (str "Processing file " file " with options " options))
   (let [port  (:port options)
         host  (:host options)
         start (not (:no-startup options))
