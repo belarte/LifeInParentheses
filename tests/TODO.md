@@ -1,2 +1,2 @@
 - [x] Create test runner and test functions
-- [ ] Handle malformed expression
+- [x] Handle malformed expression
