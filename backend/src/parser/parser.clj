@@ -38,4 +38,7 @@
 
 (defn parser> [grammar dictionary]
   (fn [expression]
-    (read-expr dictionary ((p/parser grammar) expression))))
+    (let [parsed ((p/parser grammar) expression)]
+      (if (p/failure? parsed)
+        (throw (Exception. (str "Malformed expression: '" expression "'")))
+        (read-expr dictionary parsed)))))

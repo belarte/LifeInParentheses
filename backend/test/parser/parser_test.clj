@@ -23,6 +23,10 @@
     (is (= [[:and [:or :byte :byte] [:not :byte]] [[12 34] 127]]
            (parser "(12|34)&~127")))))
 
+(deftest throws-with-malformed-expression
+  (testing "Throws with malformed expression"
+    (is (thrown? Exception (parser "(123")))))
+
 (deftest parser-generates-an-evaluable-sequence
   (testing "Parser generates evaluable sequence"
     (let [bitwise-parser (p/parser> p/grammar {"value" 4, "&" +})
