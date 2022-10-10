@@ -26,7 +26,15 @@
     :test-fn  #(and
                  (= 400 (:status %))
                  (= ["missing required key"]
-                    (-> (to-json %) :humanized :expression)))}])
+                    (-> (to-json %) :humanized :expression)))}
+
+   {:name     "Calculate requires a valid expression"
+    :endpoint "/calculate"
+    :params   {"expression" "(63|"}
+    :test-fn  #(and
+                 (= 400 (:status %))
+                 (= "malformed expression: '(63|'"
+                    (-> (to-json %) :message str/lower-case)))}])
 
 (defn- run-tests [call-endpoint]
   (let [res  (->> test-cases
