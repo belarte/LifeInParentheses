@@ -4,7 +4,8 @@
   "src/test"]
 
  :dependencies
- [[cider/cider-nrepl "0.28.4"]]
+ [[cider/cider-nrepl "0.28.4"]
+  [reagent "1.1.1"]]
 
  :dev-http {8080 "public"}
 
