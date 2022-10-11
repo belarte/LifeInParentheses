@@ -7,6 +7,8 @@ Another go at my life calculator
 
 ## Useful commands
 
+### Backend
+
 The backend has been developed with NeoVim and the [Conjure](https://github.com/Olical/conjure) plugin.
 To start an nREPL that Conjure will recognise and automatically connect to, use:
 
@@ -27,6 +29,23 @@ To build the backend as an executable JAR, from the `backend` folder:
 ```shell
 clojure -T:build uber
 ```
+
+### Frontend
+
+The frontend has been developed with NeoVim and the [Conjure](https://github.com/Olical/conjure) plugin.
+It leverages [shadow-cljs](https://github.com/thheller/shadow-cljs) for hot reloading of the code and nREPL connection.
+
+To start the front end in developer mode, run:
+
+```shell
+npx shadow-cljs watch app
+```
+
+For Conjure to hook into the nREPL created by shadow-cljs, run the following in NeoVim:
+
+`:ConjureShadowSelect app`
+
+### End to end tests
 
 End-to-end tests have been written with [Babashka](https://github.com/babashka/babashka).
 To run the tests, from the `tests` folder:
