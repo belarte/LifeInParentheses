@@ -7,8 +7,8 @@
 (defn input-component []
   (let [expr (r/atom "")]
     (fn []
-      [:form {:on-submit (fn [_]
-                           (println @expr)
+      [:form {:on-submit (fn [e]
+                           (.preventDefault e)
                            (reset! expression @expr))}
        [:input {:type "text"
                 :value @expr
