@@ -45,6 +45,20 @@ For Conjure to hook into the nREPL created by shadow-cljs, run the following in 
 
 `:ConjureShadowSelect app`
 
+### nginx
+
+The app uses [nginx](https://www.nginx.com/) as a proxy. To start the server locally, run:
+
+```shell
+nginx -g "daemon off;" -c <path to nginx.conf> -p <path to public folder>
+```
+
+It needs the configuration file for the app (committed to the project)
+and the path to the `public` folder (in the `frontend` folder).
+Also, nginx expects the backend to run on port `5000` and the frontend on port `8080`.
+
+From there, you can access both the frontend and the backend from port `80`.
+
 ### End to end tests
 
 End-to-end tests have been written with [Babashka](https://github.com/babashka/babashka).
