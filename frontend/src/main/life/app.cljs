@@ -27,8 +27,11 @@
    [input-component]
    [output-component]])
 
-(defn ^:export init []
+(defn ^:dev/after-load render []
   (d/render [app] (js/document.getElementById "root")))
+
+(defn ^:export init []
+  (render))
 
 (comment
   (init)
