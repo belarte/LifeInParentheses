@@ -10,8 +10,9 @@
 
 # Frontend
 
-- [ ] Notify when backend is not available
+- [x] Notify when backend is not available
 - [ ] Print result of expression
+- [ ] CSS
 - [ ] Draw simulation
 
 # Tests
