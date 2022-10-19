@@ -13,7 +13,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Cache dependencies
+      - name: Cache Java dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-clojure-${{ hashFiles('**/shadow-cljs.edn') }}
+          restore-keys: |
+            ${{ runner.os }}-clojure
+
+      - name: Cache Node dependencies
         uses: actions/cache@v3
         with:
           path: ~/.npm
