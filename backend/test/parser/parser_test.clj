@@ -21,7 +21,12 @@
     (is (= [[:and [:or :byte :byte] :byte] [[123 456] 789]]
            (parser "123|456&789")))
     (is (= [[:and [:or :byte :byte] [:not :byte]] [[12 34] 127]]
-           (parser "(12|34)&~127")))))
+           (parser "(12|34)&~127"))))
+  (testing "Can handle expressions with whitespaces"
+    (is (= [[:and [:or :byte :byte] :byte] [[123 456] 789]]
+           (parser " 123 | 456 & 789 ")))
+    (is (= [[:and [:or :byte :byte] [:not :byte]] [[12 34] 127]]
+           (parser "   ( 12| \t   34) & ~\n127   ")))))
 
 (deftest throws-with-malformed-expression
   (testing "Throws with malformed expression"

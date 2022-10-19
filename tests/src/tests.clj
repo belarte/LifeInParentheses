@@ -18,7 +18,7 @@
 
    {:name     "Calculate returns the correct answer"
     :endpoint "/calculate"
-    :params   {"expression" "(63|64)&191"}
+    :params   {"expression" "(63 | 64) & 191"}
     :test-fn  #(= 63 (-> (to-json %) :message :result))}
 
    {:name     "Calculate requires an expression"

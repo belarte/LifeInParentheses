@@ -1,5 +1,6 @@
 (ns parser.parser
-  (:require [instaparse.core :as p]))
+  (:require [instaparse.core :as p]
+            [clojure.string :as str]))
 
 (def grammar
     "expr = binary
@@ -38,7 +39,8 @@
 
 (defn parser> [grammar dictionary]
   (fn [expression]
-    (let [parsed ((p/parser grammar) expression)]
+    (let [expr   (str/replace expression #"\s" "")
+          parsed ((p/parser grammar) expr)]
       (if (p/failure? parsed)
         (throw (Exception. (str "Malformed expression: '" expression "'")))
         (read-expr dictionary parsed)))))
