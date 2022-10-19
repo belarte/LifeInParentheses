@@ -1,0 +1,32 @@
+name: Build frontend
+
+on: [push]
+
+jobs:
+  clojure:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Prepare node
+        uses: actions/setup-node@v3
+
+      - name: Run tests
+        run: npm run test
+        shell: bash
+
+      - name: Lint sources
+        run: clj-kondo --lint src
