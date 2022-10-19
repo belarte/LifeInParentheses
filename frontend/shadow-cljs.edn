@@ -14,4 +14,7 @@
  {:app
   {:target :browser
    :output-dir "public/js"
-   :modules {:main {:init-fn life.app/init}}}}}
+   :modules {:main {:init-fn life.app/init}}}
+  :test {:target    :karma
+         :output-to "target/test.js"
+         :ns-regexp "-test$"}}}
