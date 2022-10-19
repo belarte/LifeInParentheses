@@ -5,7 +5,8 @@
 
  :dependencies
  [[cider/cider-nrepl "0.28.4"]
-  [reagent "1.1.1"]]
+  [reagent "1.1.1"]
+  [cljs-http "0.1.46"]]
 
  :dev-http {8080 "public"}
 
