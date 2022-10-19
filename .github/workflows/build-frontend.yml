@@ -24,9 +24,11 @@ jobs:
       - name: Prepare node
         uses: actions/setup-node@v3
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Run tests
         run: npm run test
-        shell: bash
 
       - name: Lint sources
         run: clj-kondo --lint src
