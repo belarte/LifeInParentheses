@@ -1,26 +1,8 @@
 (ns life.app
   (:require [reagent.core :as r]
             [reagent.dom :as d]
+            [life.components.core :as c]
             [life.network.http :as h]))
-
-(defonce expression (r/atom ""))
-
-(defn input-component []
-  (let [expr (r/atom "")]
-    (fn []
-      [:form {:on-submit (fn [e]
-                           (.preventDefault e)
-                           (reset! expression @expr))}
-       [:input {:type "text"
-                :value @expr
-                :placeholder "Enter your expression here"
-                :on-change (fn [e]
-                             (reset! expr (-> e .-target .-value)))}]])))
-
-(defn output-component []
-  (if (empty? @expression)
-    [:p "Waiting for input"]
-    [:p "Expression:" @expression]))
 
 (defonce server-available? (r/atom false))
 (defonce error-message (r/atom ""))
@@ -34,13 +16,13 @@
 
 (defn page-content []
   [:div
-   [input-component]
-   [output-component]])
+   [c/input]
+   [c/output]])
 
 (defn app []
   (check-server!)
   [:div
-   [:h1 "Life in parenthesis"]
+   [c/title]
    (if @server-available?
      [page-content]
      [:p "Server is not available: " @error-message])])
