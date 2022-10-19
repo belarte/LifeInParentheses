@@ -6,6 +6,7 @@
     "test": "shadow-cljs compile test && karma start --single-run"
   },
   "devDependencies": {
+    "@testing-library/react": "^12.1.5",
     "karma": "^6.4.1",
     "karma-chrome-launcher": "^3.1.1",
     "karma-cljs-test": "^0.1.0",
