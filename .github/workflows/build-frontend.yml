@@ -24,6 +24,11 @@ jobs:
       - name: Prepare node
         uses: actions/setup-node@v3
 
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@9.3
+        with:
+          clj-kondo: 2022.06.22
+
       - name: Install dependencies
         run: npm install
 
