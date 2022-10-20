@@ -23,7 +23,7 @@
   [:div {:style app-style}
    [c/title]
    (if @server-available?
-     [c/page]
+     [c/page h/call]
      [:p "Server is not available: " @error-message])])
 
 (defn ^:dev/after-load render []
