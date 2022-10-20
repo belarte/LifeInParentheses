@@ -19,9 +19,13 @@
    [c/input]
    [c/output]])
 
+(def app-style
+  {:text-align "center"
+   :border "2px solid blue"})
+
 (defn app []
   (check-server!)
-  [:div
+  [:div {:style app-style}
    [c/title]
    (if @server-available?
      [page-content]
