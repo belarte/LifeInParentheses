@@ -21,4 +21,4 @@
 (defn output []
   (if (empty? @expression)
     [:p "Waiting for input"]
-    [:p "Expression:" @expression]))
+    [:p "Expression: " @expression]))

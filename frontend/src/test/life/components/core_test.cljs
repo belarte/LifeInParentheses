@@ -14,12 +14,34 @@
         (.unmount mounted-component)
         (r/flush)))))
 
+(defn element-exists-and-matches [component element matcher]
+  (is (= matcher
+         (-> component
+             (.getByText element)
+             (.-innerHTML)))))
+
+(defn element-does-not-exists [component element]
+  (is (= nil (.queryByText component element))))
+
 (deftest title-component
   (testing "A title is displayed"
     (with-mounted-component
       [component/title]
       (fn [component]
-        (is (= "Life in parenthesis"
-               (-> component
-                   (.getByText #"(?i)life")
-                   (.-innerHTML))))))))
+        (element-exists-and-matches component #"(?i)life" "Life in parenthesis")))))
+
+(deftest output-component
+  (testing "A waiting message is displayed"
+    (with-mounted-component
+      [component/output]
+      (fn [component]
+        (element-exists-and-matches component #"(?i)waiting" "Waiting for input")
+        (element-does-not-exists component #"(?i)expression"))))
+
+  (testing "The input expression is displayed"
+    (reset! component/expression "1|2")
+    (with-mounted-component
+      [component/output]
+      (fn [component]
+        (element-exists-and-matches component #"(?i)expression" "Expression: 1|2")
+        (element-does-not-exists component #"(?i)waiting")))))
