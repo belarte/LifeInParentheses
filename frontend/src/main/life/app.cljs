@@ -14,11 +14,6 @@
       (reset! server-available? (= (response :status) 200))
       (reset! error-message (response :error-text)))))
 
-(defn page-content []
-  [:div
-   [c/input]
-   [c/output]])
-
 (def app-style
   {:text-align "center"
    :border "2px solid blue"})
@@ -28,7 +23,7 @@
   [:div {:style app-style}
    [c/title]
    (if @server-available?
-     [page-content]
+     [c/page]
      [:p "Server is not available: " @error-message])])
 
 (defn ^:dev/after-load render []

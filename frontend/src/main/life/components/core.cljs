@@ -6,7 +6,7 @@
 (defn title []
   [:h1 "Life in parenthesis"])
 
-(defn input []
+(defn- input []
   (let [expr (r/atom "")]
     (fn []
       [:form {:role "submit-form-role"
@@ -19,7 +19,12 @@
                 :on-change (fn [e]
                              (reset! expr (-> e .-target .-value)))}]])))
 
-(defn output []
+(defn- output []
   (if (empty? @expression)
     [:p "Waiting for input"]
     [:p "Expression: " @expression]))
+
+(defn page []
+  [:div
+   [input]
+   [output]])

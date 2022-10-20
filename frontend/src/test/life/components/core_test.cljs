@@ -18,7 +18,7 @@
         (.unmount mounted-component)
         (r/flush)))))
 
-(defn element-exists-and-matches [component element matcher]
+(defn element-matches [component element matcher]
   (is (= matcher
          (-> component
              (.getByText element)
@@ -27,50 +27,32 @@
 (defn element-does-not-exists [component element]
   (is (= nil (.queryByText component element))))
 
-(defn page-content []
-  [:div
-   [component/input]
-   [component/output]])
-
 (deftest title-component
   (testing "A title is displayed"
     (with-mounted-component
       [component/title]
       (fn [component]
-        (element-exists-and-matches component #"(?i)life" "Life in parenthesis")))))
+        (element-matches component #"(?i)life" "Life in parenthesis")))))
 
-(deftest input-component
-  (testing "Field is empty on load"
+(deftest page-component
+  (testing "Field is empty on load and a waiting message is displayed"
     (with-mounted-component
-      [component/input]
+      [component/page]
       (fn [component]
         (is (= ""
                (-> component
                    (.getByPlaceholderText #"expression")
-                   (.-innerHTML)))))))
+                   (.-innerHTML))))
+        (element-matches component #"(?i)waiting" "Waiting for input")
+        (element-does-not-exists component #"(?i)expression"))))
 
-  (testing "Can input text"
+  (testing "Can submit an expression"
     (with-mounted-component
-      [page-content]
+      [component/page]
       (fn [component]
         (let [input (.getByPlaceholderText component #"expression here")]
           (.change rtl/fireEvent input (clj->js {:target {:value "123"}}))
           (.submit rtl/fireEvent (.getByRole component "submit-form-role"))
           (r/flush)
-          (element-exists-and-matches component #"(?i)expression" "Expression: 123"))))))
-
-(deftest output-component
-  (testing "A waiting message is displayed"
-    (with-mounted-component
-      [component/output]
-      (fn [component]
-        (element-exists-and-matches component #"(?i)waiting" "Waiting for input")
-        (element-does-not-exists component #"(?i)expression"))))
-
-  (testing "The input expression is displayed"
-    (reset! component/expression "1|2")
-    (with-mounted-component
-      [component/output]
-      (fn [component]
-        (element-exists-and-matches component #"(?i)expression" "Expression: 1|2")
-        (element-does-not-exists component #"(?i)waiting")))))
+          (element-matches component #"(?i)expression" "Expression: 123")
+          (element-does-not-exists component #"(?i)waiting"))))))
