@@ -11,8 +11,10 @@
 # Frontend
 
 - [x] Notify when backend is not available
-- [ ] Print result of expression
+- [x] Print result of expression
 - [ ] CSS
+    - [x] Initial syling
+    - [ ] Refine UI when canvas is implemented
 - [ ] Draw simulation
 
 # Tests
