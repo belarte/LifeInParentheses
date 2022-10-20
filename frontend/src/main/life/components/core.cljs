@@ -9,7 +9,8 @@
 (defn input []
   (let [expr (r/atom "")]
     (fn []
-      [:form {:on-submit (fn [e]
+      [:form {:role "submit-form-role"
+              :on-submit (fn [e]
                            (.preventDefault e)
                            (reset! expression @expr))}
        [:input {:type "text"

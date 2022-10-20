@@ -4,7 +4,11 @@
             ["@testing-library/react" :as rtl]
             [life.components.core :as component]))
 
-(use-fixtures :each {:after rtl/cleanup})
+(defn- teardown []
+  (rtl/cleanup)
+  (reset! component/expression ""))
+
+(use-fixtures :each {:after teardown})
 
 (defn with-mounted-component [component f]
   (let [mounted-component (rtl/render (r/as-element component))]
@@ -23,12 +27,37 @@
 (defn element-does-not-exists [component element]
   (is (= nil (.queryByText component element))))
 
+(defn page-content []
+  [:div
+   [component/input]
+   [component/output]])
+
 (deftest title-component
   (testing "A title is displayed"
     (with-mounted-component
       [component/title]
       (fn [component]
         (element-exists-and-matches component #"(?i)life" "Life in parenthesis")))))
+
+(deftest input-component
+  (testing "Field is empty on load"
+    (with-mounted-component
+      [component/input]
+      (fn [component]
+        (is (= ""
+               (-> component
+                   (.getByPlaceholderText #"expression")
+                   (.-innerHTML)))))))
+
+  (testing "Can input text"
+    (with-mounted-component
+      [page-content]
+      (fn [component]
+        (let [input (.getByPlaceholderText component #"expression here")]
+          (.change rtl/fireEvent input (clj->js {:target {:value "123"}}))
+          (.submit rtl/fireEvent (.getByRole component "submit-form-role"))
+          (r/flush)
+          (element-exists-and-matches component #"(?i)expression" "Expression: 123"))))))
 
 (deftest output-component
   (testing "A waiting message is displayed"
