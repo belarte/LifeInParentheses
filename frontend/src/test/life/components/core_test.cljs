@@ -18,10 +18,16 @@
         (.unmount mounted-component)
         (r/flush)))))
 
-(defn element-matches [component element matcher]
+(defn submit-expression [component expression]
+  (let [input (.getByPlaceholderText component #"expression here")]
+    (.change rtl/fireEvent input (clj->js {:target {:value expression}}))
+    (.submit rtl/fireEvent (.getByRole component "submit-form-role"))
+    (r/flush)))
+
+(defn element-exists [component matcher]
   (is (= matcher
          (-> component
-             (.getByText element)
+             (.getByText matcher)
              (.-innerHTML)))))
 
 (defn element-does-not-exists [component element]
@@ -45,7 +51,7 @@
     (with-mounted-component
       [component/title]
       (fn [component]
-        (element-matches component #"(?i)life" "Life in parenthesis")))))
+        (element-exists component "Life in parenthesis")))))
 
 (deftest page-component
   (testing "Field is empty on load and a waiting message is displayed"
@@ -56,7 +62,7 @@
                (-> component
                    (.getByPlaceholderText #"expression")
                    (.-innerHTML))))
-        (element-matches component #"(?i)waiting" "Waiting for input")
+        (element-exists component "Waiting for input")
         (element-does-not-exists component #"(?i)expression")
         (element-does-not-exists component #"(?i)result")
         (element-does-not-exists component #"(?i)something bad"))))
@@ -65,24 +71,18 @@
     (with-mounted-component
       [component/page mock-caller]
       (fn [component]
-        (let [input (.getByPlaceholderText component #"expression here")]
-          (.change rtl/fireEvent input (clj->js {:target {:value "1|2"}}))
-          (.submit rtl/fireEvent (.getByRole component "submit-form-role"))
-          (r/flush)
-          (element-matches component #"(?i)expression" "Expression: 1|2")
-          (element-matches component #"(?i)result" "Result: 3")
-          (element-does-not-exists component #"(?i)waiting")
-          (element-does-not-exists component #"(?i)something bad")))))
+        (submit-expression component "1|2")
+        (element-exists component "Expression: 1|2")
+        (element-exists component "Result: 3")
+        (element-does-not-exists component #"(?i)waiting")
+        (element-does-not-exists component #"(?i)something bad"))))
 
   (testing "An error is reported if a malformed expression is submitted"
     (with-mounted-component
       [component/page mock-caller]
       (fn [component]
-        (let [input (.getByPlaceholderText component #"expression here")]
-          (.change rtl/fireEvent input (clj->js {:target {:value "1|"}}))
-          (.submit rtl/fireEvent (.getByRole component "submit-form-role"))
-          (r/flush)
-          (element-matches component #"(?i)^expression" "Expression: 1|")
-          (element-matches component #"(?i)something bad" "Something bad happened: Malformed expression: 1|")
-          (element-does-not-exists component #"(?i)waiting")
-          (element-does-not-exists component #"(?i)result"))))))
+        (submit-expression component "1|")
+        (element-exists component "Expression: 1|")
+        (element-exists component "Something bad happened: Malformed expression: 1|")
+        (element-does-not-exists component #"(?i)waiting")
+        (element-does-not-exists component #"(?i)result")))))
