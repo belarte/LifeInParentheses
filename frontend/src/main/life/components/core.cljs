@@ -1,5 +1,6 @@
 (ns life.components.core
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [life.components.canvas :refer [canvas]]))
 
 (defonce expression (r/atom ""))
 (defonce response (r/atom nil))
@@ -34,7 +35,9 @@
     [:div
      [:p "Expression: " @expression]
      (if (= 200 (-> @response :status))
-       [:p "Result: " (-> @response :body :message :result)]
+       [:div
+        [:p "Result: " (-> @response :body :message :result)]
+        [canvas 400 300]]
        [:p "Something bad happened: " (-> @response :body :message)])]))
 
 (defn- output []

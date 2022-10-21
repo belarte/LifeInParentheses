@@ -18,6 +18,12 @@
         (.unmount mounted-component)
         (r/flush)))))
 
+(defn canvas-visible? [component]
+  (is (not= nil (.queryByRole component "canvas-role"))))
+
+(defn canvas-not-visible? [component]
+  (is (= nil (.queryByRole component "canvas-role"))))
+
 (defn submit-expression [component expression]
   (let [input (.getByPlaceholderText component #"expression here")]
     (.change rtl/fireEvent input (clj->js {:target {:value expression}}))
@@ -65,7 +71,8 @@
         (element-exists component "Waiting for input")
         (element-does-not-exists component #"(?i)expression")
         (element-does-not-exists component #"(?i)result")
-        (element-does-not-exists component #"(?i)something bad"))))
+        (element-does-not-exists component #"(?i)something bad")
+        (canvas-not-visible? component))))
 
   (testing "Can submit an expression"
     (with-mounted-component
@@ -74,6 +81,7 @@
         (submit-expression component "1|2")
         (element-exists component "Expression: 1|2")
         (element-exists component "Result: 3")
+        (canvas-visible? component)
         (element-does-not-exists component #"(?i)waiting")
         (element-does-not-exists component #"(?i)something bad"))))
 
@@ -84,5 +92,6 @@
         (submit-expression component "1|")
         (element-exists component "Expression: 1|")
         (element-exists component "Something bad happened: Malformed expression: 1|")
+        (canvas-not-visible? component)
         (element-does-not-exists component #"(?i)waiting")
         (element-does-not-exists component #"(?i)result")))))
