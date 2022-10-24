@@ -151,16 +151,23 @@
   "Represents byte as a sequence of expressions. Little-endian representation."
   bit>)
 
+(defn- board->int [board outputs]
+  (-> (map #(if (contains? (board :alive-cells) %) 1 0) outputs)
+      (from-base-2)))
+
 (defn read-byte>
   "Reads a bit as the output of a  sequence of expressions."
   [expression args]
   {:pre [(s/valid? :byte/argument args)]}
   (let [expressions (->> (repeat expression)
                          (take 8)
-                         (apply layout/spread-x>))]
-    (->> (map vector expressions (convert args))
-         (map #(apply read> %))
-         from-base-2)))
+                         (apply layout/spread-x>))
+        outputs (map #(get-in % [:alu/output :alu/position]) expressions)]
+    (-> (apply layout/merge-expressions> expressions)
+        (=> (convert args))
+        (evaluate)
+        (last)
+        (board->int outputs))))
 
 (comment
   (s/explain :byte/argument [[0 [255 8]] [4 5]])
