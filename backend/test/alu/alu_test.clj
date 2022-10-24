@@ -16,7 +16,7 @@
   "Reads a byte as the output of an expressions."
   [expression args]
   (let [result (alu/read> expression args)]
-    (result :result)))
+    (result :alu/result)))
 
 (deftest bit-is-properly-formed
   (testing "A bit is properly formed"
@@ -165,7 +165,7 @@
 
 (deftest read-generates-correct-number-of-steps
   (testing "read> generates correct number of steps"
-    (are [steps expression] (= steps (count (expression :steps)))
+    (are [steps expression] (= steps (count (expression :alu/iterations)))
       1   (alu/read> alu/byte> 255)
       25  (alu/read> (alu/not> alu/byte>) 255)
       49  (alu/read> (alu/not> (alu/not> alu/byte>)) 255)

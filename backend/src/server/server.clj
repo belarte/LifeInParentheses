@@ -31,7 +31,7 @@
           parser        (p/parser> p/grammar dictionary)
           [expr values] (parser expression)
           output        (alu/read> (eval expr) values)]
-      (respond (select-keys output [:result])))
+      (respond {:result (output :alu/result)}))
     (catch Exception e
       (respond (.getMessage e) 400))))
 
@@ -73,5 +73,5 @@
     (.stop @http-server)))
 
 (comment
-  (start 3000)
+  (start 3002)
   (stop))

@@ -18,10 +18,26 @@
 (s/def :alu/steps (s/and int? (s/or :pos pos? :zero zero?)))
 (s/def :alu/pattern :patterns/pattern)
 
+; Expression
 (s/def :alu/expression (s/keys :req [:alu/dimensions
                                      :alu/output
                                      :alu/steps]
                                :opt [:alu/pattern]))
+
+(s/def :byte/value (s/and int? #(>= % 0) #(< % 256)))
+
+; Argument
+(s/def :byte/argument (s/or :unary-argument   :byte/value
+                            :binary-arguments (s/coll-of :byte/argument :kind vector? :count 2)))
+
+(s/def :alu/result :byte/value)
+(s/def :alu/iterations (s/coll-of :alu/pattern))
+
+;Output
+(s/def :alu/read-output (s/keys :req [:alu/result
+                                      :alu/width
+                                      :alu/height
+                                      :alu/iterations]))
 
 (def bit>
   "Generator for a single bit."
@@ -134,11 +150,6 @@
   (->> (map convert args)
        (apply map vector)))
 
-(s/def :byte/value (s/and int? #(>= % 0) #(< % 256)))
-
-(s/def :byte/argument (s/or :unary-argument   :byte/value
-                            :binary-arguments (s/coll-of :byte/argument :kind vector? :count 2)))
-
 (def byte>
   "Represents byte as a sequence of expressions. Little-endian representation."
   bit>)
@@ -150,19 +161,29 @@
 (defn read>
   "Computes an expression. Returns the result as well as each steps."
   [expression args]
-  {:pre [(s/valid? :byte/argument args)]}
+  {:pre  [(s/valid? :byte/argument args)]
+   :post [(s/valid? :alu/read-output %)]}
   (let [expressions (->> (repeat expression)
                          (take 8)
                          (apply layout/spread-x>))
         outputs (map #(get-in % [:alu/output :alu/position]) expressions)
         steps (-> (apply layout/merge-expressions> expressions)
                   (=> (convert args))
-                  (evaluate))
-        result (board->int (last steps) outputs)]
-    {:result result
-     :steps steps}))
+                  (evaluate))]
+    {:alu/result     (board->int (last steps) outputs)
+     :alu/width      ((first steps) :width)
+     :alu/height     ((first steps) :height)
+     :alu/iterations (map #(get % :alive-cells) steps)}))
 
 (comment
+  (let [x {:alu/result 42
+           :alu/width 16
+           :alu/height 9
+           :alu/iterations [#{[1 2] [2 3]}
+                            #{[1 3]}
+                            #{}
+                            #{[1 2] [4 5] [6 7]}]}]
+    (s/conform :alu/read-output x))
   (s/explain :byte/argument [[0 [255 8]] [4 5]])
   (convert [5 [7 63]])
   (=> (layout/shift> (layout/flip-x> bit>) [1 2]) 1)
