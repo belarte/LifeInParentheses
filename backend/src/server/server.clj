@@ -30,8 +30,8 @@
     (let [dictionary    {"value" alu/byte>, "~" alu/not>, "&" alu/and>, "|" alu/or>}
           parser        (p/parser> p/grammar dictionary)
           [expr values] (parser expression)
-          [output _]    (alu/read> (eval expr) values)]
-      (respond {:result output}))
+          output        (alu/read> (eval expr) values)]
+      (respond (select-keys output [:result])))
     (catch Exception e
       (respond (.getMessage e) 400))))
 

@@ -159,7 +159,8 @@
                   (=> (convert args))
                   (evaluate))
         result (board->int (last steps) outputs)]
-    [result steps]))
+    {:result result
+     :steps steps}))
 
 (comment
   (s/explain :byte/argument [[0 [255 8]] [4 5]])
