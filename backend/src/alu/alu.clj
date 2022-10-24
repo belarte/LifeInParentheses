@@ -147,7 +147,7 @@
   (-> (map #(if (contains? (board :alive-cells) %) 1 0) outputs)
       (from-base-2)))
 
-(defn read-byte>
+(defn read>
   "Reads a bit as the output of a  sequence of expressions."
   [expression args]
   {:pre [(s/valid? :byte/argument args)]}
@@ -166,7 +166,7 @@
   (convert [5 [7 63]])
   (=> (layout/shift> (layout/flip-x> bit>) [1 2]) 1)
   (=> (layout/merge-expressions> (layout/flip-x> bit>) (layout/shift> bit> [3 3]) bit>) [1 1 1])
-  (read-byte> byte> 42)
+  (read> byte> 42)
   (print-e (=> (not> (layout/wire> bit> 3)) 1))
   (print-e (=> (layout/align-with-origin> (and> bit> bit>)) [1 1]))
   (let [exp   (=> (layout/align-with-origin> (and> bit> (and> bit> bit>))) [1 [1 1]])
