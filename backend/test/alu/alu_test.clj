@@ -163,6 +163,15 @@
     (is (thrown? AssertionError (read> alu/byte> -1)))
     (is (thrown? AssertionError (read> alu/byte> 256)))))
 
+(deftest read-generates-correct-number-of-steps
+  (testing "read> generates correct number of steps"
+    (are [steps expression] (= steps (count (last expression)))
+      1   (alu/read> alu/byte> 255)
+      25  (alu/read> (alu/not> alu/byte>) 255)
+      49  (alu/read> (alu/not> (alu/not> alu/byte>)) 255)
+      45  (alu/read> (alu/and> alu/byte> alu/byte>) [255 255])
+      117 (alu/read> (alu/and> (alu/and> alu/byte> alu/byte>) alu/byte>) [[255 255] 255]))))
+
 (deftest not-byte
   (testing "Byte negation"
     (let [op (alu/not> alu/byte>)]
