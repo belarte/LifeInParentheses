@@ -4,6 +4,14 @@
             [alu.layout :as layout :refer [=>]]
             [alu.alu :as alu]))
 
+(defn read-bit>
+  "Reads a single bit as the output of an expression."
+  [expression args]
+  (let [exp       (=> expression args)
+        output    (-> exp :alu/output :alu/position)
+        last-iter (last (alu/evaluate exp))]
+    (if (contains? (last-iter :alive-cells) output) 1 0)))
+
 (deftest bit-is-properly-formed
   (testing "A bit is properly formed"
     (let [expected {:alu/dimensions {:alu/origin [0 0]
@@ -18,16 +26,16 @@
 
 (deftest write-and-read-bit
   (testing "A bit in input can be read as output"
-    (is (= 0 (alu/read> alu/bit> 0)))
-    (is (= 1 (alu/read> alu/bit> 1)))))
+    (is (= 0 (read-bit> alu/bit> 0)))
+    (is (= 1 (read-bit> alu/bit> 1)))))
 
 (deftest wire-traversal
   (testing "A bit can be read after traversing a wire"
-    (is (= 0 (alu/read> (layout/wire> alu/bit> 3) 0)))
-    (is (= 1 (alu/read> (layout/wire> alu/bit> 3) 1)))
-    (is (= 1 (alu/read> (layout/wire> (layout/wire> alu/bit> 2) 3) 1))))
+    (is (= 0 (read-bit> (layout/wire> alu/bit> 3) 0)))
+    (is (= 1 (read-bit> (layout/wire> alu/bit> 3) 1)))
+    (is (= 1 (read-bit> (layout/wire> (layout/wire> alu/bit> 2) 3) 1))))
   (testing "A wire can extend a flipped pattern"
-    (is (= 1 (alu/read> (layout/wire> (layout/flip-x> alu/bit>) 4) 1)))))
+    (is (= 1 (read-bit> (layout/wire> (layout/flip-x> alu/bit>) 4) 1)))))
 
 (deftest negation-is-properly-formed
   (testing "A negation is properly formed"
@@ -52,24 +60,24 @@
 (deftest negation
   (testing "Can negate a single bit"
     (let [fun (alu/not> alu/bit>)]
-      (is (= 1 (alu/read> fun 0)))
-      (is (= 0 (alu/read> fun 1)))))
+      (is (= 1 (read-bit> fun 0)))
+      (is (= 0 (read-bit> fun 1)))))
   (testing "Can negate a flipped bit"
     (let [fun (alu/not> (layout/flip-x> alu/bit>))]
-      (is (= 1 (alu/read> fun 0)))
-      (is (= 0 (alu/read> fun 1)))))
+      (is (= 1 (read-bit> fun 0)))
+      (is (= 0 (read-bit> fun 1)))))
   (testing "Can negate a wired bit"
     (let [fun (alu/not> (layout/wire> alu/bit> 5))]
-      (is (= 1 (alu/read> fun 0)))
-      (is (= 0 (alu/read> fun 1)))))
+      (is (= 1 (read-bit> fun 0)))
+      (is (= 0 (read-bit> fun 1)))))
   (testing "Some combination"
     (let [fun (alu/not> (layout/flip-x>  (layout/wire> alu/bit> 5)))]
-      (is (= 1 (alu/read> fun 0)))
-      (is (= 0 (alu/read> fun 1)))))
+      (is (= 1 (read-bit> fun 0)))
+      (is (= 0 (read-bit> fun 1)))))
   (testing "Double negation returns original value"
     (let [fun (alu/not> (alu/not> alu/bit>))]
-      (is (= 0 (alu/read> fun 0)))
-      (is (= 1 (alu/read> fun 1))))))
+      (is (= 0 (read-bit> fun 0)))
+      (is (= 1 (read-bit> fun 1))))))
 
 (deftest and-is-properly-formed
   (testing "And is properly formed"
@@ -94,7 +102,7 @@
             (output :alu/pattern))))))
 
 (defn and-bit-test-helper [f-left f-right]
-  (are [result args] (= result (alu/read> (alu/and> f-left f-right) args))
+  (are [result args] (= result (read-bit> (alu/and> f-left f-right) args))
        0 [0 0]
        0 [1 0]
        0 [0 1]
@@ -111,14 +119,14 @@
     (and-bit-test-helper alu/bit> (layout/flip-x> alu/bit>))
     (and-bit-test-helper (layout/flip-x> alu/bit>) alu/bit>))
   (testing "Nested ands"
-    (are [result args] (= result (alu/read> (alu/and> (alu/and> alu/bit> alu/bit>) (alu/and> alu/bit> alu/bit>)) args))
+    (are [result args] (= result (read-bit> (alu/and> (alu/and> alu/bit> alu/bit>) (alu/and> alu/bit> alu/bit>)) args))
          0 [[0 0] [0 0]], 0 [[0 0] [0 1]], 0 [[0 0] [1 0]], 0 [[0 0] [1 1]],
          0 [[0 1] [0 0]], 0 [[0 1] [0 1]], 0 [[0 1] [1 0]], 0 [[0 1] [1 1]],
          0 [[1 0] [0 0]], 0 [[1 0] [0 1]], 0 [[1 0] [1 0]], 0 [[1 0] [1 1]],
          0 [[1 1] [0 0]], 0 [[1 1] [0 1]], 0 [[1 1] [1 0]], 1 [[1 1] [1 1]])))
 
 (defn or-bit-test-helper [f-left f-right]
-  (are [result args] (= result (alu/read> (alu/or> f-left f-right) args))
+  (are [result args] (= result (read-bit> (alu/or> f-left f-right) args))
        0 [0 0]
        1 [0 1]
        1 [1 0]
@@ -135,7 +143,7 @@
     (or-bit-test-helper alu/bit> (layout/flip-x> alu/bit>))
     (or-bit-test-helper (layout/flip-x> alu/bit>) alu/bit>))
   (testing "Nested ors"
-    (are [result args] (= result (alu/read> (alu/or> (alu/or> alu/bit> alu/bit>) (alu/or> alu/bit> alu/bit>)) args))
+    (are [result args] (= result (read-bit> (alu/or> (alu/or> alu/bit> alu/bit>) (alu/or> alu/bit> alu/bit>)) args))
          0 [[0 0] [0 0]], 1 [[0 0] [0 1]], 1 [[0 0] [1 0]], 1 [[0 0] [1 1]],
          1 [[0 1] [0 0]], 1 [[0 1] [0 1]], 1 [[0 1] [1 0]], 1 [[0 1] [1 1]],
          1 [[1 0] [0 0]], 1 [[1 0] [0 1]], 1 [[1 0] [1 0]], 1 [[1 0] [1 1]],

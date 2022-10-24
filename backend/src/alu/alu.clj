@@ -35,18 +35,10 @@
                     {:pre [(or (= 1 n) (= 0 n))]}
                     (if (zero? n) #{} (patterns/offset patterns/glider [1 1])))})
 
-(defn- evaluate [expression]
+(defn evaluate [expression]
   (let [{:keys [alu/dimensions alu/steps alu/pattern]} expression
         board (life/create-board (dimensions :alu/width) (dimensions :alu/height) [pattern])]
     (life/simulate board steps)))
-
-(defn read>
-  "Reads a single bit as the output of an expression."
-  [expression args]
-  (let [exp       (=> expression args)
-        output    (-> exp :alu/output :alu/position)
-        last-iter (last (evaluate exp))]
-    (if (contains? (last-iter :alive-cells) output) 1 0)))
 
 (defn- print-e
   "Prints all steps generated."
