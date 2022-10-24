@@ -12,6 +12,12 @@
         last-iter (last (alu/evaluate exp))]
     (if (contains? (last-iter :alive-cells) output) 1 0)))
 
+(defn read>
+  "Reads a byte as the output of an expressions."
+  [expression args]
+  (let [[result _] (alu/read> expression args)]
+    result))
+
 (deftest bit-is-properly-formed
   (testing "A bit is properly formed"
     (let [expected {:alu/dimensions {:alu/origin [0 0]
@@ -151,26 +157,26 @@
 
 (deftest write-and-read-byte
   (testing "A byte can be write then read again"
-    (are [result arg] (= result (alu/read> alu/byte> arg))
+    (are [result arg] (= result (read> alu/byte> arg))
       0 0, 1 1, 42 42, 86 86, 255 255))
   (testing "Inputs are validated"
-    (is (thrown? AssertionError (alu/read> alu/byte> -1)))
-    (is (thrown? AssertionError (alu/read> alu/byte> 256)))))
+    (is (thrown? AssertionError (read> alu/byte> -1)))
+    (is (thrown? AssertionError (read> alu/byte> 256)))))
 
 (deftest not-byte
   (testing "Byte negation"
     (let [op (alu/not> alu/byte>)]
-      (are [result arg] (= result (alu/read> op arg))
+      (are [result arg] (= result (read> op arg))
         255 0, 0 255, 2r10101010 2r01010101, 2r00001111 2r11110000)))
   (testing "Double negation"
     (let [op (alu/not> (alu/not> alu/byte>))]
-      (are [result arg] (= result (alu/read> op arg))
+      (are [result arg] (= result (read> op arg))
         0 0, 1 1, 42 42, 86 86, 255 255))))
 
 (deftest and-byte
   (testing "Simple binary and"
     (let [op (alu/and> alu/bit> alu/bit>)]
-      (are [result args] (= result (alu/read> op args))
+      (are [result args] (= result (read> op args))
         0          [0 0]
         0          [0 255]
         1          [1 255]
@@ -180,7 +186,7 @@
         2r10000010 [2r10101010 2r11000011])))
   (testing "Nested and"
     (let [op (alu/and> alu/bit> (alu/and> alu/bit> alu/bit>))]
-      (are [result args] (= result (alu/read> op args))
+      (are [result args] (= result (read> op args))
         0          [0   [1 2]]
         0          [255 [0 42]]
         1          [63  [1 255]]
@@ -191,7 +197,7 @@
 (deftest or-byte
   (testing "Simple binary or"
     (let [op (alu/or> alu/bit> alu/bit>)]
-      (are [result args] (= result (alu/read> op args))
+      (are [result args] (= result (read> op args))
         0          [0 0]
         255        [0 255]
         1          [1 0]
@@ -200,7 +206,7 @@
         2r11101011 [2r10101010 2r11000011])))
   (testing "Nested or"
     (let [op (alu/or> alu/bit> (alu/or> alu/bit> alu/bit>))]
-      (are [result args] (= result (alu/read> op args))
+      (are [result args] (= result (read> op args))
         3          [0   [1 2]]
         255        [255 [0 42]]
         255        [63  [64 128]]

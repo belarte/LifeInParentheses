@@ -148,18 +148,18 @@
       (from-base-2)))
 
 (defn read>
-  "Reads a bit as the output of a  sequence of expressions."
+  "Computes an expression. Returns the result as well as each steps."
   [expression args]
   {:pre [(s/valid? :byte/argument args)]}
   (let [expressions (->> (repeat expression)
                          (take 8)
                          (apply layout/spread-x>))
-        outputs (map #(get-in % [:alu/output :alu/position]) expressions)]
-    (-> (apply layout/merge-expressions> expressions)
-        (=> (convert args))
-        (evaluate)
-        (last)
-        (board->int outputs))))
+        outputs (map #(get-in % [:alu/output :alu/position]) expressions)
+        steps (-> (apply layout/merge-expressions> expressions)
+                  (=> (convert args))
+                  (evaluate))
+        result (board->int (last steps) outputs)]
+    [result steps]))
 
 (comment
   (s/explain :byte/argument [[0 [255 8]] [4 5]])
