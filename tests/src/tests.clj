@@ -62,13 +62,26 @@
              (= false (% :skip)))
           tests))
 
+(defn- summary [total ran failed]
+  (->> [(str "Tests: " total)
+        (str "Skipped: " (- total ran))
+        (str "Failed: " failed)]
+       (str/join " - ")))
+
+(defn- output [to-run res]
+  (str
+    \newline
+    (if (empty? res) "Success!" (str/join "\n" res))
+    \newline \newline
+    (summary (count test-cases) (count to-run) (count res))))
+
 (defn- run-tests [call-endpoint]
-  (let [res  (->> test-cases
-                  (skip-tests)
+  (let [to-run (skip-tests test-cases)
+        res  (->> to-run
                   (map #(assoc % :result (call-endpoint %)))
                   (filter #(seq (:result %)))
                   (map pretty-error))]
-    [(count res) (if (empty? res) "Success!" (str/join "\n" res))]))
+    [(count res) (output to-run res)]))
 
 (defn run [file options]
   (let [port  (:port options)
