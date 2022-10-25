@@ -36,8 +36,15 @@
                  (= "malformed expression: '(63|'"
                     (-> (to-json %) :message str/lower-case)))}])
 
+(defn- skip-tests [tests]
+  (filter #(or
+             (not (contains? % :skip))
+             (= false (% :skip)))
+          tests))
+
 (defn- run-tests [call-endpoint]
   (let [res  (->> test-cases
+                  (skip-tests)
                   (map #(assoc % :result (call-endpoint %)))
                   (filter #(seq (:result %)))
                   (map pretty-error))]
