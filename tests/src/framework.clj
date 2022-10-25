@@ -11,7 +11,7 @@
   {:name     name
    :endpoint endpoint
    :params   params
-   :error    (to-json result)})
+   :error    (assoc-in (to-json result) [:message :steps] "Omitted for readability...")})
 
 (defn start-calculator [file port]
   (let [cmd  ["java" "-jar" file "--port" port]
