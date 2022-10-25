@@ -24,20 +24,27 @@
   [_]
   (respond "Ok"))
 
+(defn- build-response [output steps]
+  (conj {:result (output :alu/result)}
+        (when steps [:steps (output :alu/iterations)])
+        (when steps [:width (output :alu/width)])
+        (when steps [:height (output :alu/height)])))
+
 (defn calculate
-  [{{{:keys [expression]} :query} :parameters}]
+  [{{{:keys [expression steps]} :query} :parameters}]
   (try
     (let [dictionary    {"value" alu/byte>, "~" alu/not>, "&" alu/and>, "|" alu/or>}
           parser        (p/parser> p/grammar dictionary)
           [expr values] (parser expression)
           output        (alu/read> (eval expr) values)]
-      (respond {:result (output :alu/result)}))
+      (respond (build-response output steps)))
     (catch Exception e
       (respond (.getMessage e) 400))))
 
 (def routes
   [["/health"    {:get {:handler health-check}}]
-   ["/calculate" {:get {:parameters {:query [:map [:expression string?]]}
+   ["/calculate" {:get {:parameters {:query [:map [:expression string?]
+                                                  [:steps {:optional true} boolean?]]}
                         :handler calculate}}]])
 
 (def server

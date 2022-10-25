@@ -21,6 +21,26 @@
     :params   {"expression" "(63 | 64) & 191"}
     :test-fn  #(= 63 (-> (to-json %) :message :result))}
 
+   {:name     "Calculate does not returns steps or dimensions by default"
+    :endpoint "/calculate"
+    :params   {"expression" "(63 | 64) & 191"}
+    :test-fn  #(let [response (-> (to-json %) :message)]
+                 (and
+                   (not (contains? response :steps))
+                   (not (contains? response :width))
+                   (not (contains? response :height))))}
+
+   {:name     "Calculate returns steps and dimensions when asked for"
+    :endpoint "/calculate"
+    :params   {"expression" "63 & (127 & 255)"
+               "steps" true}
+    :test-fn  #(let [response (-> (to-json %) :message)]
+                 (and
+                   (contains? response :steps)
+                   (= 117 (count (response :steps)))
+                   (= 424 (response :width))
+                   (= 35 (response :height))))}
+
    {:name     "Calculate requires an expression"
     :endpoint "/calculate"
     :test-fn  #(and
