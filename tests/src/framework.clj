@@ -2,7 +2,6 @@
   (:require [babashka.curl :as curl]
             [babashka.process :refer [process destroy-tree]]
             [babashka.wait :refer [wait-for-port]]
-            [clojure.string :as s]
             [cheshire.core :as json]))
 
 (defn to-json [error]
@@ -18,7 +17,6 @@
   (let [cmd  ["java" "-jar" file "--port" port]
         proc (process cmd {:out :inherit
                            :shutdown destroy-tree})]
-    (println (str "Starting calculator: `" (s/join " " cmd) "'"))
     (wait-for-port "localhost" port {:timeout 30000 :pause 500})
     proc))
 

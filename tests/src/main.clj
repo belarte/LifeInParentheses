@@ -58,10 +58,16 @@
   (println msg)
   (System/exit status))
 
+(defn- header-message [file options]
+  (let [no-startup (options :no-startup)]
+    (if no-startup
+      (str "Using running app with options " options)
+      (str "Processing file `" file "` with options " options))))
+
 (defn -main [& args]
   (let [{:keys [file options exit-message ok?]} (validate-args args)]
     (if exit-message
       (exit (if ok? 0 1) exit-message)
       (do
-        (println (str "Processing file " file " with options " options))
+        (println (header-message file options))
         (apply exit (t/run file options))))))
