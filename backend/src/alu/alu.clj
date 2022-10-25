@@ -163,7 +163,8 @@
   [expression args]
   {:pre  [(s/valid? :byte/argument args)]
    :post [(s/valid? :alu/read-output %)]}
-  (let [expressions (->> (repeat expression)
+  (let [expressions (->> (layout/align-with-origin> expression)
+                         (repeat)
                          (take 8)
                          (apply layout/spread-x>))
         outputs (map #(get-in % [:alu/output :alu/position]) expressions)

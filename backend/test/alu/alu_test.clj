@@ -172,6 +172,26 @@
       45  (alu/read> (alu/and> alu/byte> alu/byte>) [255 255])
       117 (alu/read> (alu/and> (alu/and> alu/byte> alu/byte>) alu/byte>) [[255 255] 255]))))
 
+(defn- iteration-within-bounds? [iteration w h]
+  (->> iteration
+       (map (fn [[x y]] (and (>= x 0)
+                             (>= y 0)
+                             (<  x w)
+                             (<  y h))))
+       (every? true?)))
+
+(deftest read-generates-iterations-within-bounds
+  (testing "read> generates iterations within bounds"
+    (are [output] (let [iter   (first (output :alu/iterations))
+                        width  (output :alu/width)
+                        height (output :alu/height)]
+                    (iteration-within-bounds? iter width height))
+      (alu/read> alu/byte> 255)
+      (alu/read> (alu/not> alu/byte>) 255)
+      (alu/read> (alu/not> (alu/not> alu/byte>)) 255)
+      (alu/read> (alu/and> alu/byte> alu/byte>) [255 255])
+      (alu/read> (alu/and> (alu/and> alu/byte> alu/byte>) alu/byte>) [[255 255] 255]))))
+
 (deftest not-byte
   (testing "Byte negation"
     (let [op (alu/not> alu/byte>)]
