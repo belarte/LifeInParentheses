@@ -157,8 +157,8 @@
 
 (deftest write-and-read-byte
   (testing "A byte can be write then read again"
-    (are [result arg] (= result (read> alu/byte> arg))
-      0 0, 1 1, 42 42, 86 86, 255 255))
+    (are [arg] (= arg (read> alu/byte> arg))
+      0, 1, 42, 86, 255))
   (testing "Inputs are validated"
     (is (thrown? AssertionError (read> alu/byte> -1)))
     (is (thrown? AssertionError (read> alu/byte> 256)))))
@@ -179,8 +179,8 @@
         255 0, 0 255, 2r10101010 2r01010101, 2r00001111 2r11110000)))
   (testing "Double negation"
     (let [op (alu/not> (alu/not> alu/byte>))]
-      (are [result arg] (= result (read> op arg))
-        0 0, 1 1, 42 42, 86 86, 255 255))))
+      (are [arg] (= arg (read> op arg))
+        0, 1, 42, 86, 255))))
 
 (deftest and-byte
   (testing "Simple binary and"
