@@ -1,10 +1,9 @@
 # Backend
 
-- [x] Paremetrize server
+- [x] Paremetrize endpoint
+    - [x] Add parameter to ask for steps
+    - [x] Endpoint to return steps
 - [ ] Improve command line parsing
-- [ ] Paremetrize endpoint
-    - [ ] Add parameter to ask for steps
-    - [ ] Endpoint to return steps
 - [ ] Improve performances
 - [ ] Add support for addition
 
