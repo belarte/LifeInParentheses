@@ -49,3 +49,10 @@
   [:div
    [input caller]
    [output]])
+
+(comment
+  (do
+    (require '[life.network.http :as h])
+    (reset! expression "127 | 128")
+    (call-calculate! h/call))
+  (.log js/console (clj->js @response)))
