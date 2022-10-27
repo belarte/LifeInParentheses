@@ -38,10 +38,11 @@
      (let [message (-> @response :body :message)]
        (if (= 200 (-> @response :status))
          (let [w (message :width)
-               h (message :height)]
+               h (message :height)
+               s (message :steps)]
            [:div
             [:p "Result: " (message :result)]
-            [canvas w h]])
+            [canvas w h s]])
          [:p "Something bad happened: " message]))]))
 
 (defn- output []

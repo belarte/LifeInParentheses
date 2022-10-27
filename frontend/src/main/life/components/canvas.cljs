@@ -3,20 +3,30 @@
 
 (defonce canvas-ref (r/atom nil))
 
+(defonce steps (r/atom []))
+
+(def size 5)
+
 (defn- draw []
   (let [ctx (.getContext @canvas-ref "2d")]
-    (.fillRect ctx 10 10 10 10)))
+    (run!
+      (fn [[x y]] (.fillRect ctx (* x size) (* y size) size size))
+      (get @steps 0))))
 
-(defn canvas [w h]
+(defn canvas [w h s]
+  (reset! steps s)
   [:div
    [:div
     [:canvas {:id "canvas"
               :role "canvas-role"
-              :width w
-              :height h
+              :width (* size w)
+              :height (* size h)
               :ref (fn [e] (reset! canvas-ref e))
               :style {:border "1px solid black"}}]]
    [:div
     [:input {:type "button"
              :value "Draw"
              :on-click (fn [] (draw))}]]])
+
+(comment
+  (.log js/console (clj->js @steps)))
