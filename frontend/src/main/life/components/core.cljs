@@ -8,7 +8,8 @@
 (defn- call-calculate! [caller]
   (caller
     "/calculate"
-    {"expression" @expression}
+    {"expression" @expression
+     "steps" true}
     (fn [r]
       (reset! response r))))
 
@@ -34,11 +35,14 @@
     [:p "Waiting for response"]
     [:div
      [:p "Expression: " @expression]
-     (if (= 200 (-> @response :status))
-       [:div
-        [:p "Result: " (-> @response :body :message :result)]
-        [canvas 400 300]]
-       [:p "Something bad happened: " (-> @response :body :message)])]))
+     (let [message (-> @response :body :message)]
+       (if (= 200 (-> @response :status))
+         (let [w (message :width)
+               h (message :height)]
+           [:div
+            [:p "Result: " (message :result)]
+            [canvas w h]])
+         [:p "Something bad happened: " message]))]))
 
 (defn- output []
   (if (empty? @expression)
