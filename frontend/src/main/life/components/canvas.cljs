@@ -31,9 +31,11 @@
 (defn- reset []
   (reset! counter 0))
 
+(defn- running? []
+  (not= nil @interval))
+
 (defn canvas [w h s]
   (reset! steps s)
-  (reset! counter 0)
   [:div
    [:div
     [:canvas {:id "canvas"
@@ -44,14 +46,14 @@
               :style {:border "1px solid black"}}]]
    [:div
     [:input {:type "button"
-             :value "Draw"
-             :on-click (fn [] (swap! counter inc))}]
+             :value "Prev"
+             :on-click #(swap! counter dec)}]
     [:input {:type "button"
-             :value "Start"
-             :on-click start}]
+             :value (if (running?) "Stop" "Start")
+             :on-click #(if (running?) (stop) (start))}]
     [:input {:type "button"
-             :value "Stop"
-             :on-click stop}]
+             :value "Next"
+             :on-click #(swap! counter inc)}]
     [:input {:type "button"
              :value "Reset"
              :on-click reset}]]])
