@@ -12,13 +12,13 @@
         index      (min @counter last-index)]
     (get @steps index)))
 
-(defn- draw []
-  (let [ctx (.getContext @canvas-ref "2d")]
-    (.clearRect ctx 0 0 (.-width @canvas-ref) (.-height @canvas-ref))
-    (run!
-      (fn [[x y]] (.fillRect ctx (* x size) (* y size) size size))
-      (next-step)))
-  (swap! counter inc))
+(defn draw []
+  (when (not= nil @canvas-ref)
+    (let [ctx (.getContext @canvas-ref "2d")]
+      (.clearRect ctx 0 0 (.-width @canvas-ref) (.-height @canvas-ref))
+      (run!
+        (fn [[x y]] (.fillRect ctx (* x size) (* y size) size size))
+        (next-step)))))
 
 (defn canvas [w h s]
   (reset! steps s)
@@ -34,7 +34,7 @@
    [:div
     [:input {:type "button"
              :value "Draw"
-             :on-click (fn [] (draw))}]]])
+             :on-click (fn [] (swap! counter inc))}]]])
 
 (comment
   (.log js/console (clj->js @steps)))

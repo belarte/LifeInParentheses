@@ -1,6 +1,6 @@
 (ns life.components.core
   (:require [reagent.core :as r]
-            [life.components.canvas :refer [canvas]]))
+            [life.components.canvas :as c]))
 
 (defonce expression (r/atom ""))
 (defonce response (r/atom nil))
@@ -42,7 +42,7 @@
                s (message :steps)]
            [:div
             [:p "Result: " (message :result)]
-            [canvas w h s]])
+            [c/canvas w h s]])
          [:p "Something bad happened: " message]))]))
 
 (defn- output []
@@ -51,7 +51,7 @@
     [generate-output]))
 
 (defn page [caller]
-  [:div
+  [:div {:on-load (c/draw)}
    [input caller]
    [output]])
 
