@@ -11,10 +11,10 @@
 
 - [x] Notify when backend is not available
 - [x] Print result of expression
+- [x] Draw simulation
 - [ ] CSS
     - [x] Initial syling
     - [ ] Refine UI when canvas is implemented
-- [ ] Draw simulation
 
 # Tests
 
