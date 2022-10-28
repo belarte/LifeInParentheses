@@ -3,17 +3,18 @@
 - [x] Paremetrize endpoint
     - [x] Add parameter to ask for steps
     - [x] Endpoint to return steps
+- [ ] Fix double negation bug => malformed expression
 - [ ] Improve command line parsing
 - [ ] Improve performances
 - [ ] Add support for addition
 
 # Frontend
 
-- [x] Notify when backend is not available
-- [x] Print result of expression
 - [x] Draw simulation
+- [ ] Settings (size, interval, ...)
 - [ ] CSS
     - [x] Initial syling
+    - [ ] Icons for buttons
     - [ ] Refine UI when canvas is implemented
 
 # Tests
