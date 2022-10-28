@@ -8,9 +8,11 @@
 
 (def size 5)
 
+(defn- last-index []
+  (- (count @steps) 1))
+
 (defn- next-step []
-  (let [last-index (- (count @steps) 1)
-        index      (min @counter last-index)]
+  (let [index (min @counter (last-index))]
     (get @steps index)))
 
 (defn draw []
@@ -21,8 +23,14 @@
         (fn [[x y]] (.fillRect ctx (* x size) (* y size) size size))
         (next-step)))))
 
+(defn- forward []
+  (swap! counter (fn [n] (if (< n (last-index)) (inc n) n))))
+
+(defn- backward []
+  (swap! counter (fn [n] (if (> n 0) (dec n) n))))
+
 (defn- start []
-  (reset! interval (js/setInterval #(swap! counter inc) 1000)))
+  (reset! interval (js/setInterval #(swap! counter forward) 1000)))
 
 (defn- stop []
   (js/clearInterval @interval)
@@ -47,13 +55,13 @@
    [:div
     [:input {:type "button"
              :value "Prev"
-             :on-click #(swap! counter dec)}]
+             :on-click backward}]
     [:input {:type "button"
              :value (if (running?) "Stop" "Start")
              :on-click #(if (running?) (stop) (start))}]
     [:input {:type "button"
              :value "Next"
-             :on-click #(swap! counter inc)}]
+             :on-click forward}]
     [:input {:type "button"
              :value "Reset"
              :on-click reset}]]])
