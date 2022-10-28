@@ -4,6 +4,7 @@
 (defonce canvas-ref (r/atom nil))
 (defonce steps (r/atom []))
 (defonce counter (r/atom 0))
+(defonce interval (r/atom nil))
 
 (def size 5)
 
@@ -20,6 +21,16 @@
         (fn [[x y]] (.fillRect ctx (* x size) (* y size) size size))
         (next-step)))))
 
+(defn- start []
+  (reset! interval (js/setInterval #(swap! counter inc) 1000)))
+
+(defn- stop []
+  (js/clearInterval @interval)
+  (reset! interval nil))
+
+(defn- reset []
+  (reset! counter 0))
+
 (defn canvas [w h s]
   (reset! steps s)
   (reset! counter 0)
@@ -34,7 +45,19 @@
    [:div
     [:input {:type "button"
              :value "Draw"
-             :on-click (fn [] (swap! counter inc))}]]])
+             :on-click (fn [] (swap! counter inc))}]
+    [:input {:type "button"
+             :value "Start"
+             :on-click start}]
+    [:input {:type "button"
+             :value "Stop"
+             :on-click stop}]
+    [:input {:type "button"
+             :value "Reset"
+             :on-click reset}]]])
 
 (comment
+  (reset)
+  (start)
+  (stop)
   (.log js/console (clj->js @steps)))
