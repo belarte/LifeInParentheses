@@ -18,26 +18,17 @@
         (.unmount mounted-component)
         (r/flush)))))
 
-(defn canvas-visible? [component]
-  (is (not= nil (.queryByRole component "canvas-role"))))
-
-(defn canvas-not-visible? [component]
-  (is (= nil (.queryByRole component "canvas-role"))))
-
 (defn submit-expression [component expression]
   (let [input (.getByPlaceholderText component #"expression here")]
     (.change rtl/fireEvent input (clj->js {:target {:value expression}}))
     (.submit rtl/fireEvent (.getByRole component "submit-form-role"))
     (r/flush)))
 
-(defn element-exists [component matcher]
-  (is (= matcher
-         (-> component
-             (.getByText matcher)
-             (.-innerHTML)))))
+(defn canvas-visible? [component]
+  (not= nil (.queryByRole component "canvas-role")))
 
-(defn element-does-not-exists [component element]
-  (is (= nil (.queryByText component element))))
+(defn element-visible? [component element]
+  (not= nil (.queryByText component element)))
 
 (defn mock-caller> [responses]
   (fn [_ params callback]
@@ -57,7 +48,7 @@
     (with-mounted-component
       [component/title]
       (fn [component]
-        (element-exists component "Life in parenthesis")))))
+        (is (element-visible? component "Life in parenthesis"))))))
 
 (deftest page-component
   (testing "Field is empty on load and a waiting message is displayed"
@@ -68,33 +59,33 @@
                (-> component
                    (.getByPlaceholderText #"expression")
                    (.-innerHTML))))
-        (element-exists component "Waiting for input")
-        (element-does-not-exists component #"(?i)expression")
-        (element-does-not-exists component #"(?i)result")
-        (element-does-not-exists component #"(?i)something bad")
-        (canvas-not-visible? component))))
+        (is (element-visible? component "Waiting for input"))
+        (is (not (element-visible? component #"(?i)expression")))
+        (is (not (element-visible? component #"(?i)result")))
+        (is (not (element-visible? component #"(?i)something bad")))
+        (is (not (canvas-visible? component))))))
 
   (testing "Can submit an expression"
     (with-mounted-component
       [component/page mock-caller]
       (fn [component]
         (submit-expression component "1|2")
-        (element-exists component "Expression: 1|2 = 3")
-        (canvas-visible? component)
-        (element-does-not-exists component #"(?i)something bad"))))
+        (is (element-visible? component "Expression: 1|2 = 3"))
+        (is (canvas-visible? component))
+        (is (not (element-visible? component #"(?i)something bad"))))))
 
   (testing "An error is reported if a malformed expression is submitted"
     (with-mounted-component
       [component/page mock-caller]
       (fn [component]
         (submit-expression component "1|")
-        (element-exists component "Something bad happened: Malformed expression: 1|")
-        (canvas-not-visible? component)
-        (element-does-not-exists component #"(?i)result"))))
+        (is (element-visible? component "Something bad happened: Malformed expression: 1|"))
+        (is (not (canvas-visible? component)))
+        (is (not (element-visible? component #"(?i)result"))))))
 
   (testing "No waiting message is visible after succesfully submitting an expression"
     (with-mounted-component
       [component/page mock-caller]
       (fn [component]
         (submit-expression component "1|2")
-        (element-does-not-exists component #"(?i)waiting")))))
+        (is (not (element-visible? component #"(?i)waiting")))))))
