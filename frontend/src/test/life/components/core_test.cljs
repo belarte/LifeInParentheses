@@ -62,8 +62,7 @@
         (is (element-visible? component "Waiting for input"))
         (is (not (element-visible? component #"(?i)expression")))
         (is (not (element-visible? component #"(?i)result")))
-        (is (not (element-visible? component #"(?i)something bad")))
-        (is (not (canvas-visible? component))))))
+        (is (not (element-visible? component #"(?i)something bad"))))))
 
   (testing "Can submit an expression"
     (with-mounted-component
@@ -71,7 +70,6 @@
       (fn [component]
         (submit-expression component "1|2")
         (is (element-visible? component "Expression: 1|2 = 3"))
-        (is (canvas-visible? component))
         (is (not (element-visible? component #"(?i)something bad"))))))
 
   (testing "An error is reported if a malformed expression is submitted"
@@ -80,7 +78,6 @@
       (fn [component]
         (submit-expression component "1|")
         (is (element-visible? component "Something bad happened: Malformed expression: 1|"))
-        (is (not (canvas-visible? component)))
         (is (not (element-visible? component #"(?i)result"))))))
 
   (testing "No waiting message is visible after succesfully submitting an expression"
@@ -89,3 +86,46 @@
       (fn [component]
         (submit-expression component "1|2")
         (is (not (element-visible? component #"(?i)waiting")))))))
+
+(deftest canvas-component
+  (with-mounted-component
+    [component/page mock-caller]
+    (fn [component]
+      (testing "Before an expression is submitted"
+        (testing "the canvas is not visible"
+          (is (not (canvas-visible? component))))
+        (testing "the buttons are not visible"
+          (is (not (element-visible? component "Prev")))
+          (is (not (element-visible? component "Start")))
+          (is (not (element-visible? component "Next")))
+          (is (not (element-visible? component "Reset")))))
+
+      (testing "With a valid expression"
+        (submit-expression component "1|2")
+        (testing "the canvas is visible"
+          (is (canvas-visible? component)))
+        (testing "the buttons are visible"
+          (is (element-visible? component "Prev"))
+          (is (element-visible? component "Start"))
+          (is (element-visible? component "Next"))
+          (is (element-visible? component "Reset"))))
+
+      (testing "With a malformed expression"
+        (submit-expression component "1|")
+        (testing "the canvas is not visible"
+          (is (not (canvas-visible? component))))
+        (testing "the buttons are not visible"
+          (is (not (element-visible? component "Prev")))
+          (is (not (element-visible? component "Start")))
+          (is (not (element-visible? component "Next")))
+          (is (not (element-visible? component "Reset")))))
+
+      (testing "With an empty expression"
+        (submit-expression component "")
+        (testing "the canvas is not visible"
+          (is (not (canvas-visible? component))))
+        (testing "the buttons are not visible"
+          (is (not (element-visible? component "Prev")))
+          (is (not (element-visible? component "Start")))
+          (is (not (element-visible? component "Next")))
+          (is (not (element-visible? component "Reset"))))))))
