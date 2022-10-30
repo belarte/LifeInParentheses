@@ -79,10 +79,8 @@
       [component/page mock-caller]
       (fn [component]
         (submit-expression component "1|2")
-        (element-exists component "Expression: 1|2")
-        (element-exists component "Result: 3")
+        (element-exists component "Expression: 1|2 = 3")
         (canvas-visible? component)
-        (element-does-not-exists component #"(?i)waiting")
         (element-does-not-exists component #"(?i)something bad"))))
 
   (testing "An error is reported if a malformed expression is submitted"
@@ -90,8 +88,13 @@
       [component/page mock-caller]
       (fn [component]
         (submit-expression component "1|")
-        (element-exists component "Expression: 1|")
         (element-exists component "Something bad happened: Malformed expression: 1|")
         (canvas-not-visible? component)
-        (element-does-not-exists component #"(?i)waiting")
-        (element-does-not-exists component #"(?i)result")))))
+        (element-does-not-exists component #"(?i)result"))))
+
+  (testing "No waiting message is visible after succesfully submitting an expression"
+    (with-mounted-component
+      [component/page mock-caller]
+      (fn [component]
+        (submit-expression component "1|2")
+        (element-does-not-exists component #"(?i)waiting")))))

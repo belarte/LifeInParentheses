@@ -34,14 +34,13 @@
   (if (= nil @response)
     [:p "Waiting for response"]
     [:div
-     [:p "Expression: " @expression]
      (let [message (-> @response :body :message)]
        (if (= 200 (-> @response :status))
          (let [w (message :width)
                h (message :height)
                s (message :steps)]
            [:div
-            [:p "Result: " (message :result)]
+            [:p "Expression: " @expression " = " (message :result)]
             [c/canvas w h s]])
          [:p "Something bad happened: " message]))]))
 
