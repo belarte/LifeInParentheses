@@ -1,5 +1,6 @@
 (ns life.components.canvas
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [reagent-modals.modals :as rm]))
 
 (defonce canvas-ref (r/atom nil))
 (defonce steps (r/atom []))
@@ -64,7 +65,12 @@
              :on-click forward}]
     [:input {:type "button"
              :value "Reset"
-             :on-click reset}]]])
+             :on-click reset}]
+    [:input {:type "button"
+             :value "Settings"
+             :on-click #(rm/modal! [:div
+                                    [:h3 "Test"]
+                                    [:p "This is a test"]])}]]])
 
 (comment
   (reset)
