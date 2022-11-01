@@ -2,7 +2,8 @@
   (:require [cljs.test :refer [deftest testing is use-fixtures]]
             [reagent.core :as r]
             ["@testing-library/react" :as rtl]
-            [life.components.core :as component]))
+            [life.components.core :as component]
+            [life.app :as app]))
 
 (defn- teardown []
   (rtl/cleanup)
@@ -31,10 +32,14 @@
   (not= nil (.queryByText component element)))
 
 (defn mock-caller> [responses]
-  (fn [_ params callback]
-    (let [param (get params "expression")
-          resp  (get responses param)]
-      (callback resp))))
+  (fn
+    ([_ callback]
+     (callback {:status 200
+                :error-text "No error"}))
+    ([_ params callback]
+     (let [param (get params "expression")
+           resp  (get responses param)]
+       (callback resp)))))
 
 (def responses {"1|2" {:status 200
                        :body {:message {:result 3}}}
@@ -46,14 +51,14 @@
 (deftest title-component
   (testing "A title is displayed"
     (with-mounted-component
-      [component/title]
+      [app/app mock-caller]
       (fn [component]
         (is (element-visible? component "Life in parenthesis"))))))
 
 (deftest page-component
   (testing "Field is empty on load and a waiting message is displayed"
     (with-mounted-component
-      [component/page nil]
+      [app/app mock-caller]
       (fn [component]
         (is (= ""
                (-> component
@@ -66,7 +71,7 @@
 
   (testing "Can submit an expression"
     (with-mounted-component
-      [component/page mock-caller]
+      [app/app mock-caller]
       (fn [component]
         (submit-expression component "1|2")
         (is (element-visible? component "Expression: 1|2 = 3"))
@@ -74,7 +79,7 @@
 
   (testing "An error is reported if a malformed expression is submitted"
     (with-mounted-component
-      [component/page mock-caller]
+      [app/app mock-caller]
       (fn [component]
         (submit-expression component "1|")
         (is (element-visible? component "Something bad happened: Malformed expression: 1|"))
@@ -82,14 +87,14 @@
 
   (testing "No waiting message is visible after succesfully submitting an expression"
     (with-mounted-component
-      [component/page mock-caller]
+      [app/app mock-caller]
       (fn [component]
         (submit-expression component "1|2")
         (is (not (element-visible? component #"(?i)waiting")))))))
 
 (deftest canvas-component
   (with-mounted-component
-    [component/page mock-caller]
+    [app/app mock-caller]
     (fn [component]
       (testing "Before an expression is submitted"
         (testing "the canvas is not visible"

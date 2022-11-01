@@ -8,8 +8,8 @@
 (defonce server-available? (r/atom false))
 (defonce error-message (r/atom ""))
 
-(defn check-server! []
-  (h/call
+(defn check-server! [caller]
+  (caller
     "/health"
     (fn [response]
       (reset! server-available? (= (response :status) 200))
@@ -19,17 +19,17 @@
   {:text-align "center"
    :border "2px solid blue"})
 
-(defn app []
-  (check-server!)
+(defn app [caller]
+  (check-server! caller)
   [:div {:style app-style}
    [c/title]
    (if @server-available?
-     [c/page h/call]
+     [c/page caller]
      [:p "Server is not available: " @error-message])
    [rm/modal-window]])
 
 (defn ^:dev/after-load render []
-  (d/render [app] (js/document.getElementById "root")))
+  (d/render [app h/call] (js/document.getElementById "root")))
 
 (defn ^:export init []
   (render))
