@@ -25,11 +25,24 @@
     (.submit rtl/fireEvent (.getByRole component "submit-form-role"))
     (r/flush)))
 
+(defn open-settings [component]
+  (let [button (.getByText component "Settings")]
+    (.click rtl/fireEvent button)
+    (r/flush)))
+
 (defn canvas-visible? [component]
   (not= nil (.queryByRole component "canvas-role")))
 
 (defn element-visible? [component element]
   (not= nil (.queryByText component element)))
+
+(defn element-in-form?
+  ([component element]
+   (not= nil (.queryByLabelText component element)))
+  ([component element value]
+   (= value (-> component
+                (.getByLabelText element)
+                (.-value)))))
 
 (defn mock-caller> [responses]
   (fn
@@ -134,3 +147,20 @@
           (is (not (element-visible? component "Start")))
           (is (not (element-visible? component "Next")))
           (is (not (element-visible? component "Reset"))))))))
+
+(deftest settings-modal
+  (with-mounted-component
+    [app/app mock-caller]
+    (fn [component]
+      (submit-expression component "1|2")
+
+      (testing "Options are not visible on main page"
+        (is (not (element-in-form? component #"(?i)cell size")))
+        (is (not (element-in-form? component #"(?i)interval")))
+        (is (not (element-visible? component "Apply"))))
+
+      (testing "Options are visible after opening settings"
+        (open-settings component)
+        (is (element-in-form? component #"(?i)cell size" "5"))
+        (is (element-in-form? component #"(?i)interval" "1000"))
+        (is (element-visible? component "Apply"))))))

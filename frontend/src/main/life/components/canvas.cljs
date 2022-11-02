@@ -43,6 +43,28 @@
 (defn- running? []
   (not= nil @interval))
 
+(defn settings []
+  [:div {:style {:text-align "left"
+                 :margin "10px"}}
+   [rm/close-button]
+   [:h3 "Settings"]
+   [:form {:on-submit (fn [e] (.preventDefault e))}
+    [:div
+     [:label
+      "Cell size (px) "
+      [:input {:type "text"
+               :value "5"
+               :on-change #()}]]]
+    [:div
+     [:label
+      "Interval (ms) "
+      [:input {:type "text"
+               :value "1000"
+               :on-change #()}]]]
+    [:div
+     [:input {:type "submit"
+              :value "Apply"}]]]])
+
 (defn canvas [w h s]
   (reset! steps s)
   [:div
@@ -68,9 +90,7 @@
              :on-click reset}]
     [:input {:type "button"
              :value "Settings"
-             :on-click #(rm/modal! [:div
-                                    [:h3 "Test"]
-                                    [:p "This is a test"]])}]]])
+             :on-click #(rm/modal! [settings])}]]])
 
 (comment
   (reset)
