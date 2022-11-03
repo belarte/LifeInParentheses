@@ -68,7 +68,9 @@
              :on-click reset}]
     [:input {:type "button"
              :value "Settings"
-             :on-click #(rm/modal! [s/settings])}]]])
+             :on-click (fn []
+                         (stop)
+                         (rm/modal! [s/settings]))}]]])
 
 (comment
   (reset)
