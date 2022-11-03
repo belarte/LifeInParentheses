@@ -21,14 +21,19 @@
         [:div
          [:label
           "Cell size (px) "
-          [:input {:type "text"
+          [:input {:type "number"
+                   :min 1
+                   :max 10
                    :default-value (str @size)
                    :placeholder "cell size"
                    :on-change (fn [e] (reset! temp-size (-> e .-target .-value)))}]]]
         [:div
          [:label
           "Interval (ms) "
-          [:input {:type "text"
+          [:input {:type "number"
+                   :min 100
+                   :max 1000
+                   :step 100
                    :default-value (str @interval)
                    :placeholder "Interval"
                    :on-change (fn [e] (reset! temp-interval (-> e .-target .-value)))}]]]
