@@ -40,7 +40,7 @@
                 (.-value)))))
 
 (defn open-settings [component]
-  (let [button (.getByText component "Settings")]
+  (let [button (.getByRole component "button" (clj->js {:name "Settings"}))]
     (.click rtl/fireEvent button)
     (r/flush)))
 

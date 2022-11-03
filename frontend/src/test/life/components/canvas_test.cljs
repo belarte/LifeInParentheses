@@ -10,19 +10,23 @@
 
 (use-fixtures :each {:after teardown})
 
-(deftest canvas-component
+(deftest before-expression-submitted
+  (testing "Before an expression is submitted"
+    (with-mounted-component
+      [app/app mock-caller]
+      (fn [component]
+          (testing "the canvas is not visible"
+            (is (not (canvas-visible? component))))
+          (testing "the buttons are not visible"
+            (is (not (element-visible? component "Prev")))
+            (is (not (element-visible? component "Start")))
+            (is (not (element-visible? component "Next")))
+            (is (not (element-visible? component "Reset"))))))))
+
+(deftest after-expression-submitted
   (with-mounted-component
     [app/app mock-caller]
     (fn [component]
-      (testing "Before an expression is submitted"
-        (testing "the canvas is not visible"
-          (is (not (canvas-visible? component))))
-        (testing "the buttons are not visible"
-          (is (not (element-visible? component "Prev")))
-          (is (not (element-visible? component "Start")))
-          (is (not (element-visible? component "Next")))
-          (is (not (element-visible? component "Reset")))))
-
       (testing "With a valid expression"
         (submit-expression component "1|2")
         (testing "the canvas is visible"
