@@ -1,7 +1,14 @@
 (ns life.components.canvas
   (:require [reagent.core :as r]
             [reagent-modals.modals :as rm]
-            [life.components.settings :as s]))
+            [life.components.settings :as s]
+            [reagent-mui.material.icon-button :refer [icon-button]]
+            [reagent-mui.icons.play-circle-outline :refer [play-circle-outline]]
+            [reagent-mui.icons.pause-circle-outline :refer [pause-circle-outline]]
+            [reagent-mui.icons.skip-previous :refer [skip-previous]]
+            [reagent-mui.icons.skip-next :refer [skip-next]]
+            [reagent-mui.icons.replay :refer [replay]]
+            [reagent-mui.icons.settings :refer [settings]]))
 
 (defonce canvas-ref (r/atom nil))
 (defonce steps (r/atom []))
@@ -43,6 +50,12 @@
 (defn- running? []
   (not= nil @interval-id))
 
+(defn- button [label on-click icon]
+  [icon-button {:aria-label label
+                :size       "large"
+                :on-click   on-click}
+   [icon {:font-size "inherit"}]])
+
 (defn canvas [w h s]
   (reset! steps s)
   [:div
@@ -54,23 +67,19 @@
               :ref (fn [e] (reset! canvas-ref e))
               :style {:border "1px solid black"}}]]
    [:div
-    [:input {:type "button"
-             :value "Prev"
-             :on-click backward}]
-    [:input {:type "button"
-             :value (if (running?) "Stop" "Start")
-             :on-click #(if (running?) (stop) (start))}]
-    [:input {:type "button"
-             :value "Next"
-             :on-click forward}]
-    [:input {:type "button"
-             :value "Reset"
-             :on-click reset}]
-    [:input {:type "button"
-             :value "Settings"
-             :on-click (fn []
-                         (stop)
-                         (rm/modal! [s/settings]))}]]])
+    [button "back-button" backward skip-previous]
+    [button
+      (if (running?) "pause-button" "play-button")
+      #(if (running?) (stop) (start))
+      (if (running?) pause-circle-outline play-circle-outline)]
+    [button "next-button" forward skip-next]
+    [button "reset-button" reset replay]
+    [button
+      "settings-button"
+      (fn []
+        (stop)
+        (rm/modal! [s/settings]))
+      settings]]])
 
 (comment
   (reset)

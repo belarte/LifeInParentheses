@@ -6,7 +6,8 @@
                                            submit-expression
                                            mock-caller
                                            element-visible?
-                                           canvas-visible?]]))
+                                           canvas-visible?
+                                           button-visible?]]))
 
 (use-fixtures :each {:after teardown})
 
@@ -32,27 +33,27 @@
         (testing "the canvas is visible"
           (is (canvas-visible? component)))
         (testing "the buttons are visible"
-          (is (element-visible? component "Prev"))
-          (is (element-visible? component "Start"))
-          (is (element-visible? component "Next"))
-          (is (element-visible? component "Reset"))))
+          (is (button-visible? component "back-button"))
+          (is (button-visible? component "play-button"))
+          (is (button-visible? component "next-button"))
+          (is (button-visible? component "reset-button"))))
 
       (testing "With a malformed expression"
         (submit-expression component "1|")
         (testing "the canvas is not visible"
           (is (not (canvas-visible? component))))
         (testing "the buttons are not visible"
-          (is (not (element-visible? component "Prev")))
-          (is (not (element-visible? component "Start")))
-          (is (not (element-visible? component "Next")))
-          (is (not (element-visible? component "Reset")))))
+          (is (not (button-visible? component "back-button")))
+          (is (not (button-visible? component "play-button")))
+          (is (not (button-visible? component "next-button")))
+          (is (not (button-visible? component "reset-button")))))
 
       (testing "With an empty expression"
         (submit-expression component "")
         (testing "the canvas is not visible"
           (is (not (canvas-visible? component))))
         (testing "the buttons are not visible"
-          (is (not (element-visible? component "Prev")))
-          (is (not (element-visible? component "Start")))
-          (is (not (element-visible? component "Next")))
-          (is (not (element-visible? component "Reset"))))))))
+          (is (not (button-visible? component "back-button")))
+          (is (not (button-visible? component "play-button")))
+          (is (not (button-visible? component "next-button")))
+          (is (not (button-visible? component "reset-button"))))))))

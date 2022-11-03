@@ -39,8 +39,11 @@
                 (.getByLabelText element)
                 (.-value)))))
 
+(defn button-visible? [component label]
+  (not= nil (.queryByRole component "button" (clj->js {:name label}))))
+
 (defn open-settings [component]
-  (let [button (.getByRole component "button" (clj->js {:name "Settings"}))]
+  (let [button (.getByRole component "button" (clj->js {:name "settings-button"}))]
     (.click rtl/fireEvent button)
     (r/flush)))
 
