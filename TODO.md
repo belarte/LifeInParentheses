@@ -11,11 +11,11 @@
 # Frontend
 
 - [x] Draw simulation
-- [ ] Settings (size, interval, ...)
+- [x] Settings (size, interval, ...)
 - [ ] CSS
     - [x] Initial syling
     - [ ] Icons for buttons
-    - [ ] Refine UI when canvas is implemented
+    - [ ] Refine UI when buttons are implemented
 
 # Tests
 
