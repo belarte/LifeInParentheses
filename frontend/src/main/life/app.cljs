@@ -1,7 +1,6 @@
 (ns life.app
   (:require [reagent.core :as r]
             [reagent.dom :as d]
-            [reagent-modals.modals :as rm]
             [life.components.core :as c]
             [life.network.http :as h]))
 
@@ -25,8 +24,7 @@
    [c/title]
    (if @server-available?
      [c/page caller]
-     [:p "Server is not available: " @error-message])
-   [rm/modal-window]])
+     [:p "Server is not available: " @error-message])])
 
 (defn ^:dev/after-load render []
   (d/render [app h/call] (js/document.getElementById "root")))

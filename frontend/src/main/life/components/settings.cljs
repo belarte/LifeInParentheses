@@ -1,42 +1,45 @@
 (ns life.components.settings
   (:require [reagent.core :as r]
-            [reagent-modals.modals :as rm]))
+            [reagent-mui.material.button :refer [button]]
+            [reagent-mui.material.text-field :refer [text-field]]
+            [reagent-mui.material.dialog :refer [dialog]]
+            [reagent-mui.material.dialog-title :refer [dialog-title]]
+            [reagent-mui.material.dialog-content :refer [dialog-content]]
+            [reagent-mui.material.dialog-actions :refer [dialog-actions]]))
 
 (defonce size (r/atom 5))
 (defonce interval (r/atom 1000))
 
+(defonce open (r/atom false))
+
 (defn settings []
   (let [temp-size (r/atom @size)
         temp-interval (r/atom @interval)]
-    (fn []
-      [:div {:style {:text-align "left"
-                     :margin "10px"}}
-       [rm/close-button]
-       [:h3 "Settings"]
-       [:form {:on-submit (fn [e]
-                            (.preventDefault e)
-                            (reset! size @temp-size)
-                            (reset! interval @temp-interval)
-                            (rm/close-modal!))}
-        [:div
-         [:label
-          "Cell size (px) "
-          [:input {:type "number"
-                   :min 1
-                   :max 10
+    [dialog {:open @open
+             :on-close (fn []
+                         (reset! open false))}
+     [dialog-title "Settings"]
+     [dialog-content
+      [text-field {:label "Cell size (px)"
+                   :auto-focus true
+                   :margin "dense"
+                   :full-width true
+                   :type "number"
                    :default-value (str @size)
-                   :placeholder "cell size"
-                   :on-change (fn [e] (reset! temp-size (-> e .-target .-value)))}]]]
-        [:div
-         [:label
-          "Interval (ms) "
-          [:input {:type "number"
-                   :min 100
-                   :max 1000
-                   :step 100
+                   :variant "standard"
+                   :on-change (fn [e] (reset! temp-size (-> e .-target .-value)))}]
+      [text-field {:label "Interval (ms)"
+                   :auto-focus true
+                   :margin "dense"
+                   :full-width true
+                   :type "number"
                    :default-value (str @interval)
-                   :placeholder "Interval"
-                   :on-change (fn [e] (reset! temp-interval (-> e .-target .-value)))}]]]
-        [:div
-         [:input {:type "submit"
-                  :value "Apply"}]]]])))
+                   :variant "standard"
+                   :on-change (fn [e] (reset! temp-interval (-> e .-target .-value)))}]]
+     [dialog-actions
+      [button {:on-click #(reset! open false)} "Close"]
+      [button {:on-click (fn []
+                           (reset! size @temp-size)
+                           (reset! interval @temp-interval)
+                           (reset! open false))}
+       "Apply"]]]))

@@ -1,10 +1,12 @@
 (ns life.components.utils
   (:require [reagent.core :as r]
             ["@testing-library/react" :as rtl]
+            [life.components.settings :as s]
             [life.components.core :as c]))
 
 (defn teardown []
   (rtl/cleanup)
+  (reset! s/open false)
   (reset! c/expression ""))
 
 (defn with-mounted-component [component f]
@@ -25,10 +27,10 @@
   (not= nil (.queryByText component element)))
 
 (defn canvas-visible? [component]
-  (not= nil (.queryByRole component "canvas-role")))
+  (not= nil (.queryByRole component "canvas-role" (clj->js {:hidden true}))))
 
 (defn canvas-dimensions [component]
-  (let [c (.getByRole component "canvas-role")]
+  (let [c (.getByRole component "canvas-role" (clj->js {:hidden true}))]
     [(.-width c) (.-height c)]))
 
 (defn element-in-form?
@@ -43,7 +45,8 @@
   (not= nil (.queryByRole component "button" (clj->js {:name label}))))
 
 (defn open-settings [component]
-  (let [button (.getByRole component "button" (clj->js {:name "settings-button"}))]
+  (let [button (.getByRole component "button" (clj->js {:name "settings-button"
+                                                        :hidden true}))]
     (.click rtl/fireEvent button)
     (r/flush)))
 

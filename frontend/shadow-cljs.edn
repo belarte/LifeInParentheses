@@ -6,7 +6,6 @@
  :dependencies
  [[cider/cider-nrepl "0.28.4"]
   [reagent "1.1.1"]
-  [org.clojars.frozenlock/reagent-modals "0.2.8"]
   [arttuka/reagent-material-ui "5.10.1-0"]
   [cljs-http "0.1.46"]]
 

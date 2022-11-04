@@ -1,6 +1,5 @@
 (ns life.components.canvas
   (:require [reagent.core :as r]
-            [reagent-modals.modals :as rm]
             [life.components.settings :as s]
             [reagent-mui.material.icon-button :refer [icon-button]]
             [reagent-mui.icons.play-circle-outline :refer [play-circle-outline]]
@@ -74,12 +73,8 @@
       (if (running?) pause-circle-outline play-circle-outline)]
     [button "next-button" forward skip-next]
     [button "reset-button" reset replay]
-    [button
-      "settings-button"
-      (fn []
-        (stop)
-        (rm/modal! [s/settings]))
-      settings]]])
+    [button "settings-button" #(reset! s/open true) settings]
+    (when @s/open [s/settings])]])
 
 (comment
   (reset)
